@@ -144,7 +144,7 @@ rejeitadas (silêncio) deixam um vão. O rastro esmaece perto da cabeça do inst
 | Longe | mais de 15 cents | `#B04A1C` | `#EE8A52` |
 
 **RF-09 · Corda afinada.** A corda solta oscila em volta da nota enquanto morre, então o tempo na
-nota é somado, não seguido: 1 segundo dentro da tolerância, com idas e vindas, nos últimos 2,5
+nota é somado, não seguido: 0,6 segundo dentro da tolerância, com idas e vindas, nos últimos 2
 segundos marca a corda. Enquanto soma, um anel verde fecha pela borda do indicador (só perto ou
 afinada; longe, não aparece); fechado, o indicador enche de verde. Marcada, a corda fica verde no
 botão (fundo, anel e selo), na tarraxa e no fio; o aparelho vibra uma vez, curto, e toca um aviso

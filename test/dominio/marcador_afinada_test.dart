@@ -22,14 +22,14 @@ void main() {
     return marcou;
   }
 
-  test('1 s seguido dentro da tolerância marca, com o progresso subindo', () {
+  test('0,6 s dentro da tolerância marca, com o progresso subindo', () {
     final marcador = MarcadorAfinada();
     expect(marcador.progresso, 0);
-    expect(passar(marcador, List.filled(12, true)), isFalse);
-    expect(marcador.progresso, closeTo(0.48, 1e-9));
-    expect(passar(marcador, List.filled(12, true), 0.48), isFalse);
+    expect(passar(marcador, List.filled(7, true)), isFalse);
+    expect(marcador.progresso, closeTo(0.28 / 0.6, 1e-9));
+    expect(passar(marcador, List.filled(7, true), 0.28), isFalse);
     expect(
-      marcador.adicionar(tempo: 0.96, duracao: passo, afinada: true),
+      marcador.adicionar(tempo: 0.56, duracao: passo, afinada: true),
       isTrue,
     );
     expect(marcador.progresso, 1);
@@ -58,15 +58,15 @@ void main() {
 
   test('o que ficou para trás da janela não conta', () {
     final marcador = MarcadorAfinada();
-    expect(passar(marcador, List.filled(20, true)), isFalse);
-    expect(passar(marcador, List.filled(20, true), 5), isFalse);
+    expect(passar(marcador, List.filled(12, true)), isFalse);
+    expect(passar(marcador, List.filled(12, true), 5), isFalse);
   });
 
   test('reiniciar esquece o tempo somado', () {
     final marcador = MarcadorAfinada();
-    passar(marcador, List.filled(20, true));
+    passar(marcador, List.filled(12, true));
     marcador.reiniciar();
     expect(marcador.progresso, 0);
-    expect(passar(marcador, List.filled(10, true), 0.8), isFalse);
+    expect(passar(marcador, List.filled(12, true), 0.48), isFalse);
   });
 }

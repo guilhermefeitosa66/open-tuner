@@ -121,6 +121,10 @@ class FonteAudioMicrofone implements FonteAudio {
     autoGain: false,
     echoCancel: false,
     noiseSuppress: false,
+    // Por padrão o plugin pede o foco de áudio e pausa a gravação quando
+    // outro som o toma, sem retomar depois. O próprio app toca a corda de
+    // referência e o aviso de afinada: o microfone precisa continuar.
+    audioInterruption: AudioInterruptionMode.none,
     androidConfig: AndroidRecordConfig(
       audioSource: fonte,
       // Um fone Bluetooth puxaria o áudio para o SCO, de 8 ou 16 kHz.

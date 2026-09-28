@@ -7,7 +7,7 @@
 /// segundos afinados, mesmo com idas e vindas, dentro dos últimos [janela]
 /// segundos. O [progresso] é o que a tela mostra enchendo o indicador.
 class MarcadorAfinada {
-  MarcadorAfinada({this.necessario = 1.0, this.janela = 2.5})
+  MarcadorAfinada({this.necessario = 0.6, this.janela = 2.0})
     : assert(necessario > 0 && necessario <= janela, 'tempos inválidos');
 
   /// Tempo somado dentro da tolerância para marcar, em segundos.
