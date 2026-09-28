@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gerado por tool/gerar_icones.py a partir de docs/marca/. Não editar à mão. -->
+<resources>
+    <!-- Fundo do ícone adaptativo: nogueira. -->
+    <color name="ic_launcher_background">#6B4226</color>
+    <!-- Tela de abertura: fundo do tema e cores do símbolo. -->
+    <color name="abertura_fundo">#14110E</color>
+    <color name="abertura_palheta">#C9935F</color>
+    <color name="abertura_onda">#14110E</color>
+</resources>

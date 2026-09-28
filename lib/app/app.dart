@@ -1,28 +1,77 @@
 import 'package:flutter/material.dart';
 
+import '../audio/fonte_audio.dart';
+import '../dados/ajustes.dart';
+import '../dados/preferencias.dart';
+import '../features/afinador/controlador_afinador.dart';
 import '../features/afinador/tela_afinador.dart';
 import '../l10n/textos.dart';
 import 'idioma.dart';
 import 'tema.dart';
 
-/// Raiz do aplicativo. O tema acompanha o do sistema: claro de dia, escuro à
-/// noite, sem opção própria por enquanto. O idioma segue o do aparelho, com
-/// inglês quando nenhum dos preferidos é suportado.
-class AppOpenTuner extends StatelessWidget {
-  const AppOpenTuner({super.key});
+/// Versão mostrada nos ajustes. Acompanha o `version` do pubspec.
+const versaoApp = '0.1.0';
+
+/// Raiz do aplicativo. O tema segue o ajuste (Sistema, Claro ou Escuro) e o
+/// idioma segue o do aparelho, com inglês quando nenhum dos preferidos é
+/// suportado.
+class AppOpenTuner extends StatefulWidget {
+  const AppOpenTuner({
+    super.key,
+    required this.preferencias,
+    required this.fonteAudio,
+    this.definirTelaLigada,
+    this.vibrar,
+  });
+
+  final Preferencias preferencias;
+  final FonteAudio fonteAudio;
+
+  /// Troca o "manter a tela ligada"; os testes passam um que não faz nada.
+  final DefinirTelaLigada? definirTelaLigada;
+
+  /// A vibração curta da corda afinada; idem.
+  final Future<void> Function()? vibrar;
+
+  @override
+  State<AppOpenTuner> createState() => _AppOpenTunerState();
+}
+
+class _AppOpenTunerState extends State<AppOpenTuner> {
+  late final Ajustes _ajustes = Ajustes(widget.preferencias);
+
+  @override
+  void dispose() {
+    _ajustes.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      onGenerateTitle: (contexto) => Textos.of(contexto).appTitle,
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: Textos.localizationsDelegates,
-      supportedLocales: idiomasSuportados,
-      localeListResolutionCallback: resolverIdioma,
-      themeMode: ThemeMode.system,
-      theme: temaClaro,
-      darkTheme: temaEscuro,
-      home: const TelaAfinador(),
+    return ListenableBuilder(
+      listenable: _ajustes,
+      builder: (context, _) => MaterialApp(
+        onGenerateTitle: (contexto) => Textos.of(contexto).appTitle,
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: Textos.localizationsDelegates,
+        supportedLocales: idiomasSuportados,
+        localeListResolutionCallback: resolverIdioma,
+        themeMode: switch (_ajustes.tema) {
+          TemaEscolhido.sistema => ThemeMode.system,
+          TemaEscolhido.claro => ThemeMode.light,
+          TemaEscolhido.escuro => ThemeMode.dark,
+        },
+        theme: temaClaro,
+        darkTheme: temaEscuro,
+        home: TelaAfinador(
+          fonte: widget.fonteAudio,
+          preferencias: widget.preferencias,
+          ajustes: _ajustes,
+          versao: versaoApp,
+          definirTelaLigada: widget.definirTelaLigada,
+          vibrar: widget.vibrar,
+        ),
+      ),
     );
   }
 }

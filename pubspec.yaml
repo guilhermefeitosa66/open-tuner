@@ -38,6 +38,12 @@ dependencies:
     sdk: flutter
   # Versão fixada pelo flutter_localizations do SDK.
   intl: ^0.20.2
+  record: ^6.2.1
+  # O 13 puxa o permission_handler_android 14, cujo build.gradle.kts exige um
+  # Kotlin Gradle Plugin mais novo que o do Flutter 3.38 e quebra o build.
+  permission_handler: ^12.0.1
+  shared_preferences: ^2.5.5
+  wakelock_plus: ^1.6.1
 
 dev_dependencies:
   flutter_test:
@@ -58,3 +64,27 @@ flutter:
   uses-material-design: true
   # Gera a classe Textos a partir dos ARBs em lib/l10n (ver l10n.yaml).
   generate: true
+
+  # Fontes empacotadas (o app não tem internet), um TTF estático por peso,
+  # com latin e latin-ext. Licença SIL OFL em assets/fontes/OFL-*.txt.
+  fonts:
+    - family: Fraunces
+      fonts:
+        - asset: assets/fontes/Fraunces-Medium.ttf
+          weight: 500
+        - asset: assets/fontes/Fraunces-SemiBold.ttf
+          weight: 600
+        - asset: assets/fontes/Fraunces-Bold.ttf
+          weight: 700
+    - family: Manrope
+      fonts:
+        - asset: assets/fontes/Manrope-Regular.ttf
+          weight: 400
+        - asset: assets/fontes/Manrope-Medium.ttf
+          weight: 500
+        - asset: assets/fontes/Manrope-SemiBold.ttf
+          weight: 600
+        - asset: assets/fontes/Manrope-Bold.ttf
+          weight: 700
+        - asset: assets/fontes/Manrope-ExtraBold.ttf
+          weight: 800

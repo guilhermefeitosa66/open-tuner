@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
-// TODO: empacotar as fontes em assets/fontes e declará-las no pubspec:
-// Fraunces (display: título e nota em destaque) e Manrope (texto corrido e
-// botões). Vão versionadas junto com a licença SIL OFL, e não pelo
-// google_fonts em tempo de execução: o aplicativo não tem permissão de
-// internet.
+/// Família das fontes de exibição: título, nome da nota em destaque e
+/// logotipo. Fraunces, empacotada em `assets/fontes` (pesos 500, 600 e 700).
+const familiaDisplay = 'Fraunces';
+
+/// Família do texto corrido, rótulos e botões. Manrope, empacotada em
+/// `assets/fontes` (pesos 400 a 800). É a fonte padrão do tema.
+const familiaTexto = 'Manrope';
 
 /// Tokens de cor do tema "Nogueira".
 ///
@@ -178,6 +180,7 @@ ThemeData _montarTema(Brightness brilho, CoresOpenTuner cores) {
   return ThemeData(
     useMaterial3: true,
     brightness: brilho,
+    fontFamily: familiaTexto,
     colorScheme: esquema,
     scaffoldBackgroundColor: cores.fundo,
     dividerColor: cores.grade,

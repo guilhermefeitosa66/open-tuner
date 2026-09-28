@@ -15,5 +15,6 @@ O nome é **OpenTuner**, uma palavra só, em camel case. No logotipo vai em Frau
 nunca "Open Tuner" nem "opentuner".
 
 Abaixo de 32 px a onda perde as voltas menores e engrossa o traço, para continuar legível na barra
-de notificação. Os ícones do Android (`mipmap-*`) ainda são os padrão do Flutter; gerá-los a partir
-destes SVGs está no roteiro da versão 0.5 (`docs/REQUISITOS.md`, seção 8).
+de notificação. Os ícones do Android (adaptativo, monocromático do Android 13 e os PNG legados), a tela de abertura
+e as imagens da loja (`docs/loja/icone-512.png`, `docs/loja/destaque-1024x500.png`) saem destes SVGs
+por `tool/gerar_icones.py`. Mudou a marca, rode o script de novo.

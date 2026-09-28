@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modify this file to customize your launch splash screen -->
+<!-- Tela de abertura até o Flutter desenhar o primeiro quadro (Android 7 a 11;
+     do 12 em diante o sistema mostra o ícone adaptativo sobre
+     windowSplashScreenBackground, em values-v31). Fundo do tema e o símbolo
+     no centro; as cores vêm de values/colors.xml e values-night/colors.xml. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@android:color/white" />
-
-    <!-- You can insert your own image assets here -->
-    <!-- <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@mipmap/launch_image" />
-    </item> -->
+    <item android:drawable="@color/abertura_fundo" />
+    <item
+        android:width="96dp"
+        android:height="106dp"
+        android:gravity="center"
+        android:drawable="@drawable/simbolo_abertura" />
 </layer-list>

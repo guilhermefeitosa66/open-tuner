@@ -73,5 +73,8 @@
   "solfejoF": "Fá",
   "solfejoG": "Sol",
   "solfejoA": "Lá",
-  "solfejoB": "Si"
+  "solfejoB": "Si",
+  "esperandoCorda": "Esperando uma corda",
+  "frequenciaHz": "{frequencia} Hz",
+  "notaAlvo": "Nota alvo {nota}"
 }

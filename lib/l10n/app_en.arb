@@ -335,5 +335,29 @@
   "solfejoB": "Ti",
   "@solfejoB": {
     "description": "Solfège name of B"
+  },
+  "esperandoCorda": "Waiting for a string",
+  "@esperandoCorda": {
+    "description": "Accessibility label of the empty indicator while no string is heard"
+  },
+  "frequenciaHz": "{frequencia} Hz",
+  "@frequenciaHz": {
+    "description": "A frequency in hertz, already formatted for the language",
+    "placeholders": {
+      "frequencia": {
+        "type": "String",
+        "example": "327.4"
+      }
+    }
+  },
+  "notaAlvo": "Target note {nota}",
+  "@notaAlvo": {
+    "description": "Accessibility label of the target note circle",
+    "placeholders": {
+      "nota": {
+        "type": "String",
+        "example": "E4"
+      }
+    }
   }
 }

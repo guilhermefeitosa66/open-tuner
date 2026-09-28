@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gerado por tool/gerar_icones.py a partir de docs/marca/. Não editar à mão. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Mesma translação e escala de docs/marca/icone-app.svg. -->
+    <group
+        android:translateX="33.5"
+        android:translateY="31.5"
+        android:scaleX="0.41"
+        android:scaleY="0.41">
+        <path
+            android:fillColor="#F5EFE6"
+            android:pathData="M50 106C42 100 6 62 5 34C4 14 22 4 50 4C78 4 96 14 95 34C94 62 58 100 50 106Z" />
+        <path
+            android:strokeColor="#6B4226"
+            android:strokeWidth="7"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M50 18C71 21 71 33 50 36C32 39 32 49 50 51C62 53 62 60 50 62C44 63 44 67 50 68L50 88" />
+    </group>
+</vector>

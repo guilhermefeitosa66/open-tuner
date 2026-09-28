@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Tema claro no Android 12+ (mesmo de values/, com a cor da abertura do sistema). -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <!-- Mostrada até o Flutter desenhar o primeiro quadro. -->
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:statusBarColor">@color/abertura_fundo</item>
+        <item name="android:navigationBarColor">@color/abertura_fundo</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+        <!-- Android 12+: a tela de abertura do sistema usa esta cor de fundo
+             e o ícone adaptativo do app. -->
+        <item name="android:windowSplashScreenBackground">@color/abertura_fundo</item>
+    </style>
+    <!-- Tema da janela por trás da interface do Flutter enquanto o app roda:
+         mesmo fundo, para não piscar branco nem preto na transição. -->
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@color/abertura_fundo</item>
+        <item name="android:statusBarColor">@color/abertura_fundo</item>
+        <item name="android:navigationBarColor">@color/abertura_fundo</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+    </style>
+</resources>

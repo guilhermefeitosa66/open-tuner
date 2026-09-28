@@ -542,6 +542,24 @@ abstract class Textos {
   /// In en, this message translates to:
   /// **'Ti'**
   String get solfejoB;
+
+  /// Accessibility label of the empty indicator while no string is heard
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for a string'**
+  String get esperandoCorda;
+
+  /// A frequency in hertz, already formatted for the language
+  ///
+  /// In en, this message translates to:
+  /// **'{frequencia} Hz'**
+  String frequenciaHz(String frequencia);
+
+  /// Accessibility label of the target note circle
+  ///
+  /// In en, this message translates to:
+  /// **'Target note {nota}'**
+  String notaAlvo(String nota);
 }
 
 class _TextosDelegate extends LocalizationsDelegate<Textos> {

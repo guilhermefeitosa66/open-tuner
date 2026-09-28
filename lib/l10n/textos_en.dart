@@ -258,4 +258,17 @@ class TextosEn extends Textos {
 
   @override
   String get solfejoB => 'Ti';
+
+  @override
+  String get esperandoCorda => 'Waiting for a string';
+
+  @override
+  String frequenciaHz(String frequencia) {
+    return '$frequencia Hz';
+  }
+
+  @override
+  String notaAlvo(String nota) {
+    return 'Target note $nota';
+  }
 }

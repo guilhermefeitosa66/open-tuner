@@ -325,7 +325,8 @@ features → dominio → core
   `CustomPainter`) e as folhas de seleção.
 - Captura de áudio: o plugin `record`, que entrega PCM em stream no Android. Se ele não servir, um
   canal de plataforma com `AudioRecord` é pequeno o bastante para escrever à mão.
-- Estado: Riverpod 3, como no slap-mobile.
+- Estado: `ChangeNotifier` e `ValueNotifier` (`ControladorAfinador`), sem Riverpod: é uma tela só, e o
+  ponteiro escuta só o que muda a cada leitura, sem reconstruir a árvore.
 - Tela ligada: `wakelock_plus`, só enquanto o afinador estiver em primeiro plano.
 
 ## 7. Fora da versão 1.0
@@ -348,10 +349,10 @@ anúncios, compras dentro do app.
 | Versão | Entrega |
 |---|---|
 | 0.1 | Esqueleto: projeto, tema claro e escuro, modelo de nota, idiomas (en, pt, es), site, CI. **Feito.** |
-| 0.2 | Detector de frequência e escolha de corda, com a suíte de testes de sinais sintéticos. |
-| 0.3 | Captura do microfone e tela do afinador: indicador, rastro, nota alvo. |
-| 0.4 | Cabeça do instrumento, barra inferior, folhas de instrumento e afinação, memória. |
-| 0.5 | Ajustes, permissão, acessibilidade, fontes e ícone do app. |
+| 0.2 | Detector de frequência e escolha de corda, com a suíte de testes de sinais sintéticos. **Feito.** |
+| 0.3 | Captura do microfone e tela do afinador: indicador, rastro, nota alvo. **Feito.** |
+| 0.4 | Cabeça do instrumento, barra inferior, folhas de instrumento e afinação, memória. **Feito.** |
+| 0.5 | Ajustes, permissão, acessibilidade, fontes e ícone do app. **Feito; falta validar num aparelho.** |
 | 1.0 | Teste com instrumentos reais (ukulele, violão, baixo, viola), publicação na Play Store e no GitHub Releases. |
 
 ## 9. Em aberto
