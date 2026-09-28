@@ -15,21 +15,52 @@ Future<void> abrirFolha(
   String? subtitulo,
   required WidgetBuilder conteudo,
 }) {
-  final cores = context.cores;
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    showDragHandle: false,
-    backgroundColor: cores.superficie,
-    barrierColor: cores.veu,
-    barrierLabel: context.textos.fechar,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+  final navegador = Navigator.of(context);
+  return navegador.push(
+    _RotaFolha(
+      veu: context.cores.veu,
+      capturedThemes: InheritedTheme.capture(
+        from: context,
+        to: navegador.context,
+      ),
+      barrierLabel: context.textos.fechar,
+      builder: (context) =>
+          Folha(titulo: titulo, subtitulo: subtitulo, conteudo: conteudo),
     ),
-    builder: (context) =>
-        Folha(titulo: titulo, subtitulo: subtitulo, conteudo: conteudo),
   );
+}
+
+const _cantos = BorderRadius.vertical(top: Radius.circular(26));
+
+/// A rota da folha. O fundo quem pinta é a própria [Folha], e o véu é
+/// trocado por ela: assim os dois acompanham o tema quando ele muda com a
+/// folha aberta (os ajustes trocam o tema de dentro de uma folha).
+class _RotaFolha extends ModalBottomSheetRoute<void> {
+  _RotaFolha({
+    required Color veu,
+    required super.builder,
+    super.capturedThemes,
+    super.barrierLabel,
+  }) : _veu = veu,
+       super(
+         isScrollControlled: true,
+         useSafeArea: true,
+         showDragHandle: false,
+         backgroundColor: Colors.transparent,
+         elevation: 0,
+         shape: const RoundedRectangleBorder(borderRadius: _cantos),
+       );
+
+  Color _veu;
+
+  @override
+  Color get barrierColor => _veu;
+
+  void trocarVeu(Color veu) {
+    if (veu == _veu) return;
+    _veu = veu;
+    changedInternalState();
+  }
 }
 
 /// Moldura comum das folhas: alça, título e o conteúdo, que rola se não
@@ -49,6 +80,20 @@ class Folha extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cores = context.cores;
+    final rota = ModalRoute.of(context);
+    if (rota is _RotaFolha && rota.barrierColor != cores.veu) {
+      // Não dá para mexer na rota no meio do build.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (rota.isActive) rota.trocarVeu(cores.veu);
+      });
+    }
+    return DecoratedBox(
+      decoration: BoxDecoration(color: cores.superficie, borderRadius: _cantos),
+      child: _moldura(context, cores),
+    );
+  }
+
+  Widget _moldura(BuildContext context, CoresOpenTuner cores) {
     return Semantics(
       scopesRoute: true,
       namesRoute: true,

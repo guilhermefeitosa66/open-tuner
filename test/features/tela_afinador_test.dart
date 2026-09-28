@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:open_tuner/audio/fonte_audio.dart';
 import 'package:open_tuner/features/afinador/desenhos.dart';
+import 'package:open_tuner/features/afinador/folhas.dart';
 import 'package:open_tuner/features/afinador/grafico.dart';
 
 import '../apoio/abrir_app.dart';
@@ -285,6 +286,37 @@ void main() {
       await tester.tap(find.byKey(const Key('tema-claro')));
       await tester.pumpAndSettle();
       expect(modo(), ThemeMode.light);
+    });
+
+    testWidgets('a folha aberta acompanha a troca de tema', (tester) async {
+      await abrirApp(tester, preferencias: {'tema': 'claro'});
+      await tester.tap(find.byKey(const Key('abrir-ajustes')));
+      await tester.pumpAndSettle();
+
+      Color fundoDaFolha() =>
+          (tester
+                      .widget<DecoratedBox>(
+                        find
+                            .descendant(
+                              of: find.byType(Folha),
+                              matching: find.byType(DecoratedBox),
+                            )
+                            .first,
+                      )
+                      .decoration
+                  as BoxDecoration)
+              .color!;
+      Color veu() =>
+          ModalRoute.of(tester.element(find.byType(Folha)))!.barrierColor!;
+
+      expect(fundoDaFolha(), const Color(0xFFFFFBF5));
+      final veuClaro = veu();
+
+      await tester.tap(find.byKey(const Key('tema-escuro')));
+      await tester.pumpAndSettle();
+
+      expect(fundoDaFolha(), const Color(0xFF1E1915));
+      expect(veu(), isNot(veuClaro));
     });
 
     testWidgets('a referência do Lá vai de 430 a 450', (tester) async {

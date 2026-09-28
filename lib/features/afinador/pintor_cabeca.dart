@@ -55,7 +55,7 @@ const _corda = Color(0xFFD9D3C9);
 const _koa = Color(0xFFB5773F);
 const _jacaranda = Color(0xFF4A2616);
 const _cedro = Color(0xFF9C5A2C);
-const _ebano = Color(0xFF2E2019);
+const _bordo = Color(0xFFD8A560);
 
 /// A cabeça do instrumento: madeira, veios, pestana, escala, tarraxas, pinos
 /// e as cordas até a pestana. A corda alvo fica destacada; as afinadas, em
@@ -85,85 +85,81 @@ class PintorCabeca extends CustomPainter {
 
   // ------------------------------------------------------------ contornos ---
 
-  /// Todos terminam no braço, de 148 a 242, com a pestana em 232.
+  /// Todos saem do braço (de 148 a 242, pestana em 236) e abrem para cima,
+  /// como a cabeça de verdade: estreita na pestana, larga no alto.
   static final Map<EstiloCabeca, Path> _contornos = {
+    // Estilo Martin: lados retos, cantos marcados e uma ponta suave no meio.
     EstiloCabeca.ukulele: Path()
-      ..moveTo(134, 62)
-      ..quadraticBezierTo(131, 30, 162, 28)
-      ..quadraticBezierTo(184, 27, 195, 44)
-      ..quadraticBezierTo(206, 27, 228, 28)
-      ..quadraticBezierTo(259, 30, 256, 62)
-      ..lineTo(254, 192)
-      ..quadraticBezierTo(252, 222, 242, 236)
-      ..lineTo(242, 274)
-      ..lineTo(148, 274)
+      ..moveTo(148, 274)
       ..lineTo(148, 236)
-      ..quadraticBezierTo(138, 222, 136, 192)
+      ..lineTo(133, 62)
+      ..quadraticBezierTo(131, 44, 147, 40)
+      ..lineTo(183, 30)
+      ..quadraticBezierTo(195, 25, 207, 30)
+      ..lineTo(243, 40)
+      ..quadraticBezierTo(259, 44, 257, 62)
+      ..lineTo(242, 236)
+      ..lineTo(242, 274)
       ..close(),
+    // Ombros retos e um arco largo no meio.
     EstiloCabeca.cavaquinho: Path()
-      ..moveTo(124, 50)
-      ..lineTo(150, 30)
-      ..quadraticBezierTo(178, 24, 195, 8)
-      ..quadraticBezierTo(212, 24, 240, 30)
-      ..lineTo(266, 50)
-      ..lineTo(263, 180)
-      ..quadraticBezierTo(260, 216, 242, 236)
-      ..lineTo(242, 274)
-      ..lineTo(148, 274)
+      ..moveTo(148, 274)
       ..lineTo(148, 236)
-      ..quadraticBezierTo(130, 216, 127, 180)
+      ..lineTo(128, 60)
+      ..quadraticBezierTo(126, 42, 143, 39)
+      ..lineTo(160, 36)
+      ..quadraticBezierTo(195, 6, 230, 36)
+      ..lineTo(247, 39)
+      ..quadraticBezierTo(264, 42, 262, 60)
+      ..lineTo(242, 236)
+      ..lineTo(242, 274)
       ..close(),
+    // O clássico: lados quase paralelos, pontas nos cantos e o arco no meio.
     EstiloCabeca.violao: Path()
-      ..moveTo(122, 40)
-      ..quadraticBezierTo(126, 20, 150, 20)
-      ..quadraticBezierTo(180, 20, 195, 34)
-      ..quadraticBezierTo(210, 20, 240, 20)
-      ..quadraticBezierTo(264, 20, 268, 40)
-      ..lineTo(266, 208)
-      ..quadraticBezierTo(262, 224, 242, 236)
-      ..lineTo(242, 274)
-      ..lineTo(148, 274)
+      ..moveTo(148, 274)
       ..lineTo(148, 236)
-      ..quadraticBezierTo(128, 224, 124, 208)
+      ..quadraticBezierTo(127, 228, 125, 208)
+      ..lineTo(121, 42)
+      ..lineTo(124, 26)
+      ..quadraticBezierTo(152, 38, 168, 30)
+      ..quadraticBezierTo(181, 16, 195, 15)
+      ..quadraticBezierTo(209, 16, 222, 30)
+      ..quadraticBezierTo(238, 38, 266, 26)
+      ..lineTo(269, 42)
+      ..lineTo(265, 208)
+      ..quadraticBezierTo(263, 228, 242, 236)
+      ..lineTo(242, 274)
       ..close(),
+    // A viola: ombros redondos e a ponta em chama no meio.
     EstiloCabeca.viola: Path()
-      ..moveTo(120, 52)
-      ..quadraticBezierTo(116, 28, 138, 26)
-      ..quadraticBezierTo(152, 25, 160, 36)
-      ..quadraticBezierTo(176, 10, 195, 26)
-      ..quadraticBezierTo(214, 10, 230, 36)
-      ..quadraticBezierTo(238, 25, 252, 26)
-      ..quadraticBezierTo(274, 28, 270, 52)
-      ..lineTo(266, 200)
-      ..quadraticBezierTo(262, 224, 242, 236)
-      ..lineTo(242, 274)
-      ..lineTo(148, 274)
+      ..moveTo(148, 274)
       ..lineTo(148, 236)
-      ..quadraticBezierTo(128, 224, 124, 200)
+      ..quadraticBezierTo(128, 226, 124, 204)
+      ..lineTo(118, 52)
+      ..quadraticBezierTo(118, 32, 137, 31)
+      ..quadraticBezierTo(160, 32, 172, 24)
+      ..quadraticBezierTo(186, 14, 195, 8)
+      ..quadraticBezierTo(204, 14, 218, 24)
+      ..quadraticBezierTo(230, 32, 253, 31)
+      ..quadraticBezierTo(272, 32, 272, 52)
+      ..lineTo(266, 204)
+      ..quadraticBezierTo(262, 226, 242, 236)
+      ..lineTo(242, 274)
       ..close(),
+    // Larga, com o topo inclinado.
     EstiloCabeca.baixo: Path()
-      ..moveTo(116, 58)
+      ..moveTo(148, 274)
+      ..lineTo(148, 238)
+      ..quadraticBezierTo(124, 226, 118, 196)
+      ..lineTo(116, 58)
       ..quadraticBezierTo(114, 26, 148, 22)
       ..lineTo(246, 12)
       ..quadraticBezierTo(280, 10, 278, 44)
       ..lineTo(272, 196)
       ..quadraticBezierTo(266, 226, 242, 238)
       ..lineTo(242, 274)
-      ..lineTo(148, 274)
-      ..lineTo(148, 238)
-      ..quadraticBezierTo(124, 226, 118, 196)
       ..close(),
   };
-
-  static final Path _veios = Path()
-    ..moveTo(138, 20)
-    ..cubicTo(150, 80, 134, 130, 150, 200)
-    ..moveTo(166, 10)
-    ..cubicTo(176, 70, 160, 120, 172, 210)
-    ..moveTo(224, 10)
-    ..cubicTo(216, 76, 234, 126, 220, 214)
-    ..moveTo(254, 20)
-    ..cubicTo(244, 84, 258, 134, 246, 196);
 
   // ----------------------------------------------------------- medidas ---
 
@@ -171,7 +167,7 @@ class PintorCabeca extends CustomPainter {
   double _xChave(bool esquerda) {
     final x = switch (estilo) {
       EstiloCabeca.baixo => 97.0,
-      EstiloCabeca.ukulele => 112.0,
+      EstiloCabeca.ukulele => 113.0,
       _ => 104.0,
     };
     return esquerda ? x : GeometriaCabeca.larguraDesenho - x;
@@ -181,7 +177,7 @@ class PintorCabeca extends CustomPainter {
   double _xPino(bool esquerda) {
     final x = switch (estilo) {
       EstiloCabeca.violao => 159.0,
-      EstiloCabeca.ukulele => 154.0,
+      EstiloCabeca.ukulele => 153.0,
       EstiloCabeca.baixo => 146.0,
       _ => 150.0,
     };
@@ -208,10 +204,10 @@ class PintorCabeca extends CustomPainter {
   Color get _tomMadeira {
     final (tom, quanto) = switch (estilo) {
       EstiloCabeca.ukulele => (_koa, 0.55),
-      EstiloCabeca.cavaquinho => (_jacaranda, 0.5),
+      EstiloCabeca.cavaquinho => (_jacaranda, 0.3),
       EstiloCabeca.violao => (madeira, 0.0),
       EstiloCabeca.viola => (_cedro, 0.5),
-      EstiloCabeca.baixo => (_ebano, 0.55),
+      EstiloCabeca.baixo => (_bordo, 0.6),
     };
     return Color.lerp(madeira, tom, quanto)!;
   }
@@ -274,31 +270,26 @@ class PintorCabeca extends CustomPainter {
     }
   }
 
+  /// Flat: a madeira chapada, a metade direita um tom abaixo e o contorno.
   void _madeira(Canvas canvas, Path contorno, GeometriaCabeca geometria) {
     final tom = _tomMadeira;
-    final escura = Color.lerp(madeiraEscura, tom, 0.3)!;
+    final escura = Color.lerp(madeiraEscura, tom, 0.25)!;
     canvas
       ..drawPath(contorno, Paint()..color = tom)
       ..save()
       ..clipPath(contorno)
       ..drawRect(
         const Rect.fromLTRB(195, 0, 300, 274),
-        Paint()..color = escura.withValues(alpha: 0.28),
-      )
-      ..drawPath(
-        _veios,
-        Paint()
-          ..color = escura.withValues(alpha: 0.45)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.3,
+        Paint()..color = escura.withValues(alpha: 0.22),
       )
       ..restore()
       ..drawPath(
         contorno,
         Paint()
-          ..color = escura.withValues(alpha: 0.6)
+          ..color = escura
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.2,
+          ..strokeWidth = 2.2
+          ..strokeJoin = StrokeJoin.round,
       );
 
     // O violão tem a placa das tarraxas por fora, de cada lado.
@@ -351,10 +342,10 @@ class PintorCabeca extends CustomPainter {
   /// O losango de madrepérola da viola.
   void _losango(Canvas canvas) {
     final losango = Path()
-      ..moveTo(195, 34)
-      ..lineTo(203, 46)
+      ..moveTo(195, 36)
+      ..lineTo(202, 47)
       ..lineTo(195, 58)
-      ..lineTo(187, 46)
+      ..lineTo(188, 47)
       ..close();
     canvas
       ..drawPath(losango, Paint()..color = _marfim)
@@ -521,8 +512,13 @@ class PintorCabeca extends CustomPainter {
     switch (estilo) {
       case EstiloCabeca.ukulele:
         canvas
-          ..drawCircle(centro, 9, preenchimento)
-          ..drawCircle(centro, 9, borda);
+          ..drawCircle(centro, 10, preenchimento)
+          ..drawCircle(centro, 10, borda)
+          ..drawCircle(
+            centro,
+            4,
+            Paint()..color = _marfimBorda.withValues(alpha: 0.35),
+          );
       case EstiloCabeca.viola:
         final chave = Rect.fromCenter(center: centro, width: 14, height: 15);
         canvas
