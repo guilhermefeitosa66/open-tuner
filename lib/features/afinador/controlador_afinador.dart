@@ -8,12 +8,14 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../audio/fonte_audio.dart';
 import '../../audio/janela_deslizante.dart';
 import '../../audio/registro.dart';
+import '../../audio/tocador.dart';
 import '../../dados/ajustes.dart';
 import '../../dados/preferencias.dart';
 import '../../dominio/afinacoes.dart';
 import '../../dominio/detector.dart';
 import '../../dominio/escolha_corda.dart';
 import '../../dominio/estado_corda.dart';
+import '../../dominio/marcador_afinada.dart';
 import '../../dominio/nota.dart';
 import '../../dominio/suavizador.dart';
 import 'historico_leituras.dart';
@@ -26,6 +28,7 @@ class LeituraTela {
     required this.cents,
     required this.frequencia,
     required this.estado,
+    this.progresso = 0,
   });
 
   /// Nenhuma corda soando: indicador vazio no centro.
@@ -48,6 +51,9 @@ class LeituraTela {
   /// null quando ociosa.
   final EstadoCorda? estado;
 
+  /// Quanto falta para a corda ganhar a marca, de 0 a 1: enche o indicador.
+  final double progresso;
+
   bool get ehOciosa => estado == null;
 
   @override
@@ -56,10 +62,11 @@ class LeituraTela {
       outro.corda == corda &&
       outro.cents == cents &&
       outro.frequencia == frequencia &&
-      outro.estado == estado;
+      outro.estado == estado &&
+      outro.progresso == progresso;
 
   @override
-  int get hashCode => Object.hash(corda, cents, frequencia, estado);
+  int get hashCode => Object.hash(corda, cents, frequencia, estado, progresso);
 }
 
 /// Liga e desliga o "manter a tela ligada".
@@ -90,9 +97,11 @@ class ControladorAfinador extends ChangeNotifier {
     required this.ajustes,
     DefinirTelaLigada? definirTelaLigada,
     Future<void> Function()? vibrar,
+    Tocador? tocador,
   }) : _preferencias = preferencias,
        _definirTelaLigada = definirTelaLigada ?? _telaLigadaPeloPlugin,
-       _vibrar = vibrar ?? _vibrarCurto {
+       _vibrar = vibrar ?? _vibrarCurto,
+       _tocador = tocador ?? TocadorAparelho() {
     _instrumento = instrumentoPorId(preferencias.instrumento ?? '');
     _afinacao = _instrumento.afinacao(preferencias.afinacao ?? '');
     _auto = preferencias.auto;
@@ -112,12 +121,14 @@ class ControladorAfinador extends ChangeNotifier {
   final Preferencias _preferencias;
   final DefinirTelaLigada _definirTelaLigada;
   final Future<void> Function() _vibrar;
+  final Tocador _tocador;
 
   /// Análises por segundo (o salto da janela sai daqui).
   static const analisesPorSegundo = 25;
 
-  /// Tempo dentro da tolerância para a corda ganhar a marca (RF-09).
-  static const tempoParaMarcar = 1.0;
+  /// Depois de um som do próprio app, quanto tempo a mais o afinador fica
+  /// surdo, pelo eco e pelo atraso do alto-falante.
+  static const folgaDoSom = 0.25;
 
   /// Sem nenhuma corda soando por este tempo, as marcas somem (RF-09).
   static const tempoParaLimparMarcas = 120.0;
@@ -136,6 +147,7 @@ class ControladorAfinador extends ChangeNotifier {
   late JanelaDeslizante _janela;
   late int _a4;
   final Suavizador _suavizador = Suavizador();
+  final MarcadorAfinada _marcador = MarcadorAfinada();
   final Set<int> _afinadas = {};
   EstadoPermissao _permissao = EstadoPermissao.desconhecida;
 
@@ -144,11 +156,15 @@ class ControladorAfinador extends ChangeNotifier {
   bool _iniciando = false;
   StreamSubscription<List<double>>? _assinatura;
 
-  /// Relógio do áudio, em segundos de som analisado. Mede a marca de 1 s e os
-  /// 2 min sem som sem depender do relógio de parede.
+  /// Relógio do áudio, em segundos de som analisado. Mede o tempo afinado e
+  /// os 2 min sem som sem depender do relógio de parede.
   double _tempo = 0;
   double _ultimoSom = 0;
-  double? _dentroDesde;
+
+  /// Até este instante do relógio do áudio o microfone está ouvindo o som do
+  /// próprio app (a corda de referência, o aviso): as leituras são ignoradas,
+  /// senão a corda de referência marcaria a si mesma como afinada.
+  double _surdoAte = -1;
   int? _cordaDaLeitura;
 
   // Medição do detector em modo debug.
@@ -230,18 +246,27 @@ class ControladorAfinador extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Tocar no botão de uma corda: fixa a corda e desliga o Auto (RF-05).
+  /// Tocar no botão de uma corda: fixa a corda, desliga o Auto e toca o som
+  /// dela, na afinação e na referência atuais (RF-05).
   void tocarCorda(int indice) {
-    final mudou = !_auto && _escolha.atual == indice;
     _auto = false;
     _preferencias.auto = false;
     _preferencias.cordaFixada = indice;
     _escolha.fixar(indice);
-    if (!mudou) {
-      _suavizador.reiniciar();
-      _dentroDesde = null;
-    }
+    final duracao = _tocador.tocarCorda(frequenciaAlvo(indice));
+    _ensurdecer(duracao);
+    _suavizador.reiniciar();
+    _marcador.reiniciar();
+    _cordaDaLeitura = null;
+    leitura.value = LeituraTela.ociosa;
     notifyListeners();
+  }
+
+  void _ensurdecer(Duration duracao) {
+    _surdoAte = math.max(
+      _surdoAte,
+      _tempo + duracao.inMicroseconds / 1e6 + folgaDoSom,
+    );
   }
 
   void _aoMudarAjustes() {
@@ -259,7 +284,7 @@ class ControladorAfinador extends ChangeNotifier {
   void _recomecarLeitura() {
     _suavizador.reiniciar();
     _janela.limpar();
-    _dentroDesde = null;
+    _marcador.reiniciar();
     _cordaDaLeitura = null;
     historico.limpar();
     leitura.value = LeituraTela.ociosa;
@@ -350,6 +375,10 @@ class ControladorAfinador extends ChangeNotifier {
 
   void _analisar(Float64List janela) {
     _tempo += _janela.salto / fonte.taxaAmostragem;
+    if (_tempo < _surdoAte) {
+      historico.adicionar(null);
+      return;
+    }
 
     Leitura? medida;
     if (kDebugMode) {
@@ -387,7 +416,11 @@ class ControladorAfinador extends ChangeNotifier {
 
   void _aoSilenciar() {
     historico.adicionar(null);
-    _dentroDesde = null;
+    _marcador.adicionar(
+      tempo: _tempo,
+      duracao: _janela.salto / fonte.taxaAmostragem,
+      afinada: false,
+    );
     if (!leitura.value.ehOciosa && _tempo - _ultimoSom >= tempoParaOcioso) {
       leitura.value = LeituraTela.ociosa;
       _suavizador.reiniciar();
@@ -405,7 +438,7 @@ class ControladorAfinador extends ChangeNotifier {
     if (corda != _cordaDaLeitura) {
       _cordaDaLeitura = corda;
       _suavizador.reiniciar();
-      _dentroDesde = null;
+      _marcador.reiniciar();
     }
     final cents = _suavizador.adicionar(_escolha.cents(frequencia, corda));
     final estado = classificar(cents, ajustes.precisao);
@@ -419,24 +452,27 @@ class ControladorAfinador extends ChangeNotifier {
             centsEntre(frequencia, alvo).abs()) {
       alvo *= 2;
     }
+    var avisar = corda != anterior;
+    final afinada = _marcador.adicionar(
+      tempo: _tempo,
+      duracao: _janela.salto / fonte.taxaAmostragem,
+      afinada: estado == EstadoCorda.afinada,
+    );
+    if (afinada && _afinadas.add(corda)) {
+      unawaited(_vibrar());
+      _ensurdecer(_tocador.tocarAfinada());
+      avisar = true;
+    }
     leitura.value = LeituraTela(
       corda: corda,
       cents: cents,
       frequencia: alvo * math.pow(2, cents / 1200),
       estado: estado,
+      // Corda já marcada e ainda na nota: o indicador fica cheio.
+      progresso: _afinadas.contains(corda) && estado == EstadoCorda.afinada
+          ? 1
+          : _marcador.progresso,
     );
-
-    var avisar = corda != anterior;
-    if (estado == EstadoCorda.afinada) {
-      _dentroDesde ??= _tempo;
-      if (_tempo - _dentroDesde! >= tempoParaMarcar - 1e-9 &&
-          _afinadas.add(corda)) {
-        unawaited(_vibrar());
-        avisar = true;
-      }
-    } else {
-      _dentroDesde = null;
-    }
     if (avisar) notifyListeners();
   }
 
@@ -448,6 +484,7 @@ class ControladorAfinador extends ChangeNotifier {
     _assinatura = null;
     unawaited(fonte.parar());
     unawaited(_definirTelaLigada(false));
+    _tocador.descartar();
     historico.dispose();
     leitura.dispose();
     super.dispose();

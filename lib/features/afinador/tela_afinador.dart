@@ -8,6 +8,7 @@ import 'package:flutter/semantics.dart';
 import '../../app/idioma.dart';
 import '../../app/tema.dart';
 import '../../audio/fonte_audio.dart';
+import '../../audio/tocador.dart';
 import '../../dados/ajustes.dart';
 import '../../dados/preferencias.dart';
 import '../ajustes/folha_ajustes.dart';
@@ -31,6 +32,7 @@ class TelaAfinador extends StatefulWidget {
     required this.versao,
     this.definirTelaLigada,
     this.vibrar,
+    this.tocador,
   });
 
   final FonteAudio fonte;
@@ -39,6 +41,7 @@ class TelaAfinador extends StatefulWidget {
   final String versao;
   final DefinirTelaLigada? definirTelaLigada;
   final Future<void> Function()? vibrar;
+  final Tocador? tocador;
 
   @override
   State<TelaAfinador> createState() => _TelaAfinadorState();
@@ -57,6 +60,7 @@ class _TelaAfinadorState extends State<TelaAfinador> {
       ajustes: widget.ajustes,
       definirTelaLigada: widget.definirTelaLigada,
       vibrar: widget.vibrar,
+      tocador: widget.tocador,
     );
     // O pedido de permissão do sistema deixa o app "inativo" por um
     // instante, sem ir para segundo plano: só a pausa de verdade solta o

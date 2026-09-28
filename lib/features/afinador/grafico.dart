@@ -295,11 +295,35 @@ class _Indicador extends StatelessWidget {
             label: rotulo,
             container: true,
             child: ExcludeSemantics(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: cores.fundo,
-                  border: Border.all(color: cor, width: 3 * escala),
+              // Perto ou afinada, um anel verde fecha pela borda enquanto a
+              // corda soma tempo na nota; fechado, o círculo enche de verde
+              // (é quando a corda ganha a marca). Longe, nada: o anel só
+              // aparece quando falta pouco.
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(
+                  end: leitura.estado == EstadoCorda.longe
+                      ? 0
+                      : leitura.progresso,
+                ),
+                duration: const Duration(milliseconds: 120),
+                builder: (context, progresso, filho) => CustomPaint(
+                  key: const Key('progresso'),
+                  foregroundPainter: PintorProgresso(
+                    progresso: progresso,
+                    cor: cores.afinado,
+                    espessura: 4 * escala,
+                  ),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: progresso >= 1
+                          ? Color.lerp(cores.fundo, cores.afinado, 0.22)
+                          : cores.fundo,
+                      border: Border.all(color: cor, width: 3 * escala),
+                    ),
+                    child: filho,
+                  ),
                 ),
                 child: Center(
                   child: Padding(
@@ -330,6 +354,43 @@ class _Indicador extends StatelessWidget {
       ],
     );
   }
+}
+
+/// O anel de progresso do indicador: um arco pela borda, do alto no sentido
+/// horário, de 0 (nada) a 1 (a volta inteira).
+class PintorProgresso extends CustomPainter {
+  const PintorProgresso({
+    required this.progresso,
+    required this.cor,
+    required this.espessura,
+  });
+
+  final double progresso;
+  final Color cor;
+  final double espessura;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (progresso <= 0) return;
+    final raio = size.shortestSide / 2 - espessura / 2;
+    canvas.drawArc(
+      Rect.fromCircle(center: size.center(Offset.zero), radius: raio),
+      -math.pi / 2,
+      2 * math.pi * progresso.clamp(0.0, 1.0),
+      false,
+      Paint()
+        ..color = cor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = espessura
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(PintorProgresso antigo) =>
+      antigo.progresso != progresso ||
+      antigo.cor != cor ||
+      antigo.espessura != espessura;
 }
 
 class _PintorPonta extends CustomPainter {

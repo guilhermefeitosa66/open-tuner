@@ -113,8 +113,11 @@ mais próxima da nota tocada, em cents. Para não pular entre cordas vizinhas, a
 acontece depois de 5 leituras consecutivas apontando para outra corda. Na viola caipira, a oitava de
 cima de um par conta como o próprio par.
 
-**RF-05 · Modo manual.** Tocar no botão de uma corda fixa aquela corda como alvo e desliga o Auto.
-Ligar o Auto de novo devolve a escolha ao detector.
+**RF-05 · Modo manual.** Tocar no botão de uma corda fixa aquela corda como alvo, desliga o Auto e
+toca o som da corda, na afinação e na referência A4 atuais, para afinar de ouvido. O som é
+sintetizado no próprio app (harmônicos de corda dedilhada na frequência exata), então serve para
+qualquer afinação sem gravação nenhuma. Enquanto ele soa, o afinador ignora o microfone, senão a
+referência marcaria a si mesma como afinada. Ligar o Auto de novo devolve a escolha ao detector.
 
 ### O afinador
 
@@ -140,8 +143,12 @@ rejeitadas (silêncio) deixam um vão. O rastro esmaece perto da cabeça do inst
 | Perto | até 15 cents | `#8A6400` | `#E6C24F` |
 | Longe | mais de 15 cents | `#B04A1C` | `#EE8A52` |
 
-**RF-09 · Corda afinada.** Uma corda que fica dentro da tolerância por 1 segundo é marcada: o botão
-dela ganha anel e selo verdes, e o aparelho vibra uma vez, curto. As marcas somem ao trocar de
+**RF-09 · Corda afinada.** A corda solta oscila em volta da nota enquanto morre, então o tempo na
+nota é somado, não seguido: 1 segundo dentro da tolerância, com idas e vindas, nos últimos 2,5
+segundos marca a corda. Enquanto soma, um anel verde fecha pela borda do indicador (só perto ou
+afinada; longe, não aparece); fechado, o indicador enche de verde. Marcada, a corda fica verde no
+botão (fundo, anel e selo), na tarraxa e no fio; o aparelho vibra uma vez, curto, e toca um aviso
+curto de dois sinos, também sintetizado. As marcas somem ao trocar de
 instrumento ou de afinação, e depois de 2 minutos sem nenhuma corda tocada.
 
 **RF-10 · Nota alvo.** Sobre a linha do centro, um círculo menor mostra a nota alvo com a oitava
@@ -150,8 +157,12 @@ instrumento ou de afinação, e depois de 2 minutos sem nenhuma corda tocada.
 **RF-11 · Cabeça do instrumento.** Na metade de baixo, o desenho da cabeça do instrumento com as
 tarraxas. Metade das cordas de cada lado, a mais grave embaixo à esquerda; com número ímpar de cordas
 o lado esquerdo fica com uma a mais. Cada tarraxa tem ao lado um botão redondo com a nota da corda.
-A corda alvo fica destacada no botão, na tarraxa e no fio da corda. O desenho é vetorial e o mesmo
-para todos os instrumentos; só muda a quantidade de tarraxas.
+A corda alvo fica destacada no botão, na tarraxa e no fio da corda. O desenho é vetorial e muda
+com o instrumento, com as tarraxas sempre nas mesmas alturas para os botões não saírem do lugar:
+ukulele (coroa arredondada, tarraxas de botão), cavaquinho (bico no alto, tarraxas borboleta de
+metal), violão (cabeça vazada com rolos, estilo clássico), viola caipira (recorte em lóbulos,
+losango de madrepérola e duas tarraxas por par) e baixo (topo inclinado, tarraxas grandes, cordas
+grossas). Trocar de instrumento funde um desenho no outro.
 
 **RF-12 · Espera.** Sem corda tocada, o indicador fica no centro, vazio, e uma mensagem pede "Toque
 qualquer corda para começar".

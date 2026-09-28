@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:open_tuner/app/app.dart';
+import 'package:open_tuner/audio/tocador.dart';
 import 'package:open_tuner/dados/preferencias.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,6 +15,29 @@ class AppAberto {
   final SharedPreferences preferencias;
   int vibracoes = 0;
   final List<bool> telaLigada = [];
+  final TocadorFalso tocador = TocadorFalso();
+}
+
+/// Anota o que o app mandou tocar, sem som nenhum.
+class TocadorFalso implements Tocador {
+  /// Frequências das cordas tocadas, na ordem.
+  final List<double> cordas = [];
+  int avisosDeAfinada = 0;
+
+  @override
+  Duration tocarCorda(double frequencia) {
+    cordas.add(frequencia);
+    return const Duration(milliseconds: 1600);
+  }
+
+  @override
+  Duration tocarAfinada() {
+    avisosDeAfinada++;
+    return const Duration(milliseconds: 550);
+  }
+
+  @override
+  void descartar() {}
 }
 
 /// Abre o OpenTuner num aparelho simulado de 390 × 844, no [idioma] dado,
@@ -48,6 +72,7 @@ Future<AppAberto> abrirApp(
       fonteAudio: aberto.fonte,
       definirTelaLigada: (ligada) async => aberto.telaLigada.add(ligada),
       vibrar: () async => aberto.vibracoes++,
+      tocador: aberto.tocador,
     ),
   );
   // Localizações, permissão e início da escuta.

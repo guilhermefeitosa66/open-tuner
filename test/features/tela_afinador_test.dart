@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:open_tuner/audio/fonte_audio.dart';
 import 'package:open_tuner/features/afinador/desenhos.dart';
+import 'package:open_tuner/features/afinador/grafico.dart';
 
 import '../apoio/abrir_app.dart';
 import '../apoio/fonte_audio_falsa.dart';
@@ -49,6 +50,20 @@ void main() {
         ),
       )
       .ligada;
+
+  double progressoDoIndicador(WidgetTester tester) =>
+      (tester
+                  .widget<CustomPaint>(find.byKey(const Key('progresso')))
+                  .foregroundPainter!
+              as PintorProgresso)
+          .progresso;
+
+  testWidgets('longe da nota, o anel de progresso não aparece', (tester) async {
+    final app = await abrirApp(tester);
+    app.fonte.frequencia = FonteAudioFalsa.desviada(e4, 30);
+    await esperar(tester, const Duration(milliseconds: 600));
+    expect(progressoDoIndicador(tester), 0);
+  });
 
   group('indicador', () {
     testWidgets('abre esperando uma corda, com o indicador no centro', (
@@ -103,7 +118,7 @@ void main() {
       expect(centroDoIndicador(tester), greaterThan(centroDaTela(tester) + 40));
     });
 
-    testWidgets('afinada: ✓ no indicador e, depois de 1 s, o selo na corda', (
+    testWidgets('afinada: ✓ no indicador e, pouco depois, selo e som', (
       tester,
     ) async {
       final app = await abrirApp(tester);
@@ -120,11 +135,18 @@ void main() {
       );
       expect(find.byKey(const Key('selo-2')), findsNothing);
       expect(app.vibracoes, 0);
+      expect(app.tocador.avisosDeAfinada, 0);
+      // O anel de progresso já começou a fechar, sem completar.
+      final progresso = progressoDoIndicador(tester);
+      expect(progresso, greaterThan(0));
+      expect(progresso, lessThan(1));
 
       await esperar(tester, const Duration(milliseconds: 1100));
 
       expect(find.byKey(const Key('selo-2')), findsOneWidget);
       expect(app.vibracoes, 1);
+      expect(app.tocador.avisosDeAfinada, 1);
+      expect(progressoDoIndicador(tester), 1);
       expect(find.bySemanticsLabel('Corda E4, afinada'), findsOneWidget);
 
       // O silêncio devolve o indicador ao centro, e a marca fica.
@@ -132,6 +154,22 @@ void main() {
       await esperar(tester, const Duration(seconds: 2));
       expect(find.text('Toque qualquer corda para começar'), findsOneWidget);
       expect(find.byKey(const Key('selo-2')), findsOneWidget);
+    });
+
+    testWidgets('a corda que oscila em volta da nota também é marcada', (
+      tester,
+    ) async {
+      final app = await abrirApp(tester);
+      // Como uma corda solta morrendo: entra e sai da tolerância a cada
+      // 0,4 s, nunca 1 s seguido dentro dela.
+      for (var i = 0; i < 4; i++) {
+        app.fonte.frequencia = e4;
+        await esperar(tester, const Duration(milliseconds: 400));
+        app.fonte.frequencia = FonteAudioFalsa.desviada(e4, 12);
+        await esperar(tester, const Duration(milliseconds: 400));
+      }
+      expect(find.byKey(const Key('selo-2')), findsOneWidget);
+      expect(app.tocador.avisosDeAfinada, 1);
     });
 
     testWidgets('as marcas somem ao trocar de afinação', (tester) async {
@@ -165,10 +203,19 @@ void main() {
       expect(autoLigado(tester), isFalse);
       expect(app.preferencias.getBool('auto'), isFalse);
       expect(app.preferencias.getInt('cordaFixada'), 0);
+      // E o som da corda, um G4.
+      expect(app.tocador.cordas, hasLength(1));
+      expect(app.tocador.cordas.single, closeTo(392.0, 0.01));
+
+      // Enquanto a referência soa, o afinador não se escuta.
+      app.fonte.frequencia = 392.0;
+      await esperar(tester, const Duration(milliseconds: 1200));
+      expect(find.text('Toque qualquer corda para começar'), findsOneWidget);
+      expect(find.byKey(const Key('selo-0')), findsNothing);
 
       // Com a corda G4 fixada, um E4 é medido contra G4: muito frouxo.
       app.fonte.frequencia = e4;
-      await esperar(tester, const Duration(milliseconds: 600));
+      await esperar(tester, const Duration(milliseconds: 1200));
       expect(find.text('Aperte a corda'), findsOneWidget);
 
       // Ligar o AUTO devolve a escolha ao detector.

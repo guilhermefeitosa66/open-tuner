@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../audio/fonte_audio.dart';
+import '../audio/tocador.dart';
 import '../dados/ajustes.dart';
 import '../dados/preferencias.dart';
 import '../features/afinador/controlador_afinador.dart';
@@ -22,6 +23,7 @@ class AppOpenTuner extends StatefulWidget {
     required this.fonteAudio,
     this.definirTelaLigada,
     this.vibrar,
+    this.tocador,
   });
 
   final Preferencias preferencias;
@@ -32,6 +34,9 @@ class AppOpenTuner extends StatefulWidget {
 
   /// A vibração curta da corda afinada; idem.
   final Future<void> Function()? vibrar;
+
+  /// Os sons (corda de referência e aviso de afinada); idem.
+  final Tocador? tocador;
 
   @override
   State<AppOpenTuner> createState() => _AppOpenTunerState();
@@ -70,6 +75,7 @@ class _AppOpenTunerState extends State<AppOpenTuner> {
           versao: versaoApp,
           definirTelaLigada: widget.definirTelaLigada,
           vibrar: widget.vibrar,
+          tocador: widget.tocador,
         ),
       ),
     );
