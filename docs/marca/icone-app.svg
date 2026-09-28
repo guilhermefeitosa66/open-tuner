@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="432" height="432">
+  <title>Ícone do Open Tuner</title>
+  <!-- Grade de ícone adaptativo do Android: 108 dp, zona segura de 66 dp no centro. -->
+  <rect width="108" height="108" fill="#6B4226"/>
+  <g transform="translate(33.5 31.5) scale(0.41)">
+    <path d="M50 106C42 100 6 62 5 34C4 14 22 4 50 4C78 4 96 14 95 34C94 62 58 100 50 106Z" fill="#F5EFE6"/>
+    <path d="M50 18C71 21 71 33 50 36C32 39 32 49 50 51C62 53 62 60 50 62C44 63 44 67 50 68L50 88" fill="none" stroke="#6B4226" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

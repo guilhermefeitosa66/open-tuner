@@ -1,0 +1,19 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - "**/*.g.dart"
+  errors:
+    # Comentários de documentação em português são a norma deste projeto.
+    slash_for_doc_comments: ignore
+
+linter:
+  rules:
+    prefer_const_constructors: true
+    prefer_final_locals: true
+    avoid_print: true
+    unawaited_futures: true
+    # Os nomes do projeto são em português, inclusive os parâmetros de
+    # `operator ==` (`outro`, e não `other`).
+    avoid_renaming_method_parameters: false

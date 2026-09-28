@@ -1,0 +1,103 @@
+# ============================================================================
+# Segredos e chaves de assinatura
+#
+# Nada aqui pode entrar no repositório, que é público. Uma chave de assinatura
+# vazada permite publicar atualizações falsas do aplicativo em nome do projeto,
+# e uma chave de release do Android **não pode ser trocada**: as lojas recusam
+# qualquer versão futura assinada com outra chave.
+# ============================================================================
+
+# Chaves de assinatura Android (debug e release)
+*.jks
+*.keystore
+*.p12
+*.pfx
+key.properties
+keystore.properties
+android/key.properties
+android/app/*.jks
+android/app/*.keystore
+android/app/debug.keystore
+android/app/upload-keystore.jks
+
+# Chaves e certificados em geral
+*.pem
+*.key
+*.crt
+*.der
+!**/android/**/res/**/*.key
+
+# Credenciais de serviços
+google-services.json
+service-account*.json
+*-service-account.json
+
+# Variáveis de ambiente e segredos locais
+.env
+.env.*
+!.env.example
+secrets.dart
+*.secrets
+credentials.json
+
+# ============================================================================
+# Saída de build
+# ============================================================================
+
+/build/
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/.gradle/
+/android/.kotlin/
+/android/local.properties
+*.apk
+*.aab
+
+# Símbolos de depuração e mapas de ofuscação.
+# O mapa é o que traduz um stack trace ofuscado de volta ao código: guardar
+# fora do repositório, mas guardar — sem ele não se depura um crash de release.
+app.*.symbols
+app.*.map.json
+/symbols/
+
+# ============================================================================
+# Ferramentas e ambiente local
+# ============================================================================
+
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub/
+.pub-cache/
+/coverage/
+flutter_*.log
+migrate_working_dir/
+
+# Editores
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*~
+.history/
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.class
+*.log
+*.pyc
+__pycache__/
+
+# ============================================================================
+# Gravações de teste
+#
+# Áudio captado do microfone durante o desenvolvimento pode conter voz e som
+# ambiente de quem gravou; fica fora do repositório.
+# ============================================================================
+
+/gravacoes/
