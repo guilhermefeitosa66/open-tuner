@@ -1,0 +1,201 @@
+/* Site do OpenTuner. As cores são os mesmos tokens do app (lib/app/tema.dart,
+   paleta Nogueira): o tema claro e o escuro seguem a preferência do sistema. */
+
+@font-face {
+  font-family: "Fraunces";
+  src: url("fontes/fraunces-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Manrope";
+  src: url("fontes/manrope-latin.woff2") format("woff2");
+  font-weight: 400 800;
+  font-display: swap;
+}
+
+:root {
+  --fundo: #F5EFE6;
+  --superficie: #FFFBF5;
+  --superficie-alta: #EDE4D6;
+  --grade: #E3D8C8;
+  --linha: #C9B9A4;
+  --texto: #231A13;
+  --texto-secundario: #6E5E50;
+  --accent: #6B4226;
+  --sobre-accent: #FFF8EF;
+  --afinado: #2A7353;
+  --perto: #8A6400;
+  --longe: #B04A1C;
+  --madeira: #7A4A2A;
+  --madeira-escura: #4E2E18;
+
+  --serifa: "Fraunces", Georgia, serif;
+  --sans: "Manrope", system-ui, sans-serif;
+  --largura: 1080px;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fundo: #14110E;
+    --superficie: #1E1915;
+    --superficie-alta: #2A231D;
+    --grade: #2A241E;
+    --linha: #4A3F35;
+    --texto: #F3EBE0;
+    --texto-secundario: #B3A597;
+    --accent: #C9935F;
+    --sobre-accent: #1A120B;
+    --afinado: #5CC592;
+    --perto: #E6C24F;
+    --longe: #EE8A52;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+a { color: var(--accent); text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+
+.pular {
+  position: absolute; left: 16px; top: -60px;
+  background: var(--accent); color: var(--sobre-accent);
+  padding: 10px 16px; border-radius: 10px; font-weight: 700; z-index: 10;
+}
+.pular:focus { top: 16px; }
+
+.conteudo { width: min(var(--largura), 100% - 32px); margin-inline: auto; }
+
+h1, h2, h3 { font-family: var(--serifa); font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; margin: 0; }
+h1 { font-size: clamp(40px, 7vw, 68px); }
+h2 { font-size: clamp(30px, 4.5vw, 42px); }
+h3 { font-size: 22px; }
+p { margin: 0; }
+
+/* Cabeçalho */
+.topo { padding-block: 22px; }
+.topo .conteudo { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.marca {
+  display: inline-flex; align-items: center; gap: 10px;
+  color: var(--texto); text-decoration: none;
+  font-family: var(--serifa); font-size: 26px; font-weight: 500; letter-spacing: -0.02em; line-height: 1;
+}
+.marca b { color: var(--accent); font-weight: 700; }
+.marca svg { width: 26px; height: 29px; flex: none; }
+.marca .palheta { fill: var(--accent); }
+.marca .onda { stroke: var(--fundo); }
+.topo nav { display: flex; gap: 22px; font-size: 15px; font-weight: 600; }
+.topo nav a { color: var(--texto-secundario); text-decoration: none; }
+.topo nav a:hover { color: var(--texto); }
+
+/* Abertura */
+.abertura { padding-block: 40px 72px; }
+.abertura .conteudo { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 56px; align-items: center; }
+.abertura p.chamada { font-size: 20px; color: var(--texto-secundario); margin-top: 20px; max-width: 34ch; }
+.acoes { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.botao {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 52px;
+  padding: 0 24px; border-radius: 999px; font-weight: 800; font-size: 16px; text-decoration: none;
+}
+.botao.primario { background: var(--accent); color: var(--sobre-accent); }
+.botao.primario:hover { filter: brightness(1.08); }
+.botao.secundario { background: var(--superficie-alta); color: var(--texto-secundario); cursor: default; }
+.botao svg { width: 20px; height: 20px; }
+.miudo { margin-top: 18px; font-size: 14px; color: var(--texto-secundario); }
+
+/* O afinador desenhado */
+.aparelho {
+  justify-self: center; width: min(340px, 100%); aspect-ratio: 340 / 400;
+  border-radius: 36px; background: #14110E; padding: 14px;
+  box-shadow: 0 0 0 1px var(--linha), 0 30px 60px -30px rgba(35, 26, 19, 0.45);
+}
+.aparelho svg { display: block; width: 100%; height: 100%; border-radius: 24px; }
+
+/* Seções */
+section { padding-block: 72px; }
+.cabeca-secao { display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; max-width: 640px; }
+.cabeca-secao p { color: var(--texto-secundario); font-size: 18px; }
+.rotulo { font-size: 13px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--texto-secundario); }
+
+.leitura { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.cartao {
+  background: var(--superficie); border: 1px solid var(--grade); border-radius: 22px;
+  padding: 24px; display: flex; flex-direction: column; gap: 12px;
+}
+.cartao svg { width: 100%; height: auto; }
+.cartao p { color: var(--texto-secundario); font-size: 16px; }
+.estado { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; }
+.estado::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: currentColor; }
+.estado.longe { color: var(--longe); }
+.estado.afinado { color: var(--afinado); }
+.estado.perto { color: var(--perto); }
+
+.instrumentos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.instrumentos ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.instrumentos li { display: flex; flex-direction: column; gap: 6px; }
+.instrumentos .nome { font-weight: 800; }
+.fichas { display: flex; flex-wrap: wrap; gap: 6px; }
+.fichas span {
+  font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 8px;
+  background: var(--superficie-alta); color: var(--texto);
+}
+
+/* A promessa */
+.promessa { background: var(--accent); color: var(--sobre-accent); }
+.promessa .conteudo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: start; }
+.promessa h2 { font-size: clamp(36px, 6vw, 58px); }
+.promessa p { font-size: 19px; }
+.promessa p + p { margin-top: 18px; }
+.promessa .assinatura { font-family: var(--serifa); font-size: 20px; font-style: italic; }
+.promessa ul { list-style: none; padding: 0; margin: 28px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; font-weight: 700; }
+.promessa li { display: flex; align-items: center; gap: 10px; }
+.promessa li svg { width: 20px; height: 20px; flex: none; }
+
+.duas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.duas .cartao p { font-size: 17px; }
+
+/* Rodapé */
+.rodape { padding-block: 40px 56px; border-top: 1px solid var(--grade); font-size: 14px; color: var(--texto-secundario); }
+.rodape .conteudo { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; align-items: center; }
+.rodape nav { display: flex; gap: 20px; }
+
+/* Texto longo (política de privacidade) */
+.documento { padding-block: 32px 80px; }
+.documento .conteudo { max-width: 720px; }
+.documento h1 { font-size: clamp(36px, 6vw, 52px); margin-bottom: 12px; }
+.documento h2 { font-size: 26px; margin: 44px 0 12px; }
+.documento p, .documento li { color: var(--texto); }
+.documento p + p { margin-top: 14px; }
+.documento ul { padding-left: 22px; margin: 12px 0 0; }
+.documento li + li { margin-top: 8px; }
+.resumo {
+  margin-top: 28px; padding: 22px 24px; border-radius: 18px;
+  background: var(--superficie-alta); font-weight: 600;
+}
+
+@media (max-width: 860px) {
+  .abertura .conteudo, .promessa .conteudo { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .leitura, .instrumentos, .duas { grid-template-columns: minmax(0, 1fr); }
+  .topo nav a:not(.sempre) { display: none; }
+  section { padding-block: 56px; }
+}
+
+@media (max-width: 480px) {
+  .promessa ul { grid-template-columns: minmax(0, 1fr); }
+  .botao { width: 100%; justify-content: center; }
+}

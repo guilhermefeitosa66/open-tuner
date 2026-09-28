@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 110" width="100" height="110">
-  <title>Open Tuner</title>
+  <title>OpenTuner</title>
   <!-- Uma cor só: a onda é recortada da palheta e deixa ver o fundo, qualquer que seja. -->
   <mask id="onda">
     <rect width="100" height="110" fill="#fff"/>

@@ -1,0 +1,8 @@
+# Textos do aplicativo: os ARBs em lib/l10n geram a classe `Textos`.
+# O inglês é o modelo e a reserva quando o idioma do aparelho não é suportado.
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: textos.dart
+output-class: Textos
+nullable-getter: false
+format: true

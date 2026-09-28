@@ -1,0 +1,339 @@
+{
+  "@@locale": "en",
+  "appTitle": "OpenTuner",
+  "@appTitle": {
+    "description": "App name, shown in the task switcher and the title"
+  },
+  "toqueQualquerCorda": "Play any string to start",
+  "@toqueQualquerCorda": {
+    "description": "Shown while no note is being heard"
+  },
+  "aperteACorda": "Tighten the string",
+  "@aperteACorda": {
+    "description": "The string is flat: raise its pitch"
+  },
+  "afrouxeACorda": "Loosen the string",
+  "@afrouxeACorda": {
+    "description": "The string is sharp: lower its pitch"
+  },
+  "afinada": "In tune",
+  "@afinada": {
+    "description": "The string is within tolerance"
+  },
+  "auto": "AUTO",
+  "@auto": {
+    "description": "Short label of the automatic string detection toggle"
+  },
+  "autoDescricao": "Detect the string automatically",
+  "@autoDescricao": {
+    "description": "Accessibility description of the AUTO toggle"
+  },
+  "ajustes": "Settings",
+  "@ajustes": {
+    "description": "Settings screen title and button"
+  },
+  "fechar": "Close",
+  "@fechar": {
+    "description": "Closes a sheet or screen"
+  },
+  "instrumento": "Instrument",
+  "@instrumento": {
+    "description": "Label of the instrument picker"
+  },
+  "afinacao": "Tuning",
+  "@afinacao": {
+    "description": "Label of the tuning picker"
+  },
+  "quantidadeCordas": "{quantidade, plural, =1{1 string} other{{quantidade} strings}}",
+  "@quantidadeCordas": {
+    "description": "Number of strings of an instrument",
+    "placeholders": {
+      "quantidade": {
+        "type": "int"
+      }
+    }
+  },
+  "quantidadePares": "{quantidade, plural, =1{1 pair} other{{quantidade} pairs}}",
+  "@quantidadePares": {
+    "description": "Number of string pairs (courses) of an instrument",
+    "placeholders": {
+      "quantidade": {
+        "type": "int"
+      }
+    }
+  },
+  "cordaNota": "String {nota}",
+  "@cordaNota": {
+    "description": "Accessibility label of a single string, by its note",
+    "placeholders": {
+      "nota": {
+        "type": "String",
+        "example": "E"
+      }
+    }
+  },
+  "parNota": "Pair {nota}",
+  "@parNota": {
+    "description": "Accessibility label of a string pair, by its note",
+    "placeholders": {
+      "nota": {
+        "type": "String",
+        "example": "E"
+      }
+    }
+  },
+  "cordaAfinada": "{rotulo}, in tune",
+  "@cordaAfinada": {
+    "description": "Accessibility label of a string already in tune",
+    "placeholders": {
+      "rotulo": {
+        "type": "String",
+        "example": "String E"
+      }
+    }
+  },
+  "desvioCents": "{cents} cents",
+  "@desvioCents": {
+    "description": "Deviation from the target note, in cents",
+    "placeholders": {
+      "cents": {
+        "type": "int",
+        "example": "-12"
+      }
+    }
+  },
+  "tema": "Theme",
+  "@tema": {
+    "description": "Theme setting"
+  },
+  "temaSistema": "System",
+  "@temaSistema": {
+    "description": "Theme option: follow the system"
+  },
+  "temaClaro": "Light",
+  "@temaClaro": {
+    "description": "Theme option: light"
+  },
+  "temaEscuro": "Dark",
+  "@temaEscuro": {
+    "description": "Theme option: dark"
+  },
+  "nomeDasNotas": "Note names",
+  "@nomeDasNotas": {
+    "description": "Setting: how note names are written"
+  },
+  "notasLetras": "C D E",
+  "@notasLetras": {
+    "description": "Note names option: letters"
+  },
+  "notasSolfejo": "Do Re Mi",
+  "@notasSolfejo": {
+    "description": "Note names option: solfège"
+  },
+  "precisao": "Precision",
+  "@precisao": {
+    "description": "Setting: tuning tolerance"
+  },
+  "precisaoNormal": "Normal · ±5",
+  "@precisaoNormal": {
+    "description": "Precision option: ±5 cents"
+  },
+  "precisaoFina": "Fine · ±2",
+  "@precisaoFina": {
+    "description": "Precision option: ±2 cents"
+  },
+  "referenciaLa": "Reference A",
+  "@referenciaLa": {
+    "description": "Setting: reference frequency of A4"
+  },
+  "referenciaLaDescricao": "A4, the note that calibrates all the others",
+  "@referenciaLaDescricao": {
+    "description": "Explains the reference A setting"
+  },
+  "diminuirReferencia": "Lower reference",
+  "@diminuirReferencia": {
+    "description": "Button that lowers the reference A"
+  },
+  "aumentarReferencia": "Raise reference",
+  "@aumentarReferencia": {
+    "description": "Button that raises the reference A"
+  },
+  "manterTelaLigada": "Keep screen on",
+  "@manterTelaLigada": {
+    "description": "Setting: keep the screen awake"
+  },
+  "manterTelaLigadaDescricao": "Only while the tuner is open",
+  "@manterTelaLigadaDescricao": {
+    "description": "Explains the keep screen on setting"
+  },
+  "sobre": "OpenTuner {versao} · open source, Apache 2.0",
+  "@sobre": {
+    "description": "About line at the bottom of the settings",
+    "placeholders": {
+      "versao": {
+        "type": "String",
+        "example": "1.0.0"
+      }
+    }
+  },
+  "permissaoTitulo": "The tuner needs to hear your instrument",
+  "@permissaoTitulo": {
+    "description": "Title of the microphone permission screen"
+  },
+  "permissaoTexto": "The microphone is only used to hear the string. Nothing is recorded or leaves your phone.",
+  "@permissaoTexto": {
+    "description": "Why the microphone is needed"
+  },
+  "permissaoPermitir": "Allow microphone",
+  "@permissaoPermitir": {
+    "description": "Button that asks for the microphone permission"
+  },
+  "permissaoNegada": "Microphone access is off. Turn it on in the system settings to tune.",
+  "@permissaoNegada": {
+    "description": "Shown when the microphone permission was denied"
+  },
+  "abrirConfiguracoes": "Open settings",
+  "@abrirConfiguracoes": {
+    "description": "Button that opens the system app settings"
+  },
+  "grupoUkuleleCavaquinho": "Ukulele & cavaquinho",
+  "@grupoUkuleleCavaquinho": {
+    "description": "Instrument group heading"
+  },
+  "grupoViolaoViola": "Guitar & viola",
+  "@grupoViolaoViola": {
+    "description": "Instrument group heading"
+  },
+  "grupoBaixo": "Bass",
+  "@grupoBaixo": {
+    "description": "Instrument group heading"
+  },
+  "instrumentoUkulele": "Ukulele",
+  "@instrumentoUkulele": {
+    "description": "Instrument name"
+  },
+  "instrumentoUkuleleBaritono": "Baritone ukulele",
+  "@instrumentoUkuleleBaritono": {
+    "description": "Instrument name"
+  },
+  "instrumentoCavaquinho": "Cavaquinho",
+  "@instrumentoCavaquinho": {
+    "description": "Instrument name"
+  },
+  "instrumentoViolao": "Guitar",
+  "@instrumentoViolao": {
+    "description": "Instrument name: acoustic guitar"
+  },
+  "instrumentoViolao7": "7-string guitar",
+  "@instrumentoViolao7": {
+    "description": "Instrument name"
+  },
+  "instrumentoViolaCaipira": "Viola caipira",
+  "@instrumentoViolaCaipira": {
+    "description": "Instrument name: Brazilian 10-string viola"
+  },
+  "instrumentoBaixo": "Bass",
+  "@instrumentoBaixo": {
+    "description": "Instrument name: 4-string bass"
+  },
+  "instrumentoBaixo5": "5-string bass",
+  "@instrumentoBaixo5": {
+    "description": "Instrument name"
+  },
+  "instrumentoBaixo6": "6-string bass",
+  "@instrumentoBaixo6": {
+    "description": "Instrument name"
+  },
+  "afinacaoPadrao": "Standard",
+  "@afinacaoPadrao": {
+    "description": "Tuning name"
+  },
+  "afinacaoSolGrave": "Low G",
+  "@afinacaoSolGrave": {
+    "description": "Tuning name: ukulele with low G"
+  },
+  "afinacaoEmRe": "D tuning",
+  "@afinacaoEmRe": {
+    "description": "Tuning name"
+  },
+  "afinacaoNatural": "Natural",
+  "@afinacaoNatural": {
+    "description": "Tuning name"
+  },
+  "afinacaoDropD": "Drop D",
+  "@afinacaoDropD": {
+    "description": "Tuning name"
+  },
+  "afinacaoMeioTomAbaixo": "Half step down",
+  "@afinacaoMeioTomAbaixo": {
+    "description": "Tuning name"
+  },
+  "afinacaoUmTomAbaixo": "Whole step down",
+  "@afinacaoUmTomAbaixo": {
+    "description": "Tuning name"
+  },
+  "afinacaoDadgad": "DADGAD",
+  "@afinacaoDadgad": {
+    "description": "Tuning name"
+  },
+  "afinacaoOpenG": "Open G",
+  "@afinacaoOpenG": {
+    "description": "Tuning name"
+  },
+  "afinacaoOpenD": "Open D",
+  "@afinacaoOpenD": {
+    "description": "Tuning name"
+  },
+  "afinacaoSetimaEmDo": "Low C 7th",
+  "@afinacaoSetimaEmDo": {
+    "description": "Tuning name: 7-string guitar with low C"
+  },
+  "afinacaoSetimaEmSi": "Low B 7th",
+  "@afinacaoSetimaEmSi": {
+    "description": "Tuning name: 7-string guitar with low B"
+  },
+  "afinacaoCebolaoEmMi": "Cebolão in E",
+  "@afinacaoCebolaoEmMi": {
+    "description": "Tuning name: viola caipira"
+  },
+  "afinacaoCebolaoEmRe": "Cebolão in D",
+  "@afinacaoCebolaoEmRe": {
+    "description": "Tuning name: viola caipira"
+  },
+  "afinacaoRioAbaixo": "Rio abaixo",
+  "@afinacaoRioAbaixo": {
+    "description": "Tuning name: viola caipira"
+  },
+  "afinacaoComDoAgudo": "High C",
+  "@afinacaoComDoAgudo": {
+    "description": "Tuning name: 6-string bass with high C"
+  },
+  "solfejoC": "Do",
+  "@solfejoC": {
+    "description": "Solfège name of C"
+  },
+  "solfejoD": "Re",
+  "@solfejoD": {
+    "description": "Solfège name of D"
+  },
+  "solfejoE": "Mi",
+  "@solfejoE": {
+    "description": "Solfège name of E"
+  },
+  "solfejoF": "Fa",
+  "@solfejoF": {
+    "description": "Solfège name of F"
+  },
+  "solfejoG": "Sol",
+  "@solfejoG": {
+    "description": "Solfège name of G"
+  },
+  "solfejoA": "La",
+  "@solfejoA": {
+    "description": "Solfège name of A"
+  },
+  "solfejoB": "Ti",
+  "@solfejoB": {
+    "description": "Solfège name of B"
+  }
+}

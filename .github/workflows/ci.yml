@@ -43,6 +43,11 @@ jobs:
       - name: Formatação
         run: dart format --output=none --set-exit-if-changed lib test
 
+      # Os scripts de chave e de release rodam fora do CI, na máquina de quem
+      # guarda a chave; aqui só a análise estática deles.
+      - name: Scripts
+        run: shellcheck tool/*.sh
+
       # O analisador observa o projeto inteiro por inotify, e o limite padrão
       # de instâncias do runner às vezes não basta: o `flutter analyze` falha
       # com "Too many open files" sem que haja nada errado no código.

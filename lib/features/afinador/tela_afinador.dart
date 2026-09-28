@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/idioma.dart';
 import '../../app/tema.dart';
 
 /// Tela principal: o afinador.
@@ -31,7 +32,7 @@ class TelaAfinador extends StatelessWidget {
                     color: cores.fundo,
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
-                      'Toque qualquer corda',
+                      context.textos.toqueQualquerCorda,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: cores.textoSecundario,
                       ),
@@ -54,9 +55,9 @@ class _Titulo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cores = context.cores;
-    final estilo = Theme.of(
-      context,
-    ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600);
+    final estilo = Theme.of(context).textTheme.headlineSmall;
+    // O nome é uma palavra só, "OpenTuner": as duas metades se distinguem pela
+    // cor e pelo peso, não por espaço. Não se traduz.
     return Align(
       alignment: Alignment.centerLeft,
       child: Text.rich(
@@ -64,12 +65,15 @@ class _Titulo extends StatelessWidget {
           style: estilo,
           children: [
             TextSpan(
-              text: 'open ',
-              style: TextStyle(color: cores.texto),
+              text: 'Open',
+              style: TextStyle(color: cores.texto, fontWeight: FontWeight.w500),
             ),
             TextSpan(
-              text: 'tuner',
-              style: TextStyle(color: cores.accent),
+              text: 'Tuner',
+              style: TextStyle(
+                color: cores.accent,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ),
@@ -83,6 +87,7 @@ class _BarraInferior extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textos = context.textos;
     return Container(
       color: context.cores.superficie,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -90,8 +95,9 @@ class _BarraInferior extends StatelessWidget {
         children: [
           Expanded(
             child: _BotaoOpcao(
-              rotulo: 'Instrumento',
-              valor: 'Ukulele',
+              rotulo: textos.instrumento,
+              valor:
+                  '${textos.instrumentoUkulele} · ${textos.quantidadeCordas(4)}',
               // A escolha de instrumento ainda não existe.
               aoTocar: () {},
             ),
@@ -99,8 +105,8 @@ class _BarraInferior extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: _BotaoOpcao(
-              rotulo: 'Afinação',
-              valor: 'Padrão · G C E A',
+              rotulo: textos.afinacao,
+              valor: '${textos.afinacaoPadrao} · G C E A',
               // A escolha de afinação ainda não existe.
               aoTocar: () {},
             ),

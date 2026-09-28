@@ -1,4 +1,4 @@
-# Requisitos do Open Tuner
+# Requisitos do OpenTuner
 
 Versão 1 do documento, setembro de 2026. Descreve o que a versão 1.0 do aplicativo precisa fazer,
 o que fica para depois e o que está fora de propósito.
@@ -23,6 +23,21 @@ inferior, que lá leva a músicas, aulas e ferramentas, aqui só escolhe instrum
   crash reporting remoto ou publicidade. Isso também deixa o app apto para o F-Droid.
 - **A cor nunca é a única informação.** Todo estado também tem posição (esquerda, centro, direita),
   sinal (−, +) e texto ("Aperte a corda").
+- **Nunca anúncios.** Enquanto o projeto puder ser custeado e mantido na loja, não haverá anúncio,
+  compra dentro do app nem versão paga com recurso a mais. A promessa está no site, em público.
+
+### Onde vai estar
+
+A distribuição é global, Android primeiro e iOS depois.
+
+- **Google Play**, em Android App Bundle, com a ficha da loja em inglês, português e espanhol. No
+  formulário de segurança de dados: nenhum dado coletado nem compartilhado.
+- **GitHub Releases**, com os APKs assinados pela mesma chave da loja, para quem não usa a Play Store.
+- **F-Droid**, depois da 1.0. Nada no projeto pode impedir isso (seção 4, Privacidade).
+- **App Store**, depois que a versão Android estiver estável (seção 4, Plataformas).
+- **Site** em `site/`, publicado no GitHub Pages, em inglês: apresentação, a promessa de não ter
+  anúncios e a política de privacidade que as lojas exigem
+  (`https://guilhermefeitosa66.github.io/open-tuner/privacy/`).
 
 ## 2. Instrumentos e afinações da versão 1.0
 
@@ -194,8 +209,18 @@ aparelho mais fraco de teste.
 **Bateria.** Nenhum trabalho em segundo plano. O microfone só fica aberto com a tela do afinador em
 primeiro plano (RF-01).
 
-**Compatibilidade.** Android 7.0 (API 24) ou mais novo. APKs separados por ABI (arm64-v8a,
-armeabi-v7a, x86_64). Só orientação retrato na versão 1.0.
+**Compatibilidade.** Android 7.0 (API 24) ou mais novo, com o `targetSdk` que a Play Store exigir
+na data da publicação. Android App Bundle na loja; APKs separados por ABI (arm64-v8a, armeabi-v7a,
+x86_64) no GitHub. Só orientação retrato na versão 1.0.
+
+**Plataformas.** Android primeiro, iOS depois, e nenhuma escolha de agora pode prender o código ao
+Android:
+
+- plugins de áudio, permissão e tela ligada precisam ter suporte a iOS (`record`,
+  `permission_handler` e `wakelock_plus` têm);
+- código nativo só com o equivalente em iOS planejado;
+- a pasta `ios/` entra quando a versão iOS começar, com o texto de `NSMicrophoneUsageDescription`
+  traduzido em cada idioma (`InfoPlist.strings`).
 
 **Tamanho.** APK de release de no máximo 20 MB por ABI, com as fontes incluídas.
 
@@ -213,8 +238,28 @@ privacidade publicada junto com o app.
 - texto até 130% do tamanho do sistema sem cortar nem sobrepor;
 - nenhuma informação só por cor (princípios, seção 1).
 
-**Idioma.** Português do Brasil na versão 1.0, com todos os textos em arquivos ARB desde o início,
-para o inglês entrar sem mexer em tela.
+**Idiomas.** O app segue o idioma do aparelho. Se nenhum dos idiomas preferidos do usuário for
+suportado, usa inglês.
+
+- idiomas da 1.0: inglês (modelo e reserva), português e espanhol, em `lib/l10n/app_*.arb`. Um
+  teste garante que todos os arquivos têm as mesmas chaves;
+- a escolha é pelo idioma, não pelo país: pt-PT e pt-BR usam `pt`, es-MX usa `es`. Uma variante
+  regional ganha arquivo próprio só quando algum texto precisar mudar;
+- no Android 13 ou mais novo, o idioma do app pode ser trocado nas configurações do sistema
+  (`res/xml/locales_config.xml`), sem ajuste dentro do app;
+- nomes de instrumentos e afinações são textos traduzidos. O domínio só conhece ids;
+- números no formato do idioma, pelo `intl`: 327,4 Hz em português e espanhol, 327.4 Hz em inglês.
+  Nunca vírgula ou ponto fixos no código;
+- nomes das notas: C D E em todos os idiomas por padrão, ou solfejo com a grafia do idioma (Dó Ré Mi
+  em português, Do Re Mi em espanhol). A notação alemã (H para Si, B para Si bemol) entra junto com
+  o alemão;
+- idiomas escritos da direita para a esquerda (árabe, hebraico, persa): a interface espelha, **o
+  gráfico do afinador não**. Grave à esquerda e agudo à direita é convenção musical, e ♭ e ♯ ficam
+  onde estão;
+- textos mais longos (alemão, russo) precisam caber: os botões da barra inferior cortam com
+  reticências e nunca escondem a quantidade de cordas;
+- depois da 1.0, tradução pela comunidade num Weblate hospedado (gratuito para projeto livre).
+  Tradução automática não é publicada sem revisão de quem fala o idioma.
 
 **Qualidade.**
 
@@ -274,6 +319,8 @@ features → dominio → core
   frequência, escolha de corda (Auto com histerese), classificação do estado (afinado, perto, longe).
   É onde estão os testes que importam.
 - `lib/dados/`: preferências do usuário (`shared_preferences`).
+- `lib/l10n/`: os textos, um ARB por idioma, e as classes geradas pelo `gen-l10n` (versionadas).
+  `lib/app/idioma.dart` escolhe o idioma a partir das preferências do aparelho.
 - `lib/features/afinador/`: a tela, o rastro (um `CustomPainter`), a cabeça do instrumento (outro
   `CustomPainter`) e as folhas de seleção.
 - Captura de áudio: o plugin `record`, que entrega PCM em stream no Android. Se ele não servir, um
@@ -286,10 +333,11 @@ features → dominio → core
 **Depois (1.1 em diante):**
 
 - afinações personalizadas, criadas e salvas pelo usuário;
+- versão iOS;
 - tom de referência: toque longo no botão da corda toca a nota;
 - modo cromático, sem instrumento, mostrando qualquer nota;
 - violão de 12 cordas;
-- inglês;
+- mais idiomas pela comunidade (francês, alemão, italiano, japonês e outros), com a notação alemã;
 - publicação no F-Droid.
 
 **Fora de propósito:** músicas, cifras, aulas, metrônomo, gravação, conta de usuário, nuvem,
@@ -299,18 +347,19 @@ anúncios, compras dentro do app.
 
 | Versão | Entrega |
 |---|---|
-| 0.1 | Esqueleto: projeto, tema claro e escuro, modelo de nota, CI. **Feito.** |
+| 0.1 | Esqueleto: projeto, tema claro e escuro, modelo de nota, idiomas (en, pt, es), site, CI. **Feito.** |
 | 0.2 | Detector de frequência e escolha de corda, com a suíte de testes de sinais sintéticos. |
 | 0.3 | Captura do microfone e tela do afinador: indicador, rastro, nota alvo. |
 | 0.4 | Cabeça do instrumento, barra inferior, folhas de instrumento e afinação, memória. |
 | 0.5 | Ajustes, permissão, acessibilidade, fontes e ícone do app. |
-| 1.0 | Teste com instrumentos reais (ukulele, violão, baixo, viola), APK de release assinado. |
+| 1.0 | Teste com instrumentos reais (ukulele, violão, baixo, viola), publicação na Play Store e no GitHub Releases. |
 
 ## 9. Em aberto
 
 - **Oitavas da viola caipira no Rio abaixo.** Conferir com um violeiro, ou numa referência
   confiável, antes da 1.0.
-- **Nome na loja.** Verificar se "Open Tuner" colide com outro app na Play Store ou no F-Droid antes
-  de publicar.
+- **Nome na loja.** Verificar se "OpenTuner" colide com outro app ou marca na Play Store, no F-Droid
+  e na App Store antes de publicar. Com distribuição global, vale uma busca nas bases de marcas
+  (WIPO Global Brand Database) também.
 - **Critério para limpar as marcas de corda afinada.** Os 2 minutos da RF-09 são um palpite; ajustar
   depois de usar com o instrumento na mão.

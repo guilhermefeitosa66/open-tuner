@@ -1,0 +1,50 @@
+# Publica o site do projeto no GitHub Pages: a apresentação do aplicativo, em
+# inglês, a política de privacidade e os termos de uso que as lojas pedem em
+# URLs estáveis:
+#
+#   https://guilhermefeitosa66.github.io/open-tuner/privacy/
+#   https://guilhermefeitosa66.github.io/open-tuner/terms/
+#
+# O site é estático e vive inteiro em site/, sem etapa de geração.
+#
+# Uma vez só, antes da primeira execução: Settings → Pages → Source:
+# "GitHub Actions".
+name: Site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - site/**
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Uma publicação por vez; a que está em andamento termina.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    name: Publicar
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.publicacao.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: publicacao
+        uses: actions/deploy-pages@v4
