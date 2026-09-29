@@ -87,8 +87,25 @@ h2 { font-size: clamp(30px, 4.5vw, 42px); }
 h3 { font-size: 22px; }
 p { margin: 0; }
 
+/* Idiomas: a faixa do alto de todas as páginas leva à mesma página nas outras
+   línguas. A atual fica com o destaque, como os botões selecionados do app. */
+.faixa-idiomas { padding-top: 12px; }
+.faixa-idiomas .conteudo { display: flex; justify-content: flex-end; }
+.idiomas {
+  display: flex; flex-wrap: wrap; gap: 4px; padding: 4px;
+  border-radius: 26px; background: var(--superficie-alta);
+}
+.idiomas a {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; min-width: 44px; padding: 0 14px; border-radius: 22px;
+  color: var(--texto); font-size: 15px; font-weight: 700; line-height: 1.2; text-decoration: none;
+}
+.idiomas a:hover { background: var(--superficie); }
+.idiomas a[aria-current="page"] { background: var(--accent); color: var(--sobre-accent); }
+.idiomas .bandeira { font-size: 18px; line-height: 1; }
+
 /* Cabeçalho */
-.topo { padding-block: 22px; }
+.topo { padding-block: 16px 22px; }
 .topo .conteudo { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .marca {
   display: inline-flex; align-items: center; gap: 10px;
@@ -145,10 +162,15 @@ section { padding-block: 72px; }
 .estado.afinado { color: var(--afinado); }
 .estado.perto { color: var(--perto); }
 
+.adendo { margin-top: 24px; max-width: 640px; color: var(--texto-secundario); font-size: 17px; }
+.adendo strong { color: var(--texto); }
+
 .instrumentos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-.instrumentos ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
-.instrumentos li { display: flex; flex-direction: column; gap: 6px; }
-.instrumentos .nome { font-weight: 800; }
+/* Listas de nome e fichas: instrumentos, ajustes e arquivos para baixar. */
+.linhas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.linhas li { display: flex; flex-direction: column; gap: 6px; }
+.linhas .nome { font-weight: 800; }
+.linhas .detalhe { color: var(--texto-secundario); font-size: 16px; }
 .fichas { display: flex; flex-wrap: wrap; gap: 6px; }
 .fichas span {
   font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 8px;
@@ -168,6 +190,15 @@ section { padding-block: 72px; }
 
 .duas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
 .duas .cartao p { font-size: 17px; }
+.cartao .botao { align-self: flex-start; margin-top: 4px; }
+
+/* A impressão digital do certificado, para conferir o APK baixado */
+.impressao {
+  display: block; padding: 12px 14px; border-radius: 12px;
+  background: var(--superficie-alta); color: var(--texto);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; line-height: 1.5;
+  overflow-wrap: anywhere;
+}
 
 /* Rodapé */
 .rodape { padding-block: 40px 56px; border-top: 1px solid var(--grade); font-size: 14px; color: var(--texto-secundario); }
@@ -198,4 +229,9 @@ section { padding-block: 72px; }
 @media (max-width: 480px) {
   .promessa ul { grid-template-columns: minmax(0, 1fr); }
   .botao { width: 100%; justify-content: center; }
+  /* Os três idiomas numa linha só a partir de 360 px; abaixo disso, quebram
+     em vez de rolar a página de lado. */
+  .idiomas { width: 100%; gap: 2px; padding: 3px; }
+  .idiomas a { flex: 1 1 auto; gap: 5px; padding: 0 8px; font-size: 14px; }
+  .idiomas .bandeira { font-size: 16px; }
 }

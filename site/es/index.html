@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenTuner · afinador de cuerdas gratis y sin anuncios</title>
+<meta name="description" content="OpenTuner es un afinador simple, gratis y de código abierto para ukelele, guitarra, bajo y sus parientes. Sin anuncios, sin rastreo, sin cuenta, sin internet.">
+<meta name="theme-color" content="#F5EFE6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14110E" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="OpenTuner">
+<meta property="og:description" content="Un afinador de cuerdas que solo afina. Gratis, de código abierto y sin anuncios.">
+<link rel="alternate" hreflang="en" href="https://guilhermefeitosa66.github.io/open-tuner/">
+<link rel="alternate" hreflang="pt" href="https://guilhermefeitosa66.github.io/open-tuner/pt/">
+<link rel="alternate" hreflang="es" href="https://guilhermefeitosa66.github.io/open-tuner/es/">
+<link rel="alternate" hreflang="x-default" href="https://guilhermefeitosa66.github.io/open-tuner/">
+<link rel="icon" href="../simbolo.svg" type="image/svg+xml">
+<link rel="preload" href="../fontes/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fontes/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../estilo.css">
+<script src="../idioma.js" defer></script>
+<script src="../afinador.js" defer></script>
+</head>
+<body>
+<a class="pular" href="#principal">Saltar al contenido</a>
+
+<div class="faixa-idiomas">
+  <div class="conteudo">
+    <nav class="idiomas" aria-label="Idioma">
+      <a href="../" hreflang="en" lang="en"><span class="bandeira" aria-hidden="true">🇺🇸</span>English</a>
+      <a href="../pt/" hreflang="pt" lang="pt-BR"><span class="bandeira" aria-hidden="true">🇧🇷</span>Português</a>
+      <a href="./" hreflang="es" lang="es" aria-current="page"><span class="bandeira" aria-hidden="true">🇪🇸</span>Español</a>
+    </nav>
+  </div>
+</div>
+
+<header class="topo">
+  <div class="conteudo">
+    <a class="marca" href="./" aria-label="OpenTuner, inicio">
+      <svg viewBox="0 0 100 110" aria-hidden="true"><path class="palheta" d="M50 106C42 100 6 62 5 34C4 14 22 4 50 4C78 4 96 14 95 34C94 62 58 100 50 106Z"/><path class="onda" d="M50 18C71 21 71 33 50 36C32 39 32 49 50 51C62 53 62 60 50 62C44 63 44 67 50 68L50 88" fill="none" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Open<b>Tuner</b></span>
+    </a>
+    <nav aria-label="Secciones">
+      <a href="#how">Cómo funciona</a>
+      <a href="#instruments">Instrumentos</a>
+      <a href="#download">Descargar</a>
+      <a href="privacy/">Privacidad</a>
+      <a class="sempre" href="https://github.com/guilhermefeitosa66/open-tuner">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="principal">
+
+<section class="abertura" aria-labelledby="titulo">
+  <div class="conteudo">
+    <div>
+      <h1 id="titulo">Un afinador que solo afina.</h1>
+      <p class="chamada">Toca una cuerda y OpenTuner te dice si está floja, demasiado tensa o afinada. Ukelele, guitarra, bajo y sus parientes. Eso es todo lo que hace.</p>
+      <div class="acoes">
+        <a class="botao primario" href="https://github.com/guilhermefeitosa66/open-tuner/releases/latest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+          Descargar para Android
+        </a>
+        <span class="botao secundario">Google Play · próximamente</span>
+      </div>
+      <p class="miudo">Libre y de código abierto · Android 7.0 o posterior · iOS más adelante</p>
+    </div>
+
+    <div class="aparelho">
+      <svg id="afinador" viewBox="0 0 312 372" role="img" aria-label="La pantalla del afinador: un marcador se mueve a la izquierda cuando la cuerda está floja, a la derecha cuando está demasiado tensa y se queda en la línea central cuando está afinada, dejando un rastro que baja por la pantalla.">
+        <rect width="312" height="372" fill="#14110E"/>
+        <path d="M0 26H312M0 52H312M0 78H312M0 104H312M0 130H312M0 156H312M0 182H312M0 208H312M0 234H312M0 260H312M0 286H312M0 312H312M0 338H312M0 364H312M26 0V372M52 0V372M78 0V372M104 0V372M130 0V372M182 0V372M208 0V372M234 0V372M260 0V372M286 0V372" stroke="#231E19" stroke-width="1"/>
+        <path d="M156 0V372" stroke="#4A3F35" stroke-width="1.5"/>
+        <text x="18" y="46" fill="#B3A597" font-family="Fraunces, Georgia, serif" font-size="26">♭</text>
+        <text x="278" y="46" fill="#B3A597" font-family="Fraunces, Georgia, serif" font-size="26">♯</text>
+        <path id="rastro-longe" d="M0 0" fill="none" stroke="#EE8A52" stroke-width="3" stroke-linecap="round"/>
+        <path id="rastro-perto" d="M0 0" fill="none" stroke="#E6C24F" stroke-width="3" stroke-linecap="round"/>
+        <path id="rastro-afinado" d="M156 92L156 360" fill="none" stroke="#5CC592" stroke-width="3" stroke-linecap="round"/>
+        <g transform="translate(156 214)">
+          <circle r="25" fill="#1E1915" stroke="#4A3F35" stroke-width="2"/>
+          <text x="-4" y="8" text-anchor="middle" fill="#F3EBE0" font-family="Fraunces, Georgia, serif" font-size="22" font-weight="600">E</text>
+          <text x="9" y="-1" text-anchor="middle" fill="#F3EBE0" font-family="Fraunces, Georgia, serif" font-size="11" font-weight="600">4</text>
+        </g>
+        <g id="bolha" transform="translate(156 0)">
+          <path id="bolha-ponta" d="M-7 79L0 88L7 79Z" fill="#5CC592"/>
+          <circle id="bolha-aro" cy="54" r="26" fill="#14110E" stroke="#5CC592" stroke-width="3"/>
+          <text id="bolha-texto" y="61" text-anchor="middle" fill="#F3EBE0" font-family="Manrope, system-ui, sans-serif" font-size="18" font-weight="800">✓</text>
+        </g>
+        <rect x="0" y="330" width="312" height="42" fill="url(#esmaecer)"/>
+        <defs>
+          <linearGradient id="esmaecer" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#14110E" stop-opacity="0"/>
+            <stop offset="1" stop-color="#14110E"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section id="how" aria-labelledby="titulo-como">
+  <div class="conteudo">
+    <div class="cabeca-secao">
+      <span class="rotulo">Cómo funciona</span>
+      <h2 id="titulo-como">Mira una sola línea</h2>
+      <p>La línea central es la nota. El marcador muestra qué tan lejos está la cuerda de ella, en cents, y el rastro de abajo muestra cómo llegaste ahí.</p>
+    </div>
+    <div class="leitura">
+      <div class="cartao">
+        <svg viewBox="0 0 300 110" aria-hidden="true">
+          <path d="M150 0V110" style="stroke: var(--linha)" stroke-width="1.5"/>
+          <path d="M72 70L80 78L88 70" style="fill: var(--longe)"/>
+          <circle cx="80" cy="42" r="26" style="fill: var(--superficie); stroke: var(--longe)" stroke-width="3"/>
+          <text x="80" y="49" text-anchor="middle" style="fill: var(--texto)" font-family="Manrope, sans-serif" font-size="18" font-weight="800">−24</text>
+          <path d="M80 86L84 94L78 102L83 110" fill="none" style="stroke: var(--longe)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <span class="estado longe">A la izquierda de la línea</span>
+        <h3>Floja</h3>
+        <p>La cuerda suena más grave que la nota. Ténsala y el marcador avanza hacia la derecha.</p>
+      </div>
+      <div class="cartao">
+        <svg viewBox="0 0 300 110" aria-hidden="true">
+          <path d="M150 0V110" style="stroke: var(--linha)" stroke-width="1.5"/>
+          <path d="M142 70L150 78L158 70" style="fill: var(--afinado)"/>
+          <circle cx="150" cy="42" r="26" style="fill: var(--superficie); stroke: var(--afinado)" stroke-width="3"/>
+          <path d="M139 42.5l7.5 7.5 15-15" fill="none" style="stroke: var(--afinado)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M150 86V110" fill="none" style="stroke: var(--afinado)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <span class="estado afinado">Sobre la línea</span>
+        <h3>Afinada</h3>
+        <p>Mantenla ahí un momento: un anillo verde se cierra alrededor del marcador, suena un aviso y la cuerda recibe un ✓ verde. Pasa a la siguiente.</p>
+      </div>
+      <div class="cartao">
+        <svg viewBox="0 0 300 110" aria-hidden="true">
+          <path d="M150 0V110" style="stroke: var(--linha)" stroke-width="1.5"/>
+          <path d="M184 70L192 78L200 70" style="fill: var(--perto)"/>
+          <circle cx="192" cy="42" r="26" style="fill: var(--superficie); stroke: var(--perto)" stroke-width="3"/>
+          <text x="192" y="49" text-anchor="middle" style="fill: var(--texto)" font-family="Manrope, sans-serif" font-size="18" font-weight="800">+9</text>
+          <path d="M192 86L188 94L194 102L190 110" fill="none" style="stroke: var(--perto)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <span class="estado perto">A la derecha de la línea</span>
+        <h3>Demasiado tensa</h3>
+        <p>La cuerda suena más aguda que la nota. Aflójala un poco. El amarillo significa que estás cerca.</p>
+      </div>
+    </div>
+    <p class="adendo">¿Todas las cuerdas afinadas? <strong>Reiniciar</strong> borra las marcas, para afinar otro instrumento o revisarlas todas de nuevo.</p>
+  </div>
+</section>
+
+<section id="instruments" aria-labelledby="titulo-instrumentos">
+  <div class="conteudo">
+    <div class="cabeca-secao">
+      <span class="rotulo">Instrumentos</span>
+      <h2 id="titulo-instrumentos">La afinación estándar ya viene elegida</h2>
+      <p>Elige el instrumento y la afinación en la barra inferior. En Auto, OpenTuner reconoce la cuerda que tocaste. O toca una cuerda para fijarla y escuchar su nota, sintetizada por la app, para afinar de oído.</p>
+    </div>
+    <div class="instrumentos">
+      <div class="cartao">
+        <h3>Ukelele y cavaquinho</h3>
+        <ul class="linhas">
+          <li><span class="nome">Ukelele</span><span class="fichas"><span>Estándar</span><span>Sol grave (Low G)</span><span>En Re</span></span></li>
+          <li><span class="nome">Ukelele barítono</span><span class="fichas"><span>Estándar</span></span></li>
+          <li><span class="nome">Cavaquinho</span><span class="fichas"><span>Estándar</span><span>Natural</span></span></li>
+        </ul>
+      </div>
+      <div class="cartao">
+        <h3>Guitarra y viola</h3>
+        <ul class="linhas">
+          <li><span class="nome">Guitarra</span><span class="fichas"><span>Estándar</span><span>Drop D</span><span>Medio tono abajo</span><span>Un tono abajo</span><span>DADGAD</span><span>Open G</span><span>Open D</span></span></li>
+          <li><span class="nome">Guitarra de 7 cuerdas</span><span class="fichas"><span>Séptima en Do</span><span>Séptima en Si</span></span></li>
+          <li><span class="nome">Viola caipira</span><span class="fichas"><span>Cebolão en Mi</span><span>Cebolão en Re</span><span>Rio abaixo</span></span></li>
+        </ul>
+      </div>
+      <div class="cartao">
+        <h3>Bajo</h3>
+        <ul class="linhas">
+          <li><span class="nome">Bajo de 4 cuerdas</span><span class="fichas"><span>Estándar</span><span>Drop D</span><span>Medio tono abajo</span></span></li>
+          <li><span class="nome">Bajo de 5 cuerdas</span><span class="fichas"><span>Estándar</span><span>Con Do agudo</span></span></li>
+          <li><span class="nome">Bajo de 6 cuerdas</span><span class="fichas"><span>Estándar</span></span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="settings" aria-labelledby="titulo-ajustes">
+  <div class="conteudo">
+    <div class="cabeca-secao">
+      <span class="rotulo">Ajustes</span>
+      <h2 id="titulo-ajustes">A tu manera</h2>
+      <p>Los ajustes se abren desde la esquina superior de la pantalla. Tus elecciones quedan guardadas en el teléfono.</p>
+    </div>
+    <div class="duas">
+      <div class="cartao">
+        <h3>En pantalla</h3>
+        <ul class="linhas">
+          <li><span class="nome">Tema</span><span class="fichas"><span>Sistema</span><span>Claro</span><span>Oscuro</span></span></li>
+          <li><span class="nome">Nombre de las notas</span><span class="fichas"><span>C D E</span><span>Do Re Mi</span></span></li>
+          <li><span class="nome">Idioma</span><span class="fichas"><span>Idioma del sistema</span><span lang="en">English</span><span lang="pt-BR">Português</span><span lang="es">Español</span></span></li>
+        </ul>
+      </div>
+      <div class="cartao">
+        <h3>Mientras afinas</h3>
+        <ul class="linhas">
+          <li><span class="nome">Referencia del La (A4)</span><span class="fichas"><span>430 a 450 Hz</span></span></li>
+          <li><span class="nome">Precisión</span><span class="fichas"><span>Normal · ±5 cents</span><span>Fina · ±2 cents</span></span></li>
+          <li><span class="nome">Mantener la pantalla encendida</span><span class="fichas"><span>Solo mientras el afinador esté abierto</span></span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="promessa" aria-labelledby="titulo-promessa">
+  <div class="conteudo">
+    <h2 id="titulo-promessa">Sin anuncios. Ni ahora, ni después.</h2>
+    <div>
+      <p>OpenTuner es simple a propósito: una pantalla, una función. No tiene anuncios, rastreo, cuenta ni nada que comprar dentro de la app.</p>
+      <p>Mi objetivo es no mostrar nunca un anuncio, mientras pueda pagar este proyecto y mantenerlo en la tienda.</p>
+      <p class="assinatura">Guilherme Feitoza, autor</p>
+      <ul>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Sin anuncios</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Sin rastreo</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Sin cuenta</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Sin compras en la app</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="titulo-privado">
+  <div class="conteudo">
+    <div class="cabeca-secao">
+      <span class="rotulo">Privacidad y código</span>
+      <h2 id="titulo-privado">Solo escucha, y solo mientras afinas</h2>
+    </div>
+    <div class="duas">
+      <div class="cartao">
+        <h3>Micrófono, y nada más</h3>
+        <p>El micrófono es el único permiso que pide OpenTuner. El sonido se analiza en memoria mientras tocas y luego se descarta. Nunca se graba, y la app no tiene permiso de internet, así que no podría enviar nada aunque quisiera. Funciona sin conexión, siempre.</p>
+        <p><a href="privacy/">Lee la política de privacidad</a></p>
+      </div>
+      <div class="cartao">
+        <h3>Código abierto</h3>
+        <p>Toda la app está en GitHub bajo la licencia Apache 2.0. Lee el código, compila la app por tu cuenta, informa de un error o ayuda a traducirla a tu idioma.</p>
+        <p><a href="https://github.com/guilhermefeitosa66/open-tuner">github.com/guilhermefeitosa66/open-tuner</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="download" aria-labelledby="titulo-baixar">
+  <div class="conteudo">
+    <div class="cabeca-secao">
+      <span class="rotulo">Descargar</span>
+      <h2 id="titulo-baixar">Instala la app desde GitHub</h2>
+      <p>Cada versión se publica en GitHub Releases en archivos APK, para Android 7.0 o posterior. En Google Play, próximamente.</p>
+    </div>
+    <div class="duas">
+      <div class="cartao">
+        <h3>Qué archivo elegir</h3>
+        <ul class="linhas">
+          <li><span class="nome">arm64-v8a</span><span class="detalhe">La mayoría de los teléfonos</span></li>
+          <li><span class="nome">armeabi-v7a</span><span class="detalhe">Teléfonos ARM de 32 bits, más antiguos</span></li>
+          <li><span class="nome">x86_64</span><span class="detalhe">Chromebooks y emuladores</span></li>
+        </ul>
+        <p>La arquitectura va al final del nombre del archivo. La primera vez, Android puede pedirte permiso para instalar apps desde el navegador o el administrador de archivos.</p>
+        <a class="botao primario" href="https://github.com/guilhermefeitosa66/open-tuner/releases/latest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+          Versión más reciente
+        </a>
+      </div>
+      <div class="cartao">
+        <h3>Comprueba lo que descargaste</h3>
+        <p>Las sumas SHA-256 de los APK están en SHA256SUMS.txt, en la misma versión. Todos los APK están firmados con el mismo certificado, y esta es su huella digital SHA-256, la misma en todas las versiones:</p>
+        <p><code class="impressao">b8b7f73d8b7444f478f2ee19a7d3df61798d86a465b4b0dd5acf69bc9408834f</code></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="rodape">
+  <div class="conteudo">
+    <span>© 2026 Guilherme Feitoza · Apache 2.0</span>
+    <nav aria-label="Pie de página">
+      <a href="privacy/">Privacidad</a>
+      <a href="terms/">Términos</a>
+      <a href="https://github.com/guilhermefeitosa66/open-tuner">Código fuente</a>
+      <a href="https://github.com/guilhermefeitosa66/open-tuner/issues">Informar un problema</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

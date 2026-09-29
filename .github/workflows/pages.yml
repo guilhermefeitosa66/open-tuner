@@ -1,9 +1,13 @@
-# Publica o site do projeto no GitHub Pages: a apresentação do aplicativo, em
-# inglês, a política de privacidade e os termos de uso que as lojas pedem em
-# URLs estáveis:
+# Publica o site do projeto no GitHub Pages: a apresentação do aplicativo, a
+# política de privacidade e os termos de uso que as lojas pedem em URLs
+# estáveis. Inglês fica na raiz, e essas URLs não mudam (a de privacidade está
+# no Play Console):
 #
 #   https://guilhermefeitosa66.github.io/open-tuner/privacy/
 #   https://guilhermefeitosa66.github.io/open-tuner/terms/
+#
+# Português e espanhol ficam em pt/ e es/, com as mesmas páginas
+# (pt/privacy/, es/terms/...).
 #
 # O site é estático e vive inteiro em site/, sem etapa de geração.
 #
