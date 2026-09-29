@@ -52,6 +52,12 @@ void main() {
       )
       .ligada;
 
+  bool linhaAfinadaAcesa(WidgetTester tester) =>
+      tester
+          .widget<AnimatedOpacity>(find.byKey(const Key('linha-afinada')))
+          .opacity ==
+      1;
+
   double progressoDoIndicador(WidgetTester tester) =>
       (tester
                   .widget<CustomPaint>(find.byKey(const Key('progresso')))
@@ -89,6 +95,7 @@ void main() {
       expect(find.text('Aperte a corda'), findsOneWidget);
       expect(find.text('Toque qualquer corda para começar'), findsNothing);
       expect(find.text('−20'), findsOneWidget);
+      expect(linhaAfinadaAcesa(tester), isFalse);
       expect(centroDoIndicador(tester), lessThan(centroDaTela(tester) - 40));
       // A nota alvo e a frequência medida, com vírgula em português.
       expect(find.bySemanticsLabel('Nota alvo E4'), findsOneWidget);
@@ -134,6 +141,19 @@ void main() {
         ),
         findsOneWidget,
       );
+      // A linha verde acende e a nota alvo fica verde.
+      expect(linhaAfinadaAcesa(tester), isTrue);
+      final borda =
+          (tester
+                      .widget<AnimatedContainer>(
+                        find.byKey(const Key('nota-alvo')),
+                      )
+                      .decoration!
+                  as BoxDecoration)
+              .border!
+              .top
+              .color;
+      expect(borda, const Color(0xFF2A7353));
       expect(find.byKey(const Key('selo-2')), findsNothing);
       expect(app.vibracoes, 0);
       expect(app.tocador.avisosDeAfinada, 0);

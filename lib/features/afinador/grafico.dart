@@ -95,7 +95,8 @@ class PintorGrade extends CustomPainter {
 }
 
 /// O rastro (RF-07): cada leitura é um ponto que rola para baixo, ligado ao
-/// seguinte, com a cor do estado do trecho. Um null é um vão.
+/// seguinte por uma curva lisa (Catmull-Rom), com a cor do estado do trecho.
+/// Um null é um vão.
 ///
 /// Redesenha só quando o [historico] avisa, sem reconstruir widget nenhum.
 class PintorRastro extends CustomPainter {
@@ -120,6 +121,13 @@ class PintorRastro extends CustomPainter {
     final afinado = Path();
     final perto = Path();
     final longe = Path();
+    Offset? ponto(int i) {
+      if (i < 0 || i >= historico.length) return null;
+      final cents = historico[i];
+      if (cents == null) return null;
+      return Offset(geometria.xDe(cents), geometria.inicioRastro + i * passo);
+    }
+
     for (var i = 0; i < historico.length - 1; i++) {
       final a = historico[i];
       final b = historico[i + 1];
@@ -130,10 +138,17 @@ class PintorRastro extends CustomPainter {
         EstadoCorda.perto => perto,
         EstadoCorda.longe => longe,
       };
-      final y = geometria.inicioRastro + i * passo;
+      // Catmull-Rom: as tangentes saem dos vizinhos; na ponta de um trecho
+      // (vão ou fim), o próprio ponto faz de vizinho.
+      final p1 = ponto(i)!;
+      final p2 = ponto(i + 1)!;
+      final p0 = ponto(i - 1) ?? p1;
+      final p3 = ponto(i + 2) ?? p2;
+      final c1 = p1 + (p2 - p0) / 6;
+      final c2 = p2 - (p3 - p1) / 6;
       trecho
-        ..moveTo(geometria.xDe(a), y)
-        ..lineTo(geometria.xDe(b), y + passo);
+        ..moveTo(p1.dx, p1.dy)
+        ..cubicTo(c1.dx, c1.dy, c2.dx, c2.dy, p2.dx, p2.dy);
     }
     Paint traco(Color cor) => Paint()
       ..color = cor
@@ -477,8 +492,49 @@ class _Pilula extends StatelessWidget {
   }
 }
 
+/// A linha verde do centro, acesa enquanto a corda está afinada: dá para ver
+/// de longe, sem ler número nenhum.
+class LinhaAfinada extends StatelessWidget {
+  const LinhaAfinada({
+    super.key,
+    required this.leitura,
+    required this.geometria,
+  });
+
+  final ValueListenable<LeituraTela> leitura;
+  final GeometriaGrafico geometria;
+
+  @override
+  Widget build(BuildContext context) {
+    final cores = context.cores;
+    final largura = 3 * geometria.escala;
+    return ValueListenableBuilder<LeituraTela>(
+      valueListenable: leitura,
+      builder: (context, atual, _) => Stack(
+        children: [
+          Positioned(
+            left: geometria.centroX - largura / 2,
+            width: largura,
+            top: 0,
+            bottom: 0,
+            child: IgnorePointer(
+              child: AnimatedOpacity(
+                key: const Key('linha-afinada'),
+                opacity: atual.estado == EstadoCorda.afinada ? 1 : 0,
+                duration: const Duration(milliseconds: 180),
+                child: ColoredBox(color: cores.afinado),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// A nota alvo sobre a linha do centro e, embaixo, a frequência medida
-/// (RF-10). Ociosa, dá lugar ao convite para tocar uma corda (RF-12).
+/// (RF-10); verde enquanto a corda está afinada. Ociosa, dá lugar ao convite
+/// para tocar uma corda (RF-12).
 class NotaAlvo extends StatelessWidget {
   const NotaAlvo({
     super.key,
@@ -502,6 +558,7 @@ class NotaAlvo extends StatelessWidget {
           controlador: controlador,
           corda: corda,
           frequencia: leitura.frequencia,
+          afinada: leitura.estado == EstadoCorda.afinada,
           geometria: geometria,
         );
       },
@@ -514,12 +571,14 @@ class _NotaEFrequencia extends StatelessWidget {
     required this.controlador,
     required this.corda,
     required this.frequencia,
+    required this.afinada,
     required this.geometria,
   });
 
   final ControladorAfinador controlador;
   final int corda;
   final double frequencia;
+  final bool afinada;
   final GeometriaGrafico geometria;
 
   @override
@@ -549,11 +608,16 @@ class _NotaEFrequencia extends StatelessWidget {
           child: Semantics(
             label: textos.notaAlvo('$rotulo${nota.oitava}'),
             excludeSemantics: true,
-            child: DecoratedBox(
+            child: AnimatedContainer(
+              key: const Key('nota-alvo'),
+              duration: const Duration(milliseconds: 180),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: cores.superficie,
-                border: Border.all(color: cores.linha, width: 2),
+                border: Border.all(
+                  color: afinada ? cores.afinado : cores.linha,
+                  width: afinada ? 2.5 : 2,
+                ),
               ),
               child: Center(
                 child: FittedBox(
@@ -565,7 +629,7 @@ class _NotaEFrequencia extends StatelessWidget {
                       oitava: '${nota.oitava}',
                       tamanho: 27 * escala,
                       tamanhoOitava: 14 * escala,
-                      cor: cores.texto,
+                      cor: afinada ? cores.afinado : cores.texto,
                       opacidadeOitava: 1,
                     ),
                   ),

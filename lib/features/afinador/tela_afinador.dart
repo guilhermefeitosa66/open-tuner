@@ -353,6 +353,13 @@ class _Grafico extends StatelessWidget {
         else ...[
           if (permitido)
             Positioned.fill(
+              child: LinhaAfinada(
+                leitura: controlador.leitura,
+                geometria: geometria,
+              ),
+            ),
+          if (permitido)
+            Positioned.fill(
               child: NotaAlvo(controlador: controlador, geometria: geometria),
             ),
           Positioned.fill(
