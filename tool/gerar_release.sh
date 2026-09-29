@@ -131,13 +131,18 @@ for apk in "${apks[@]}"; do
     aviso "${apk##*/} tem $((tamanho / 1024 / 1024)) MB, acima dos 20 MB de docs/REQUISITOS.md."
 done
 
+# SHA256SUMS.txt vai para o GitHub junto dos APKs e lista só eles: com o
+# .aab (que não vai), `sha256sum -c` de quem baixou acusaria o arquivo que
+# falta. A soma do .aab fica à parte, para conferir o que foi à Play Store.
 (
   cd "$destino"
   if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum -- *.apk *.aab >SHA256SUMS.txt
+    soma() { sha256sum -- "$@"; }
   else
-    shasum -a 256 -- *.apk *.aab >SHA256SUMS.txt
+    soma() { shasum -a 256 -- "$@"; }
   fi
+  soma *.apk >SHA256SUMS.txt
+  soma *.aab >SHA256SUMS-aab.txt
 )
 
 # As notas vão com a impressão digital do certificado preenchida: é o que

@@ -40,7 +40,8 @@ guarda a chave** e vai para dois lugares: os APKs para o **GitHub Releases** e o
    | `opentuner-X.Y.Z-armeabi-v7a.apk` | GitHub: celulares ARM de 32 bits |
    | `opentuner-X.Y.Z-x86_64.apk` | GitHub: Chromebooks e emuladores x86 |
    | `opentuner-X.Y.Z.aab` | Play Store |
-   | `SHA256SUMS.txt` | somas para quem baixa conferir |
+   | `SHA256SUMS.txt` | somas dos APKs, para quem baixa do GitHub conferir |
+   | `SHA256SUMS-aab.txt` | soma do `.aab`, para conferir o que foi à Play Store |
    | `notas.md` | notas com a impressão digital preenchida |
 
    E confere: nenhuma chave de debug, o mesmo certificado em todos os APKs, nenhuma permissão do
