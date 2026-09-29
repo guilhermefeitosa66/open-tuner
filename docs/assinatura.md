@@ -12,10 +12,10 @@ arquivo (o repositório é público).
 | | |
 |---|---|
 | Keystore principal | computador de desenvolvimento do Guilherme, `~/.opentuner-chaves/` |
-| Cópia 1 | _a preencher: ex. pendrive cifrado guardado em ..._ |
+| Cópia 1 | Google Drive do Guilherme, pasta `chaves-android/opentuner/` (espelho local em `~/google-drive/`) |
 | Cópia 2 | _a preencher: ex. anexo no cofre de senhas_ |
-| Senha e alias | _a preencher: cofre de senhas, separado do arquivo_ |
-| Última conferência das cópias | _a preencher: data_ |
+| Senha e alias | no `key.properties` guardado junto da cópia 1 (a separar num cofre de senhas) |
+| Última conferência das cópias | 29/09/2026: a cópia 1 abre com a senha e dá a impressão digital abaixo |
 | Impressão digital SHA-256 do certificado | `b8b7f73d8b7444f478f2ee19a7d3df61798d86a465b4b0dd5acf69bc9408834f` |
 
 ## Gerar (uma vez só)
