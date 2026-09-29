@@ -131,6 +131,89 @@ void main() {
           }
         });
 
+        // O caso do microfone do celular: a fundamental quase some e os
+        // harmônicos pares dominam. O mergulho de d' em meio período fica
+        // abaixo do limiar do YIN (~0,07 no primeiro timbre, ~0,13 no
+        // segundo, como na gravação real), e o primeiro abaixo do limiar
+        // dava a oitava de cima.
+        test(
+          'fundamental fraca e harmônicos pares fortes: dá a fundamental',
+          () {
+            var semente = 20;
+            for (final amplitudes in const [
+              [0.2, 1.0, 0.1, 0.6, 0.05, 0.3],
+              [0.25, 1.0, 0.2, 0.7, 0.1, 0.4],
+            ]) {
+              for (final f in [41.2, 55.0, 73.42, 82.41, 110.0, 146.83]) {
+                final sinal = somar(
+                  corda(f, taxa, n, amplitudes: amplitudes),
+                  ruido(n, 0.005, semente: semente++),
+                );
+                expect(
+                  erroEmCents(detector, sinal, f).abs(),
+                  lessThanOrEqualTo(1),
+                  reason: '$f Hz, $amplitudes',
+                );
+              }
+            }
+          },
+        );
+
+        // Um sinal periódico em τ também é em 2τ, 3τ... e o ruído pode deixar
+        // d' num desses múltiplos um pouco abaixo do de τ: a escolha é o
+        // primeiro mergulho perto do mais fundo, não o mais fundo. O mais
+        // fundo pode cair longe (o 13º múltiplo no 880 Hz a 48 kHz), onde o
+        // atraso inteiro de τ, multiplicado, já erra por algumas amostras.
+        test('nota aguda com ruído (SNR ~14 dB) não cai uma oitava', () {
+          var semente = 40;
+          for (final f in [
+            261.63,
+            329.63,
+            392.0,
+            440.0,
+            587.33,
+            659.26,
+            880.0,
+            1000.0,
+          ]) {
+            final limpo = corda(f, taxa, n, amplitudes: const [1, 0.3, 0.1]);
+            final sinal = somar(
+              limpo,
+              ruido(n, rms(limpo) / 5, semente: semente++),
+            );
+            expect(
+              erroEmCents(detector, sinal, f).abs(),
+              lessThanOrEqualTo(6),
+              reason: '$f Hz',
+            );
+          }
+        });
+
+        // A corda solta uma oitava (ou uma 12ª) abaixo soando por simpatia,
+        // como o D4 sob o D5 do cavaquinho: o sinal passa a ser periódico
+        // no múltiplo, e d' ali fica abaixo do d' do período da nota tocada.
+        // A outra corda puxa a leitura uns cents (como já puxava antes), mas
+        // não pode levar à oitava de baixo.
+        test('corda uma oitava ou 12ª abaixo, a 20%: a aguda não cai', () {
+          var semente = 60;
+          for (final divisor in [2, 3]) {
+            for (final f in [293.66, 392.0, 440.0, 587.33, 659.26, 1000.0]) {
+              final sinal = somar(
+                somar(
+                  corda(f, taxa, n, amplitudes: const [1, 0.4, 0.2, 0.1]),
+                  corda(f / divisor, taxa, n, pico: 0.1),
+                ),
+                ruido(n, 0.005, semente: semente++),
+              );
+              expect(
+                erroEmCents(detector, sinal, f).abs(),
+                lessThanOrEqualTo(5),
+                reason: '$f Hz com $f/$divisor',
+              );
+            }
+          }
+        });
+
         test('com ruído branco (SNR ~20 dB): erro de até 3 cents', () {
           var semente = 1;
           for (final f in [30.87, 41.20, 82.41, 196.0, 440.0, 659.26]) {
@@ -212,6 +295,48 @@ void main() {
           detector.analisar(seno(41.2, taxa, detector.tamanhoJanela)),
           isNull,
         );
+      });
+    }
+  });
+
+  // Na faixa do violão (até E4 × 1,3), o meio período de um E4 cai abaixo
+  // do menor atraso buscado. Com o 2º harmônico dominante, d' mergulha ali
+  // abaixo do limiar, e a regra "periódico abaixo da faixa é som acima da
+  // faixa" descartava a leitura; só um mergulho perto do mais fundo conta.
+  group('faixa do violão', () {
+    for (final taxa in taxas) {
+      test('a $taxa Hz lê as cordas agudas com o 2º harmônico dominante', () {
+        final detector = DetectorFrequencia(
+          taxaAmostragem: taxa,
+          frequenciaMinima: 82.41 * 0.8,
+          frequenciaMaxima: 329.63 * 1.3,
+        );
+        final n = detector.tamanhoEntradaRecomendada;
+        var semente = 80;
+        for (final f in [246.94, 293.66, 329.63]) {
+          final sinal = somar(
+            corda(f, taxa, n, amplitudes: const [0.25, 1, 0.2, 0.6, 0.1, 0.3]),
+            ruido(n, 0.005, semente: semente++),
+          );
+          expect(
+            erroEmCents(detector, sinal, f).abs(),
+            lessThanOrEqualTo(1),
+            reason: '$f Hz',
+          );
+        }
+      });
+
+      test('a $taxa Hz continua sem leitura acima da faixa', () {
+        final detector = DetectorFrequencia(
+          taxaAmostragem: taxa,
+          frequenciaMinima: 82.41 * 0.8,
+          frequenciaMaxima: 329.63 * 1.3,
+        );
+        final n = detector.tamanhoEntradaRecomendada;
+        for (final f in [700.0, 1000.0, 1500.0]) {
+          final sinal = corda(f, taxa, n, amplitudes: const [1, 0.5, 0.3]);
+          expect(detector.analisar(sinal), isNull, reason: '$f Hz');
+        }
       });
     }
   });

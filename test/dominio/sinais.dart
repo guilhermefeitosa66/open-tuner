@@ -94,3 +94,50 @@ List<double> cordaInarmonica(
   }
   return saida;
 }
+
+/// Corda grave como o microfone do celular a capta: harmônicos pares fortes,
+/// com a fundamental e os harmônicos ímpares sumindo com constante de tempo
+/// [some] segundos (os pares, em 2 s). Começa com a fundamental presente e
+/// termina quase periódica na metade do período, que é quando o YIN passa a
+/// ler a oitava de cima.
+List<double> cordaParesFortes(
+  double frequencia,
+  int taxa,
+  double segundos, {
+  double some = 0.25,
+}) {
+  const amplitudes = [1.0, 0.9, 0.12, 0.6, 0.05, 0.35, 0.03, 0.2];
+  final n = (taxa * segundos).round();
+  return List.generate(n, (i) {
+    final t = i / taxa;
+    var valor = 0.0;
+    for (var k = 0; k < amplitudes.length; k++) {
+      final harmonico = k + 1;
+      final constante = harmonico.isOdd ? some : 2.0;
+      valor +=
+          amplitudes[k] *
+          math.exp(-t / constante) *
+          math.sin(2 * math.pi * frequencia * harmonico * t + 0.7 * k);
+    }
+    return 0.25 * valor;
+  });
+}
+
+/// [som] tocado aos [inicio] segundos de um sinal de [total] segundos e
+/// abafado aos [fim] segundos (some em uns 30 ms, como a mão na corda).
+List<double> tocada(
+  List<double> som,
+  int taxa, {
+  required double inicio,
+  required double total,
+  double fim = double.infinity,
+}) {
+  final saida = List<double>.filled((taxa * total).round(), 0);
+  final primeira = (inicio * taxa).round();
+  for (var i = 0; i < som.length && primeira + i < saida.length; i++) {
+    final t = (primeira + i) / taxa;
+    final abafamento = t > fim ? math.exp(-(t - fim) / 0.03) : 1.0;
+    saida[primeira + i] = som[i] * abafamento;
+  }
+  return saida;
+}

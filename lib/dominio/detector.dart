@@ -30,11 +30,15 @@ class Leitura {
 ///    custo é O(n log n), e não O(n × τmáx) como na soma direta;
 /// 3. normaliza pela média acumulada, `d'(τ) = d(τ) · τ / Σ d(1..τ)`;
 /// 4. procura, entre `taxa / frequenciaMaxima` e `taxa / frequenciaMinima`,
-///    o primeiro τ com `d'` abaixo do [limiar] e desce até o mínimo local.
-///    Pegar o primeiro, e não o mais fundo, é o que evita dar a oitava de
-///    baixo numa corda aguda; a normalização pela média acumulada é o que
-///    evita dar a oitava de cima num baixo com o 2º harmônico mais forte que
-///    a fundamental;
+///    o primeiro τ com `d'` perto do mergulho mais fundo (abaixo de um corte
+///    relativo a ele, nunca acima do [limiar]) e desce até o mínimo local.
+///    Pegar o primeiro perto do mais fundo, e não o mais fundo, é o que
+///    evita dar a oitava de baixo numa corda aguda; o corte relativo, e não
+///    o [limiar] fixo, é o que evita dar a oitava de cima numa corda grave
+///    captada pelo celular, com a fundamental fraca e os harmônicos pares
+///    fortes (ver [_escolherAtraso]); a normalização pela média acumulada é
+///    o que evita dar a oitava de cima num baixo com o 2º harmônico mais
+///    forte que a fundamental;
 /// 5. refina o período com uma parábola ajustada a `d` ao redor do mínimo;
 /// 6. repete tudo sobre as amostras filtradas por um passa-baixas com corte
 ///    perto da fundamental, para tirar o puxão dos harmônicos inarmônicos
@@ -65,7 +69,9 @@ class DetectorFrequencia {
   /// Faixa aceita, em Hz. Leituras fora dela são rejeitadas.
   final double frequenciaMinima, frequenciaMaxima;
 
-  /// Limiar do YIN: quanto menor, mais exigente com a periodicidade.
+  /// Limiar do YIN: quanto menor, mais exigente com a periodicidade. Sem
+  /// nenhum mergulho de `d'` abaixo dele não há leitura, e o corte relativo
+  /// ao mergulho mais fundo nunca passa dele.
   final double limiar;
 
   /// RMS mínimo (amostras em −1..1) para tentar a análise.
@@ -165,30 +171,9 @@ class DetectorFrequencia {
     _calcularDiferenca();
     _normalizar();
 
-    // Periódico já abaixo do menor atraso buscado: o som está acima da faixa,
-    // e o que apareceria dentro dela seria uma sub-harmônica (3 kHz lido
-    // como 1 kHz).
-    final dn = _normalizada;
-    for (var tau = 2; tau < _atrasoMinimo; tau++) {
-      if (dn[tau] < limiar) return null;
-    }
-
-    // Primeiro atraso abaixo do limiar, e daí até o mínimo local.
-    final ultimo = _atrasoMaximo - 1; // o maior atraso buscado
-    var tau = _atrasoMinimo;
-    while (tau <= ultimo && dn[tau] >= limiar) {
-      tau++;
-    }
-    if (tau > ultimo) return null;
-    while (tau < ultimo && dn[tau + 1] < dn[tau]) {
-      tau++;
-    }
-    // Ainda descendo na borda: o período é maior que o maior buscado.
-    if (tau == ultimo && dn[tau + 1] < dn[tau]) return null;
-    // Já subindo desde a borda de baixo: o período é menor que o menor.
-    if (tau == _atrasoMinimo && dn[tau - 1] < dn[tau]) return null;
-
-    final confianca = (1 - dn[tau]).clamp(0.0, 1.0);
+    final tau = _escolherAtraso();
+    if (tau == null) return null;
+    final confianca = (1 - _normalizada[tau]).clamp(0.0, 1.0);
 
     final periodoBruto = _refinar(tau);
     if (periodoBruto == null) return null;
@@ -203,6 +188,124 @@ class DetectorFrequencia {
       return Leitura(frequencia: bruta, confianca: confianca);
     }
     return Leitura(frequencia: frequencia, confianca: confianca);
+  }
+
+  /// Quanto um mergulho de `d'` pode ficar acima do mais fundo e ainda contar
+  /// como o período: o corte é `fatorDoMinimo × mínimo + folgaDoMinimo`,
+  /// nunca abaixo de [_pisoDoCorte] nem acima do [limiar]. Ver
+  /// [_escolherAtraso].
+  static const double _fatorDoMinimo = 2;
+  static const double _folgaDoMinimo = 0.02;
+  static const double _pisoDoCorte = 0.04;
+
+  /// Folga, em frações do atraso candidato (mais uma amostra por múltiplo),
+  /// para um mergulho mais fundo contar como múltiplo inteiro dele. Ver
+  /// [_escolherAtraso].
+  static const double _toleranciaMultiplo = 0.1;
+
+  /// O atraso inteiro do período em [_normalizada], ou null se não houver
+  /// período na faixa.
+  ///
+  /// O YIN original pega o primeiro mergulho de `d'` abaixo do [limiar]. No
+  /// microfone do celular isso falha nas cordas graves: ele quase não capta a
+  /// fundamental, e o corpo do violão reforça os harmônicos pares, então o
+  /// sinal fica quase periódico em meio ou um terço do período. O mergulho
+  /// nesses atrasos chega a `d'` de 0,10 a 0,15, logo abaixo do limiar,
+  /// enquanto o do período de verdade fica perto de 0,01: o primeiro abaixo
+  /// do limiar é o harmônico (E2 lido como E3 ou B3).
+  ///
+  /// Por isso o limiar deixa de ser absoluto e passa a ser relativo ao
+  /// mergulho mais fundo da faixa (o "mínimo global"), como no McLeod Pitch
+  /// Method (primeiro pico acima de uma fração do maior): vale o primeiro
+  /// mergulho com `d'` abaixo de `2 × mínimo + 0,02`, com piso de 0,04. O
+  /// [limiar] continua valendo para aceitar a leitura: o corte nunca passa
+  /// dele, e sem nenhum mergulho abaixo dele não há leitura.
+  ///
+  /// "Perto do mínimo", e não "o mínimo", por causa da oitava de baixo: um
+  /// sinal periódico em τ também é em 2τ e 3τ, e nesses múltiplos `d'` sai
+  /// parecido com o de τ, às vezes menor. Numa corda aguda com outras cordas
+  /// soando por simpatia (o D4 solto sob o D5 do cavaquinho, o E2 sob o E4 do
+  /// violão), o mergulho no múltiplo chega à metade do da nota tocada: o
+  /// fator 2 cobre isso. A folga de 0,02 cobre o ruído quando o mínimo é
+  /// pequeno, e o piso de 0,04 cobre o som limpo, com o mínimo quase zero:
+  /// ali uma corda uma oitava abaixo soando a 20% da amplitude já põe o `d'`
+  /// da nota tocada em 0,03. O harmônico de um grave, ao contrário, fica 5 a
+  /// 30 vezes acima do mínimo, e entre 0,05 e 0,15. Calibrado na bancada
+  /// (gravação real de violão pelo celular e cenários sintéticos): com corte
+  /// menor começam a aparecer leituras uma oitava abaixo nas cordas agudas;
+  /// com corte maior voltam os harmônicos nas graves.
+  ///
+  /// Mais duas regras, na mesma linha:
+  ///
+  /// - o mínimo global é procurado também abaixo da faixa, e um mergulho
+  ///   abaixo do corte antes do menor atraso buscado quer dizer som acima da
+  ///   faixa (3 kHz lido como 1 kHz). Com o corte relativo, o mergulho de um
+  ///   harmônico forte abaixo da faixa (o 2º harmônico de um E4 no celular)
+  ///   não descarta mais a leitura;
+  /// - um ponto mais fundo que o escolhido nos três períodos seguintes
+  ///   precisa cair num múltiplo inteiro dele (ver [_toleranciaMultiplo]).
+  ///   Quando o 3º harmônico domina, `d'` mergulha em τ/3, 2τ/3 e τ; se 2τ/3
+  ///   passar no corte, a leitura sairia uma quinta acima. Um período de
+  ///   verdade divide os mergulhos mais fundos que ele; 2τ/3 não divide τ, e
+  ///   a busca segue para o próximo. Só três períodos, e não a faixa toda:
+  ///   com muito ruído os mergulhos nos múltiplos ficam todos parecidos, o
+  ///   mais fundo cai num múltiplo distante, e ali o erro do atraso inteiro,
+  ///   multiplicado, já passaria da folga.
+  int? _escolherAtraso() {
+    final dn = _normalizada;
+    final ultimo = _atrasoMaximo - 1; // o maior atraso buscado
+
+    var minimo = double.infinity;
+    for (var t = 2; t <= ultimo; t++) {
+      if (dn[t] < minimo) minimo = dn[t];
+    }
+    if (!(minimo < limiar)) return null; // também pega NaN
+    final corte = math.min(
+      math.max(_fatorDoMinimo * minimo + _folgaDoMinimo, _pisoDoCorte),
+      limiar,
+    );
+
+    // Periódico já abaixo do menor atraso buscado: o som está acima da faixa,
+    // e o que apareceria dentro dela seria uma sub-harmônica.
+    for (var t = 2; t < _atrasoMinimo; t++) {
+      if (dn[t] < corte) return null;
+    }
+
+    // Primeiro mergulho abaixo do corte, e daí até o mínimo local.
+    var tau = _atrasoMinimo;
+    while (true) {
+      while (tau <= ultimo && dn[tau] >= corte) {
+        tau++;
+      }
+      if (tau > ultimo) return null;
+      while (tau < ultimo && dn[tau + 1] < dn[tau]) {
+        tau++;
+      }
+      var fimDoMergulho = tau;
+      while (fimDoMergulho <= ultimo && dn[fimDoMergulho] < corte) {
+        fimDoMergulho++;
+      }
+      // O ponto mais fundo que este nos três períodos seguintes precisa
+      // cair num múltiplo inteiro dele. O atraso inteiro pode estar até uma
+      // amostra fora do período, e o erro se multiplica no múltiplo: daí a
+      // folga de uma amostra por múltiplo.
+      final limite = math.min(ultimo, 3 * tau);
+      var maisFundo = -1;
+      for (var t = fimDoMergulho; t <= limite; t++) {
+        if (dn[t] < (maisFundo < 0 ? dn[tau] : dn[maisFundo])) maisFundo = t;
+      }
+      if (maisFundo < 0) break;
+      final multiplo = (maisFundo / tau).round();
+      final desvio = (maisFundo - multiplo * tau).abs();
+      if (desvio <= _toleranciaMultiplo * tau + multiplo) break;
+      // Não divide: pula o resto deste mergulho.
+      tau = fimDoMergulho;
+    }
+    // Ainda descendo na borda: o período é maior que o maior buscado.
+    if (tau == ultimo && dn[tau + 1] < dn[tau]) return null;
+    // Já subindo desde a borda de baixo: o período é menor que o menor.
+    if (tau == _atrasoMinimo && dn[tau - 1] < dn[tau]) return null;
+    return tau;
   }
 
   /// O período refinado com o passa-baixas (2ª passada de [analisar]), ou

@@ -13,6 +13,7 @@ import '../../dados/ajustes.dart';
 import '../../dados/preferencias.dart';
 import '../../dominio/afinacoes.dart';
 import '../../dominio/detector.dart';
+import '../../dominio/dobra_harmonicos.dart';
 import '../../dominio/escolha_corda.dart';
 import '../../dominio/estado_corda.dart';
 import '../../dominio/marcador_afinada.dart';
@@ -106,6 +107,7 @@ class ControladorAfinador extends ChangeNotifier {
     _afinacao = _instrumento.afinacao(preferencias.afinacao ?? '');
     _auto = preferencias.auto;
     _escolha = EscolhaCorda(alvos: _alvos(), pares: _instrumento.pares);
+    _dobra = DobraHarmonicos(alvos: _alvos(), pares: _instrumento.pares);
     if (!_auto) {
       _escolha.fixar(
         preferencias.cordaFixada.clamp(0, _afinacao.notas.length - 1).toInt(),
@@ -143,6 +145,7 @@ class ControladorAfinador extends ChangeNotifier {
   late Afinacao _afinacao;
   late bool _auto;
   late EscolhaCorda _escolha;
+  late DobraHarmonicos _dobra;
   late DetectorFrequencia _detector;
   late JanelaDeslizante _janela;
   late int _a4;
@@ -223,6 +226,7 @@ class ControladorAfinador extends ChangeNotifier {
     _preferencias.afinacao = afinacao.id;
     _afinadas.clear();
     _escolha = EscolhaCorda(alvos: _alvos(), pares: _instrumento.pares);
+    _dobra = DobraHarmonicos(alvos: _alvos(), pares: _instrumento.pares);
     if (!_auto) {
       _escolha.fixar(0);
       _preferencias.cordaFixada = 0;
@@ -257,6 +261,7 @@ class ControladorAfinador extends ChangeNotifier {
     _ensurdecer(duracao);
     _suavizador.reiniciar();
     _marcador.reiniciar();
+    _dobra.reiniciar();
     _cordaDaLeitura = null;
     leitura.value = LeituraTela.ociosa;
     notifyListeners();
@@ -274,6 +279,7 @@ class ControladorAfinador extends ChangeNotifier {
       _a4 = ajustes.a4;
       final fixada = _auto ? null : _escolha.atual;
       _escolha.trocarAlvos(_alvos());
+      _dobra.trocarAlvos(_alvos());
       if (fixada != null) _escolha.fixar(fixada);
       _recomecarLeitura();
       notifyListeners();
@@ -285,6 +291,7 @@ class ControladorAfinador extends ChangeNotifier {
     _suavizador.reiniciar();
     _janela.limpar();
     _marcador.reiniciar();
+    _dobra.reiniciar();
     _cordaDaLeitura = null;
     historico.limpar();
     leitura.value = LeituraTela.ociosa;
@@ -399,11 +406,25 @@ class ControladorAfinador extends ChangeNotifier {
       medida = _detector.analisar(janela);
     }
 
-    if (medida == null) {
+    // Leituras num harmônico (ou sub-harmônico) da nota que está soando
+    // voltam à fundamental; a dobra precisa de todas as análises, com a
+    // energia, para seguir a nota e reconhecer a palhetada.
+    final corrigida = _dobra.corrigir(medida, rms: _rms(janela));
+    if (corrigida == null) {
       _aoSilenciar();
     } else {
-      _aoOuvir(medida.frequencia);
+      _aoOuvir(corrigida.frequencia);
     }
+  }
+
+  /// Energia das amostras que o detector analisa (as últimas da janela).
+  double _rms(Float64List janela) {
+    final n = math.min(_detector.tamanhoJanela, janela.length);
+    var soma = 0.0;
+    for (var i = janela.length - n; i < janela.length; i++) {
+      soma += janela[i] * janela[i];
+    }
+    return n == 0 ? 0 : math.sqrt(soma / n);
   }
 
   static String _pico(List<double> amostras) {
