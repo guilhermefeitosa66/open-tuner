@@ -149,6 +149,21 @@ class ControladorAfinador extends ChangeNotifier {
   /// Silêncio depois do qual o indicador volta ao centro, vazio.
   static const tempoParaOcioso = 1.5;
 
+  /// Palhetada nova, para recomeçar o anel e o aviso: a energia da janela
+  /// passa este fator sobre a média das últimas [analisesDeEnergia]
+  /// análises. Mais exigente que a palhetada do filtro, que existe para
+  /// descartar o ataque: o batimento de uma nota que continua soando
+  /// (±40% de energia) não pode fazer o aviso repetir sozinho.
+  static const fatorPalhetadaNova = 2.0;
+  static const analisesDeEnergia = 10;
+
+  /// Energia mínima dessa palhetada (RMS, amostras em −1..1).
+  static const energiaPalhetadaNova = 0.01;
+
+  /// Depois de a corda se confirmar afinada, por quanto tempo uma palhetada
+  /// nova ainda não recomeça o anel e o aviso.
+  static const intervaloEntreAvisos = 1.0;
+
   /// Com a tela ociosa, duas leituras concordam se ficam a menos disto, em
   /// cents.
   static const concordancia = 50.0;
@@ -172,6 +187,21 @@ class ControladorAfinador extends ChangeNotifier {
   late final FiltroKalman _filtro = FiltroKalman(precisao: ajustes.precisao);
   final MarcadorAfinada _marcador = MarcadorAfinada();
   final Set<int> _afinadas = {};
+
+  /// A corda já se confirmou afinada nesta nota: o anel está cheio e o aviso
+  /// já tocou. Volta a false (e o anel a zero) a cada palhetada nova, quando
+  /// o ✓ apaga, na troca de corda e no silêncio: toda vez que a corda chega
+  /// à nota de novo, o anel enche e o aviso toca, mesmo numa corda já
+  /// marcada (uma corda afinada desafina com a tensão das seguintes, e quem
+  /// afina confere de novo).
+  bool _confirmada = false;
+  double _tempoConfirmacao = double.negativeInfinity;
+
+  /// Energia das últimas análises e o instante da última palhetada nova (ver
+  /// [fatorPalhetadaNova]). Uma palhetada logo depois do aviso fica guardada
+  /// e recomeça o anel quando o [intervaloEntreAvisos] passar.
+  final List<double> _energias = [];
+  double _ultimaPalhetadaNova = double.negativeInfinity;
   EstadoPermissao _permissao = EstadoPermissao.desconhecida;
 
   bool _visivel = false;
@@ -292,12 +322,19 @@ class ControladorAfinador extends ChangeNotifier {
     _filtro
       ..reiniciar()
       ..esquecerEnergia();
-    _marcador.reiniciar();
+    _rearmar();
     _dobra.reiniciar();
     _cordaDaLeitura = null;
     _pendente = null;
     leitura.value = LeituraTela.ociosa;
     notifyListeners();
+  }
+
+  /// Recomeça a contagem para a corda se confirmar afinada: o anel volta a
+  /// zero, e o aviso toca de novo na próxima vez que ela chegar à nota.
+  void _rearmar() {
+    _marcador.reiniciar();
+    _confirmada = false;
   }
 
   void _ensurdecer(Duration duracao) {
@@ -317,7 +354,7 @@ class ControladorAfinador extends ChangeNotifier {
       // Uma corda marcada com ±5 cents pode estar fora de ±2: as marcas da
       // precisão mais folgada não valem na mais estreita (na volta, valem).
       if (precisao.tolerancia < _precisao.tolerancia) {
-        _marcador.reiniciar();
+        _rearmar();
         if (_afinadas.isNotEmpty) {
           _afinadas.clear();
           notifyListeners();
@@ -342,7 +379,7 @@ class ControladorAfinador extends ChangeNotifier {
   void _recomecarLeitura() {
     _filtro.esquecerTudo();
     _janela.limpar();
-    _marcador.reiniciar();
+    _rearmar();
     _dobra.reiniciar();
     _escolha.soltar();
     _cordaDaLeitura = null;
@@ -467,6 +504,7 @@ class ControladorAfinador extends ChangeNotifier {
     // voltam à fundamental; a dobra precisa de todas as análises, com a
     // energia, para seguir a nota e reconhecer a palhetada.
     final rms = _rms(janela);
+    _acompanharEnergia(rms);
     final corrigida = _dobra.corrigir(medida, rms: rms);
     if (corrigida == null) {
       // O filtro também precisa das análises sem leitura: é a energia delas
@@ -476,6 +514,19 @@ class ControladorAfinador extends ChangeNotifier {
     } else {
       _aoOuvir(corrigida.frequencia, rms);
     }
+  }
+
+  void _acompanharEnergia(double rms) {
+    var media = 0.0;
+    for (final e in _energias) {
+      media += e;
+    }
+    if (_energias.isNotEmpty) media /= _energias.length;
+    if (rms >= energiaPalhetadaNova && rms > fatorPalhetadaNova * media) {
+      _ultimaPalhetadaNova = _tempo;
+    }
+    _energias.add(rms);
+    if (_energias.length > analisesDeEnergia) _energias.removeAt(0);
   }
 
   /// Energia das amostras que o detector analisa (as últimas da janela).
@@ -510,6 +561,7 @@ class ControladorAfinador extends ChangeNotifier {
       // contra a de antes, levaria o ponteiro à borda até a troca.
       _escolha.soltar();
       _pendente = null;
+      _rearmar();
     }
     if (_afinadas.isNotEmpty && _tempo - _ultimoSom >= tempoParaLimparMarcas) {
       _afinadas.clear();
@@ -542,7 +594,7 @@ class ControladorAfinador extends ChangeNotifier {
     final cordaNova = corda != _cordaDaLeitura;
     if (cordaNova) {
       _cordaDaLeitura = corda;
-      _marcador.reiniciar();
+      _rearmar();
     }
     final exibicao = _filtro.adicionar(
       tempo: _tempo,
@@ -561,6 +613,15 @@ class ControladorAfinador extends ChangeNotifier {
     final estado = exibicao.afinada
         ? EstadoCorda.afinada
         : (cents.abs() <= limitePerto ? EstadoCorda.perto : EstadoCorda.longe);
+
+    // Corda tocada de novo, ou que saiu da nota depois de confirmada: o anel
+    // recomeça, para encher e avisar outra vez quando ela chegar à nota.
+    if (_confirmada &&
+        (estado != EstadoCorda.afinada ||
+            (_ultimaPalhetadaNova > _tempoConfirmacao &&
+                _tempo - _tempoConfirmacao >= intervaloEntreAvisos))) {
+      _rearmar();
+    }
     // O rastro segue o indicador: com o ✓, o círculo está na linha do
     // centro, e o ponto do rastro também.
     historico.adicionar(
@@ -587,7 +648,10 @@ class ControladorAfinador extends ChangeNotifier {
           estado == EstadoCorda.afinada &&
           cents.abs() <= ajustes.precisao.tolerancia,
     );
-    if (afinada && _afinadas.add(corda)) {
+    if (afinada && !_confirmada) {
+      _confirmada = true;
+      _tempoConfirmacao = _tempo;
+      _afinadas.add(corda);
       unawaited(_vibrar());
       _ensurdecer(_tocador.tocarAfinada());
       avisar = true;
@@ -598,12 +662,9 @@ class ControladorAfinador extends ChangeNotifier {
       frequencia: alvo * math.pow(2, cents / 1200),
       estado: estado,
       numero: exibicao.numero,
-      // Corda já marcada: o indicador fica cheio com o ✓ e vazio sem ele (o
-      // tempo somado para a marca não diz mais nada, e o anel cheio sem o ✓
-      // diria "afinada" junto com "Afrouxe a corda").
-      progresso: _afinadas.contains(corda)
-          ? (estado == EstadoCorda.afinada ? 1 : 0)
-          : _marcador.progresso,
+      // Confirmada nesta nota: o anel fica cheio enquanto durar o ✓ (sem o
+      // ✓ ela já foi rearmada, e o anel recomeça do tempo somado).
+      progresso: _confirmada ? 1 : _marcador.progresso,
     );
     if (avisar) notifyListeners();
   }

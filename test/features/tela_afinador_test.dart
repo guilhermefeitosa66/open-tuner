@@ -427,6 +427,104 @@ void main() {
       );
     });
 
+    testWidgets('tocar de novo a corda já marcada: o anel recomeça e avisa', (
+      tester,
+    ) async {
+      final app = await abrirApp(tester);
+      app.fonte.frequencia = e4;
+      await esperar(tester, const Duration(milliseconds: 1500));
+      expect(find.byKey(const Key('selo-2')), findsOneWidget);
+      expect(app.tocador.avisosDeAfinada, 1);
+      expect(progressoDoIndicador(tester), 1);
+
+      // A corda para e é tocada de novo, ainda afinada.
+      app.fonte.frequencia = null;
+      await esperar(tester, const Duration(milliseconds: 400));
+      app.fonte.frequencia = e4;
+      final progressos = <double>[];
+      for (var i = 0; i < 40; i++) {
+        await tester.pump(const Duration(milliseconds: 40));
+        progressos.add(progressoDoIndicador(tester));
+      }
+      // O anel recomeçou do zero, encheu de novo e o aviso tocou outra vez;
+      // a marca embaixo continua.
+      expect(progressos.where((p) => p > 0 && p < 1), isNotEmpty);
+      expect(progressos.last, 1);
+      expect(app.tocador.avisosDeAfinada, 2);
+      expect(app.vibracoes, 2);
+      expect(find.byKey(const Key('selo-2')), findsOneWidget);
+    });
+
+    testWidgets('tocada de novo sem parar de soar: avisa de novo', (
+      tester,
+    ) async {
+      final app = await abrirApp(tester);
+      app.fonte
+        ..frequencia = e4
+        ..amplitude = 0.4;
+      await esperar(tester, const Duration(milliseconds: 1500));
+      expect(app.tocador.avisosDeAfinada, 1);
+      // A nota foi morrendo; a palhetada nova volta com força.
+      app.fonte.amplitude = 0.1;
+      await esperar(tester, const Duration(milliseconds: 600));
+      app.fonte.amplitude = 0.5;
+      await esperar(tester, const Duration(milliseconds: 1500));
+      expect(app.tocador.avisosDeAfinada, 2);
+    });
+
+    testWidgets('tocada de novo logo depois do aviso: avisa de novo', (
+      tester,
+    ) async {
+      final app = await abrirApp(tester);
+      app.fonte
+        ..frequencia = e4
+        ..amplitude = 0.1;
+      while (app.tocador.avisosDeAfinada == 0) {
+        await tester.pump(const Duration(milliseconds: 40));
+      }
+      // Palhetada forte assim que o período surdo do aviso acaba (antes de
+      // 1 s): fica guardada e vale quando o intervalo passar.
+      await esperar(tester, const Duration(milliseconds: 840));
+      app.fonte.amplitude = 0.5;
+      await esperar(tester, const Duration(milliseconds: 1600));
+      expect(app.tocador.avisosDeAfinada, 2);
+    });
+
+    testWidgets('a corda que sai da nota e volta avisa de novo', (
+      tester,
+    ) async {
+      final app = await abrirApp(tester);
+      app.fonte.frequencia = e4;
+      await esperar(tester, const Duration(milliseconds: 1500));
+      expect(app.tocador.avisosDeAfinada, 1);
+
+      // A tarraxa (ou a tensão das outras cordas) tira a corda da nota, com
+      // ela soando, e depois ela volta.
+      app.fonte.frequencia = FonteAudioFalsa.desviada(e4, -20);
+      await esperar(tester, const Duration(milliseconds: 800));
+      expect(find.text('Afinada'), findsNothing);
+      expect(app.tocador.avisosDeAfinada, 1);
+      app.fonte.frequencia = e4;
+      await esperar(tester, const Duration(milliseconds: 1500));
+      expect(app.tocador.avisosDeAfinada, 2);
+    });
+
+    testWidgets(
+      'a nota afinada soando, com a energia oscilando, avisa uma vez',
+      (tester) async {
+        final app = await abrirApp(tester);
+        app.fonte.frequencia = e4;
+        // Batimento de 4 Hz na energia, ±40%, por 6 s: pode parecer palhetada,
+        // mas é a mesma nota.
+        for (var i = 0; i < 150; i++) {
+          app.fonte.amplitude =
+              0.3 * (1 + 0.4 * math.sin(2 * math.pi * 4 * i * 0.04));
+          await tester.pump(const Duration(milliseconds: 40));
+        }
+        expect(app.tocador.avisosDeAfinada, 1);
+      },
+    );
+
     testWidgets('as marcas somem ao trocar de afinação', (tester) async {
       final app = await abrirApp(tester);
       app.fonte.frequencia = e4;

@@ -174,10 +174,16 @@ que o indicador tinha naquela leitura):
 nota é somado, não seguido: 0,6 segundo dentro da tolerância, com idas e vindas, nos últimos 2
 segundos marca a corda. Conta o tempo com o ✓ e o ponteiro dentro da tolerância: a corda parada na
 folga de saída do ✓ não ganha a marca. Enquanto soma, um anel verde fecha pela borda do indicador
-(só perto ou afinada; longe, não aparece); fechado, o indicador enche de verde. Com a corda já
-marcada, o anel fica cheio com o ✓ e vazio sem ele. Marcada, a corda fica verde no
-botão (fundo, anel e selo), na tarraxa e no fio; o aparelho vibra uma vez, curto, e toca um aviso
-curto de dois sinos, também sintetizado. As marcas somem ao trocar de
+(só perto ou afinada; longe, não aparece); fechado, o indicador enche de verde, o aparelho vibra
+uma vez, curto, e toca um aviso curto de dois sinos, também sintetizado. Marcada, a corda fica
+verde no botão (fundo, anel e selo), na tarraxa e no fio.
+
+O anel e o aviso valem para toda vez que a corda chega à nota, não só para a primeira: uma corda
+afinada desafina um pouco com a tensão das seguintes, e quem afina confere de novo. O anel recomeça
+do zero (e o aviso volta a tocar quando ele fechar) quando a corda é tocada de novo (a energia passa
+2 × a média dos últimos 0,4 s; o batimento de uma nota que continua soando não chega a isso, e
+nunca antes de 1 s do último aviso), quando o ✓ apaga (a corda saiu da nota), na troca de corda e
+depois do silêncio. A marca embaixo continua. As marcas somem ao trocar de
 instrumento ou de afinação, ao mudar a referência do Lá, ao passar da precisão normal para a fina, e
 depois de 2 minutos sem nenhuma corda tocada.
 
