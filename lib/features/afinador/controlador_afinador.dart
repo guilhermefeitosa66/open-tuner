@@ -202,6 +202,11 @@ class ControladorAfinador extends ChangeNotifier {
   /// e recomeça o anel quando o [intervaloEntreAvisos] passar.
   final List<double> _energias = [];
   double _ultimaPalhetadaNova = double.negativeInfinity;
+
+  /// Depois do Recomeçar, a marca só volta a contar com uma nota nova: uma
+  /// palhetada depois da limpeza, outra corda ou o silêncio.
+  bool _esperandoNotaNova = false;
+  double _tempoLimpeza = double.negativeInfinity;
   EstadoPermissao _permissao = EstadoPermissao.desconhecida;
 
   bool _visivel = false;
@@ -293,6 +298,21 @@ class ControladorAfinador extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Limpa as marcas de corda afinada (o botão Recomeçar): para afinar outro
+  /// instrumento igual, ou conferir tudo de novo. O instrumento, a afinação
+  /// e a corda alvo continuam.
+  void limparMarcas() {
+    if (_afinadas.isEmpty) return;
+    _afinadas.clear();
+    _rearmar();
+    // A corda que acabou de ser afinada costuma estar ainda soando: sem
+    // esperar, ela ganharia a marca de novo em 0,6 s, e o instrumento
+    // seguinte começaria com uma corda "afinada" que ninguém afinou.
+    _esperandoNotaNova = true;
+    _tempoLimpeza = _tempo;
+    notifyListeners();
+  }
+
   /// Liga ou desliga o Auto. Desligar fixa a corda atual (ou a primeira).
   void definirAuto(bool ligado) {
     if (ligado == _auto) return;
@@ -323,6 +343,7 @@ class ControladorAfinador extends ChangeNotifier {
       ..reiniciar()
       ..esquecerEnergia();
     _rearmar();
+    _esperandoNotaNova = false;
     _dobra.reiniciar();
     _cordaDaLeitura = null;
     _pendente = null;
@@ -380,6 +401,7 @@ class ControladorAfinador extends ChangeNotifier {
     _filtro.esquecerTudo();
     _janela.limpar();
     _rearmar();
+    _esperandoNotaNova = false;
     _dobra.reiniciar();
     _escolha.soltar();
     _cordaDaLeitura = null;
@@ -562,6 +584,7 @@ class ControladorAfinador extends ChangeNotifier {
       _escolha.soltar();
       _pendente = null;
       _rearmar();
+      _esperandoNotaNova = false;
     }
     if (_afinadas.isNotEmpty && _tempo - _ultimoSom >= tempoParaLimparMarcas) {
       _afinadas.clear();
@@ -641,10 +664,15 @@ class ControladorAfinador extends ChangeNotifier {
     // Para a marca da corda, só conta o tempo dentro da tolerância (RF-09):
     // o ✓ fica aceso até 1,6 × ela, e a corda parada logo fora não pode
     // ganhar a marca por ter passado pela nota.
+    if (_esperandoNotaNova &&
+        (cordaNova || _ultimaPalhetadaNova > _tempoLimpeza)) {
+      _esperandoNotaNova = false;
+    }
     final afinada = _marcador.adicionar(
       tempo: _tempo,
       duracao: _janela.salto / fonte.taxaAmostragem,
       afinada:
+          !_esperandoNotaNova &&
           estado == EstadoCorda.afinada &&
           cents.abs() <= ajustes.precisao.tolerancia,
     );

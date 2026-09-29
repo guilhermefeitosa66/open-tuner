@@ -183,7 +183,12 @@ afinada desafina um pouco com a tensão das seguintes, e quem afina confere de n
 do zero (e o aviso volta a tocar quando ele fechar) quando a corda é tocada de novo (a energia passa
 2 × a média dos últimos 0,4 s; o batimento de uma nota que continua soando não chega a isso, e
 nunca antes de 1 s do último aviso), quando o ✓ apaga (a corda saiu da nota), na troca de corda e
-depois do silêncio. A marca embaixo continua. As marcas somem ao trocar de
+depois do silêncio. A marca embaixo continua.
+
+Com alguma corda marcada, um botão **Recomeçar** aparece sobre o braço, embaixo da cabeça do
+instrumento, junto das marcas que ele limpa: para afinar um segundo instrumento igual, ou conferir
+tudo de novo. Ele limpa as marcas e mantém o instrumento, a afinação e a corda alvo. As marcas
+também somem ao trocar de
 instrumento ou de afinação, ao mudar a referência do Lá, ao passar da precisão normal para a fina, e
 depois de 2 minutos sem nenhuma corda tocada.
 
@@ -209,13 +214,17 @@ ponteiro à borda.
 
 **RF-13 · Barra inferior.** Dois botões, lado a lado, e nada mais:
 
-- **Instrumento**, com o nome e a quantidade de cordas ("Violão · 6 cordas", "Viola caipira · 5 pares");
+- **Instrumento**, com o nome e a quantidade de cordas ("Violão / Guitarra · 6 cordas", "Viola caipira
+  · 5 pares"); um nome que não cabe encolhe em vez de ser cortado;
 - **Afinação**, com o nome e as notas ("Drop D · D A D G B E").
 
 Cada um abre uma folha que sobe de baixo. A folha fecha ao escolher, ao tocar fora dela, ao
 arrastar para baixo ou com o botão voltar.
 
-**RF-14 · Escolher instrumento.** Lista agrupada (Ukulele e cavaquinho · Violão e viola · Baixo).
+**RF-14 · Escolher instrumento.** Lista agrupada (Ukulele e cavaquinho · Violão, guitarra e viola ·
+Baixo). O violão de 6 cordas se chama "Violão / Guitarra" em português, porque a guitarra elétrica
+usa a mesma afinação e quem toca guitarra não procuraria "Violão"; em inglês ("Guitar") e em
+espanhol ("Guitarra") o nome já cobre os dois.
 Cada linha mostra a quantidade de cordas, o nome e as notas da afinação padrão; a linha atual tem ✓.
 Escolher um instrumento aplica a afinação padrão dele.
 
@@ -234,6 +243,7 @@ Abertos pelo ícone no canto do topo, na mesma folha que sobe de baixo.
 | Ajuste | Opções | Padrão |
 |---|---|---|
 | Tema | Sistema · Claro · Escuro | Sistema |
+| Idioma | Idioma do sistema · Português (Brasil) · English · Español, cada um com a bandeira e o nome na própria língua; muda na hora | Idioma do sistema |
 | Nome das notas | C D E · Dó Ré Mi | C D E |
 | Precisão | Normal (±5 cents) · Fina (±2 cents) | Normal |
 | Referência do Lá (A4) | 430 a 450 Hz, de 1 em 1 | 440 Hz |
@@ -288,15 +298,18 @@ privacidade publicada junto com o app.
 - texto até 130% do tamanho do sistema sem cortar nem sobrepor;
 - nenhuma informação só por cor (princípios, seção 1).
 
-**Idiomas.** O app segue o idioma do aparelho. Se nenhum dos idiomas preferidos do usuário for
+**Idiomas.** Por padrão o app segue o idioma do aparelho; nos ajustes dá para escolher outro
+(RF-17), e a escolha vale na hora e fica guardada. Se nenhum dos idiomas preferidos do usuário for
 suportado, usa inglês.
 
 - idiomas da 1.0: inglês (modelo e reserva), português e espanhol, em `lib/l10n/app_*.arb`. Um
   teste garante que todos os arquivos têm as mesmas chaves;
 - a escolha é pelo idioma, não pelo país: pt-PT e pt-BR usam `pt`, es-MX usa `es`. Uma variante
   regional ganha arquivo próprio só quando algum texto precisar mudar;
-- no Android 13 ou mais novo, o idioma do app pode ser trocado nas configurações do sistema
-  (`res/xml/locales_config.xml`), sem ajuste dentro do app;
+- o seletor é o dos ajustes do app, com a bandeira e o nome de cada idioma na própria língua. O app
+  não declara o idioma por app do Android 13+ (`android:localeConfig`): com os dois, a escolha feita
+  dentro do app anularia em silêncio a feita nas configurações do sistema, e sincronizá-los pediria
+  código nativo. O seletor do app vale em qualquer versão do Android e, depois, no iOS;
 - nomes de instrumentos e afinações são textos traduzidos. O domínio só conhece ids;
 - números no formato do idioma, pelo `intl`: 327,4 Hz em português e espanhol, 327.4 Hz em inglês.
   Nunca vírgula ou ponto fixos no código;
@@ -306,8 +319,10 @@ suportado, usa inglês.
 - idiomas escritos da direita para a esquerda (árabe, hebraico, persa): a interface espelha, **o
   gráfico do afinador não**. Grave à esquerda e agudo à direita é convenção musical, e ♭ e ♯ ficam
   onde estão;
-- textos mais longos (alemão, russo) precisam caber: os botões da barra inferior cortam com
-  reticências e nunca escondem a quantidade de cordas;
+- textos mais longos (alemão, russo) precisam caber: nos botões da barra inferior, o nome encolhe
+  até 15% para caber numa linha e, se ainda não couber, quebra em duas (nunca fica menor que isso,
+  para não desfazer o texto grande da acessibilidade); a quantidade de cordas corta com reticências e
+  nunca some;
 - depois da 1.0, tradução pela comunidade num Weblate hospedado (gratuito para projeto livre).
   Tradução automática não é publicada sem revisão de quem fala o idioma.
 
@@ -370,7 +385,8 @@ features → dominio → core
   É onde estão os testes que importam.
 - `lib/dados/`: preferências do usuário (`shared_preferences`).
 - `lib/l10n/`: os textos, um ARB por idioma, e as classes geradas pelo `gen-l10n` (versionadas).
-  `lib/app/idioma.dart` escolhe o idioma a partir das preferências do aparelho.
+  `lib/app/idioma.dart` escolhe o idioma a partir das preferências do aparelho (quando o usuário não
+  escolheu um nos ajustes) e lista as opções do seletor.
 - `lib/features/afinador/`: a tela, o rastro (um `CustomPainter`), a cabeça do instrumento (outro
   `CustomPainter`) e as folhas de seleção.
 - Captura de áudio: o plugin `record`, que entrega PCM em stream no Android. Se ele não servir, um

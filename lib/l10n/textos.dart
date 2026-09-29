@@ -369,7 +369,7 @@ abstract class Textos {
   /// **'Cavaquinho'**
   String get instrumentoCavaquinho;
 
-  /// Instrument name: acoustic guitar
+  /// Instrument name: 6-string acoustic and electric guitar (same tuning). In Portuguese both names are needed ("violão" is only the acoustic one); in English "guitar" already covers both
   ///
   /// In en, this message translates to:
   /// **'Guitar'**
@@ -560,6 +560,48 @@ abstract class Textos {
   /// In en, this message translates to:
   /// **'Target note {nota}'**
   String notaAlvo(String nota);
+
+  /// Button over the instrument head, shown when a string is marked as tuned: clears all the marks (e.g. to tune a second instrument)
+  ///
+  /// In en, this message translates to:
+  /// **'Start over'**
+  String get recomecar;
+
+  /// Accessibility label of the start over button
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the tuned strings'**
+  String get recomecarDescricao;
+
+  /// Settings: title of the app language section
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get idioma;
+
+  /// Settings: language option that follows the device language
+  ///
+  /// In en, this message translates to:
+  /// **'System language'**
+  String get idiomaSistema;
+
+  /// Name of the Portuguese language in Portuguese itself. Do not translate: the same in every file
+  ///
+  /// In en, this message translates to:
+  /// **'Português (Brasil)'**
+  String get nomeIdiomaPt;
+
+  /// Name of the English language in English itself. Do not translate: the same in every file
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get nomeIdiomaEn;
+
+  /// Name of the Spanish language in Spanish itself. Do not translate: the same in every file
+  ///
+  /// In en, this message translates to:
+  /// **'Español'**
+  String get nomeIdiomaEs;
 }
 
 class _TextosDelegate extends LocalizationsDelegate<Textos> {

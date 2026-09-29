@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../app/idioma.dart';
 import '../dominio/estado_corda.dart';
 import 'preferencias.dart';
 
@@ -12,7 +13,8 @@ class Ajustes extends ChangeNotifier {
       _notacao = _preferencias.notacao,
       _precisao = _preferencias.precisao,
       _a4 = _preferencias.a4,
-      _telaLigada = _preferencias.telaLigada;
+      _telaLigada = _preferencias.telaLigada,
+      _idioma = _idiomaValido(_preferencias.idioma);
 
   final Preferencias _preferencias;
 
@@ -21,6 +23,7 @@ class Ajustes extends ChangeNotifier {
   Precisao _precisao;
   int _a4;
   bool _telaLigada;
+  String? _idioma;
 
   TemaEscolhido get tema => _tema;
   set tema(TemaEscolhido valor) {
@@ -63,4 +66,20 @@ class Ajustes extends ChangeNotifier {
     _preferencias.telaLigada = valor;
     notifyListeners();
   }
+
+  /// Código do idioma escolhido ('pt', 'en', 'es'); null segue o aparelho.
+  /// Um código que o app não suporta vale como null.
+  String? get idioma => _idioma;
+  set idioma(String? codigo) {
+    final valido = _idiomaValido(codigo);
+    if (valido == _idioma) return;
+    _idioma = valido;
+    _preferencias.idioma = valido;
+    notifyListeners();
+  }
+
+  static String? _idiomaValido(String? codigo) =>
+      idiomasSuportados.any((idioma) => idioma.languageCode == codigo)
+      ? codigo
+      : null;
 }

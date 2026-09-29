@@ -271,4 +271,25 @@ class TextosEn extends Textos {
   String notaAlvo(String nota) {
     return 'Target note $nota';
   }
+
+  @override
+  String get recomecar => 'Start over';
+
+  @override
+  String get recomecarDescricao => 'Clear the tuned strings';
+
+  @override
+  String get idioma => 'Language';
+
+  @override
+  String get idiomaSistema => 'System language';
+
+  @override
+  String get nomeIdiomaPt => 'Português (Brasil)';
+
+  @override
+  String get nomeIdiomaEn => 'English';
+
+  @override
+  String get nomeIdiomaEs => 'Español';
 }

@@ -139,9 +139,85 @@ class CabecaInstrumento extends StatelessWidget {
                   afinada: controlador.afinadas.contains(i),
                 ),
               ),
+            // Recomeçar: só aparece com alguma corda marcada, junto das
+            // marcas que ele limpa, sobre o braço.
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 8 * geometria.escala,
+              child: Center(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder: (filho, animacao) => FadeTransition(
+                    opacity: animacao,
+                    child: ScaleTransition(scale: animacao, child: filho),
+                  ),
+                  child: controlador.afinadas.isEmpty
+                      ? const SizedBox.shrink()
+                      : BotaoRecomecar(
+                          key: const Key('recomecar'),
+                          aoTocar: controlador.limparMarcas,
+                        ),
+                ),
+              ),
+            ),
           ],
         );
       },
+    );
+  }
+}
+
+/// O botão que limpa as marcas de corda afinada: uma pílula de alto
+/// contraste sobre a madeira, com o ícone de recomeçar.
+class BotaoRecomecar extends StatelessWidget {
+  const BotaoRecomecar({super.key, required this.aoTocar});
+
+  final VoidCallback aoTocar;
+
+  @override
+  Widget build(BuildContext context) {
+    final cores = context.cores;
+    final textos = context.textos;
+    return Semantics(
+      button: true,
+      // O rótulo começa pelo texto visível ("toque em Recomeçar", por voz);
+      // a dica diz o que ele faz.
+      label: textos.recomecar,
+      hint: textos.recomecarDescricao,
+      onTap: aoTocar,
+      excludeSemantics: true,
+      child: Material(
+        color: cores.texto,
+        shape: const StadiumBorder(),
+        elevation: 2,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: aoTocar,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 8, 18, 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.restart_alt_rounded, size: 20, color: cores.fundo),
+                  const SizedBox(width: 6),
+                  Text(
+                    textos.recomecar,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: cores.fundo,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -181,6 +257,10 @@ class BotaoCorda extends StatelessWidget {
         notacao,
         afinada: afinada,
       ),
+      // O excludeSemantics tira a semântica do InkWell, e com ela a ação de
+      // toque: sem o onTap aqui, o Acesso com interruptor e o Voice Access
+      // não acham o botão.
+      onTap: () => controlador.tocarCorda(indice),
       excludeSemantics: true,
       child: Stack(
         clipBehavior: Clip.none,

@@ -13,9 +13,9 @@ import 'tema.dart';
 /// Versão mostrada nos ajustes. Acompanha o `version` do pubspec.
 const versaoApp = '0.1.0';
 
-/// Raiz do aplicativo. O tema segue o ajuste (Sistema, Claro ou Escuro) e o
-/// idioma segue o do aparelho, com inglês quando nenhum dos preferidos é
-/// suportado.
+/// Raiz do aplicativo. O tema segue o ajuste (Sistema, Claro ou Escuro). O
+/// idioma é o escolhido nos ajustes ou, por padrão, o do aparelho, com inglês
+/// quando nenhum dos preferidos é suportado.
 class AppOpenTuner extends StatefulWidget {
   const AppOpenTuner({
     super.key,
@@ -61,6 +61,11 @@ class _AppOpenTunerState extends State<AppOpenTuner> {
         localizationsDelegates: Textos.localizationsDelegates,
         supportedLocales: idiomasSuportados,
         localeListResolutionCallback: resolverIdioma,
+        // Escolhido nos ajustes; null segue os idiomas do aparelho.
+        locale: switch (_ajustes.idioma) {
+          final codigo? => Locale(codigo),
+          null => null,
+        },
         themeMode: switch (_ajustes.tema) {
           TemaEscolhido.sistema => ThemeMode.system,
           TemaEscolhido.claro => ThemeMode.light,

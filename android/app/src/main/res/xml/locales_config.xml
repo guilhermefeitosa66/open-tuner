@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Idiomas oferecidos no seletor de idioma por app do Android 13+.
-     Tem de acompanhar os ARBs em lib/l10n e `idiomasSuportados` em
-     lib/app/idioma.dart. -->
-<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
-    <locale android:name="en"/>
-    <locale android:name="pt"/>
-    <locale android:name="es"/>
-</locale-config>

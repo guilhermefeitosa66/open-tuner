@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app/idioma.dart';
 import '../../app/tema.dart';
 import '../../dominio/afinacoes.dart';
+import '../../l10n/textos.dart';
 import 'controlador_afinador.dart';
 import 'desenhos.dart';
 import 'nomes.dart';
@@ -11,8 +12,8 @@ import 'nomes.dart';
 /// tocar fora, ao arrastar para baixo ou com o voltar.
 Future<void> abrirFolha(
   BuildContext context, {
-  required String titulo,
-  String? subtitulo,
+  required String Function(Textos textos) titulo,
+  String Function(Textos textos)? subtitulo,
   required WidgetBuilder conteudo,
 }) {
   final navegador = Navigator.of(context);
@@ -23,7 +24,7 @@ Future<void> abrirFolha(
         from: context,
         to: navegador.context,
       ),
-      barrierLabel: context.textos.fechar,
+      rotulo: context.textos.fechar,
       builder: (context) =>
           Folha(titulo: titulo, subtitulo: subtitulo, conteudo: conteudo),
     ),
@@ -32,16 +33,18 @@ Future<void> abrirFolha(
 
 const _cantos = BorderRadius.vertical(top: Radius.circular(26));
 
-/// A rota da folha. O fundo quem pinta é a própria [Folha], e o véu é
-/// trocado por ela: assim os dois acompanham o tema quando ele muda com a
-/// folha aberta (os ajustes trocam o tema de dentro de uma folha).
+/// A rota da folha. O fundo quem pinta é a própria [Folha], e o véu (a cor
+/// e o rótulo que o leitor de tela fala nele) é trocado por ela: assim
+/// acompanham o tema e o idioma quando eles mudam com a folha aberta (os
+/// ajustes mudam os dois de dentro de uma folha).
 class _RotaFolha extends ModalBottomSheetRoute<void> {
   _RotaFolha({
     required Color veu,
+    required String rotulo,
     required super.builder,
     super.capturedThemes,
-    super.barrierLabel,
   }) : _veu = veu,
+       _rotulo = rotulo,
        super(
          isScrollControlled: true,
          useSafeArea: true,
@@ -52,19 +55,25 @@ class _RotaFolha extends ModalBottomSheetRoute<void> {
        );
 
   Color _veu;
+  String _rotulo;
 
   @override
   Color get barrierColor => _veu;
 
-  void trocarVeu(Color veu) {
-    if (veu == _veu) return;
+  @override
+  String get barrierLabel => _rotulo;
+
+  void trocarVeu(Color veu, String rotulo) {
+    if (veu == _veu && rotulo == _rotulo) return;
     _veu = veu;
+    _rotulo = rotulo;
     changedInternalState();
   }
 }
 
 /// Moldura comum das folhas: alça, título e o conteúdo, que rola se não
-/// couber.
+/// couber. O título e o subtítulo saem dos textos a cada desenho: trocar o
+/// idioma nos ajustes, com a folha aberta, traduz também o título dela.
 class Folha extends StatelessWidget {
   const Folha({
     super.key,
@@ -73,18 +82,20 @@ class Folha extends StatelessWidget {
     required this.conteudo,
   });
 
-  final String titulo;
-  final String? subtitulo;
+  final String Function(Textos textos) titulo;
+  final String Function(Textos textos)? subtitulo;
   final WidgetBuilder conteudo;
 
   @override
   Widget build(BuildContext context) {
     final cores = context.cores;
+    final fechar = context.textos.fechar;
     final rota = ModalRoute.of(context);
-    if (rota is _RotaFolha && rota.barrierColor != cores.veu) {
+    if (rota is _RotaFolha &&
+        (rota.barrierColor != cores.veu || rota.barrierLabel != fechar)) {
       // Não dá para mexer na rota no meio do build.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (rota.isActive) rota.trocarVeu(cores.veu);
+        if (rota.isActive) rota.trocarVeu(cores.veu, fechar);
       });
     }
     return DecoratedBox(
@@ -94,6 +105,9 @@ class Folha extends StatelessWidget {
   }
 
   Widget _moldura(BuildContext context, CoresOpenTuner cores) {
+    final textos = context.textos;
+    final titulo = this.titulo(textos);
+    final subtitulo = this.subtitulo?.call(textos);
     return Semantics(
       scopesRoute: true,
       namesRoute: true,
@@ -140,7 +154,7 @@ class Folha extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Text(
-                        subtitulo!,
+                        subtitulo,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,

@@ -26,13 +26,14 @@ Android primeiro, com distribuição global; iOS depois.
 
 ## O que vai fazer
 
-- Ukulele (e barítono), cavaquinho, violão de 6 e 7 cordas, viola caipira e baixo de 4, 5 e 6
-  cordas, cada um com as afinações mais usadas. A padrão vem escolhida.
+- Ukulele (e barítono), cavaquinho, violão e guitarra de 6 cordas, violão de 7 cordas, viola
+  caipira e baixo de 4, 5 e 6 cordas, cada um com as afinações mais usadas. A padrão vem escolhida.
 - Detecção automática da corda tocada, ou escolha manual tocando na corda.
 - O ponteiro corre na horizontal: à esquerda da linha do centro a corda está frouxa, à direita está
   apertada demais, na linha está afinada. O rastro rola para baixo e mostra como a afinação chegou lá.
 - Tema claro e escuro, notas em C D E ou Dó Ré Mi, referência do Lá ajustável.
-- No idioma do aparelho; quando o idioma não é suportado, em inglês.
+- No idioma do aparelho (ou no escolhido nos ajustes: português, inglês ou espanhol); quando o
+  idioma do aparelho não é suportado, em inglês.
 - Uma permissão só, a do microfone. O áudio não é gravado nem sai do aparelho.
 - **Nunca anúncios**, enquanto o projeto puder ser custeado e mantido na loja.
 

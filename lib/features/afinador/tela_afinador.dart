@@ -108,7 +108,7 @@ class _TelaAfinadorState extends State<TelaAfinador> {
     unawaited(
       abrirFolha(
         context,
-        titulo: context.textos.ajustes,
+        titulo: (textos) => textos.ajustes,
         conteudo: (_) =>
             ConteudoAjustes(ajustes: widget.ajustes, versao: widget.versao),
       ),
@@ -174,6 +174,7 @@ class _Topo extends StatelessWidget {
             toggled: controlador.auto,
             button: true,
             label: textos.autoDescricao,
+            onTap: () => controlador.definirAuto(!controlador.auto),
             excludeSemantics: true,
             child: InkWell(
               key: const Key('auto'),
@@ -463,9 +464,6 @@ class _BarraInferior extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cores = context.cores;
-    final textos = context.textos;
-    final instrumento = controlador.instrumento;
-    final notacao = controlador.ajustes.notacao;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: cores.superficie,
@@ -473,47 +471,60 @@ class _BarraInferior extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-        // Os dois botões com a mesma altura, a do mais alto.
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: _BotaoBarra(
-                  key: const Key('botao-instrumento'),
-                  rotulo: textos.instrumento,
-                  valor: nomeInstrumento(textos, instrumento.id),
-                  detalhe: quantidadeDeCordas(textos, instrumento),
-                  aoTocar: () => abrirFolha(
-                    context,
-                    titulo: textos.instrumento,
-                    conteudo: (_) =>
-                        ListaInstrumentos(controlador: controlador),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _BotaoBarra(
-                  key: const Key('botao-afinacao'),
-                  rotulo: textos.afinacao,
-                  valor: nomeAfinacao(textos, controlador.afinacao.id),
-                  detalhe: notasDaAfinacao(
-                    textos,
-                    controlador.afinacao,
-                    notacao,
-                  ),
-                  aoTocar: () => abrirFolha(
-                    context,
-                    titulo: textos.afinacao,
-                    subtitulo: nomeInstrumento(textos, instrumento.id),
-                    conteudo: (_) => ListaAfinacoes(controlador: controlador),
-                  ),
-                ),
-              ),
-            ],
-          ),
+        // A largura de cada botão é medida aqui, por fora do IntrinsicHeight
+        // (que não aceita LayoutBuilder dentro), para o nome decidir se cabe.
+        child: LayoutBuilder(
+          builder: (context, restricoes) {
+            final larguraBotao = (restricoes.maxWidth - _espacoEntreBotoes) / 2;
+            return _botoes(context, larguraBotao);
+          },
         ),
+      ),
+    );
+  }
+
+  static const _espacoEntreBotoes = 10.0;
+
+  Widget _botoes(BuildContext context, double larguraBotao) {
+    final textos = context.textos;
+    final instrumento = controlador.instrumento;
+    final notacao = controlador.ajustes.notacao;
+    // Os dois botões com a mesma altura, a do mais alto.
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _BotaoBarra(
+              key: const Key('botao-instrumento'),
+              largura: larguraBotao,
+              rotulo: textos.instrumento,
+              valor: nomeInstrumento(textos, instrumento.id),
+              detalhe: quantidadeDeCordas(textos, instrumento),
+              aoTocar: () => abrirFolha(
+                context,
+                titulo: (textos) => textos.instrumento,
+                conteudo: (_) => ListaInstrumentos(controlador: controlador),
+              ),
+            ),
+          ),
+          const SizedBox(width: _espacoEntreBotoes),
+          Expanded(
+            child: _BotaoBarra(
+              key: const Key('botao-afinacao'),
+              largura: larguraBotao,
+              rotulo: textos.afinacao,
+              valor: nomeAfinacao(textos, controlador.afinacao.id),
+              detalhe: notasDaAfinacao(textos, controlador.afinacao, notacao),
+              aoTocar: () => abrirFolha(
+                context,
+                titulo: (textos) => textos.afinacao,
+                subtitulo: (textos) => nomeInstrumento(textos, instrumento.id),
+                conteudo: (_) => ListaAfinacoes(controlador: controlador),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -523,11 +534,62 @@ class _BarraInferior extends StatelessWidget {
 class _BotaoBarra extends StatelessWidget {
   const _BotaoBarra({
     super.key,
+    required this.largura,
     required this.rotulo,
     required this.valor,
     required this.detalhe,
     required this.aoTocar,
   });
+
+  /// Largura do botão inteiro, medida pela barra.
+  final double largura;
+
+  // Medidas internas do botão: o que sobra para o texto é a largura menos
+  // os recuos e a seta.
+  static const _recuoEsquerdo = 14.0;
+  static const _recuoDireito = 8.0;
+  static const _espacoSeta = 4.0;
+  static const _tamanhoSeta = 24.0;
+
+  /// O nome encolhe até 85% do tamanho para caber numa linha; menos que isso
+  /// anularia o tamanho de texto pedido na acessibilidade, e ele quebra em
+  /// duas linhas no lugar.
+  static const _menorEscalaDoValor = 0.85;
+
+  Widget _valor(BuildContext context, CoresOpenTuner cores) {
+    final estilo = TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w800,
+      color: cores.texto,
+    );
+    final disponivel =
+        largura - _recuoEsquerdo - _recuoDireito - _espacoSeta - _tamanhoSeta;
+    final pintor = TextPainter(
+      text: TextSpan(text: valor, style: estilo),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    final necessario = pintor.width;
+    pintor.dispose();
+    if (necessario <= disponivel) {
+      return Text(valor, maxLines: 1, style: estilo);
+    }
+    if (necessario * _menorEscalaDoValor <= disponivel) {
+      // Encolhe um pouco para caber numa linha ("Violão / Guitarra").
+      return Text(
+        valor,
+        maxLines: 1,
+        style: estilo.copyWith(fontSize: 16 * disponivel / necessario),
+      );
+    }
+    return Text(
+      valor,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: estilo,
+    );
+  }
 
   final String rotulo;
   final String valor;
@@ -544,7 +606,12 @@ class _BotaoBarra extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         onTap: aoTocar,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
+          padding: const EdgeInsets.fromLTRB(
+            _recuoEsquerdo,
+            8,
+            _recuoDireito,
+            8,
+          ),
           child: Row(
             children: [
               Expanded(
@@ -564,16 +631,7 @@ class _BotaoBarra extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 1),
-                    Text(
-                      valor,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: cores.texto,
-                      ),
-                    ),
+                    _valor(context, cores),
                     Text(
                       detalhe,
                       maxLines: 1,
@@ -587,10 +645,10 @@ class _BotaoBarra extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: _espacoSeta),
               Icon(
                 Icons.keyboard_arrow_up_rounded,
-                size: 24,
+                size: _tamanhoSeta,
                 color: cores.accent,
               ),
             ],

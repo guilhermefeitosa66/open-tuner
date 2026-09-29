@@ -76,5 +76,12 @@
   "solfejoB": "Si",
   "esperandoCorda": "Esperando una cuerda",
   "frequenciaHz": "{frequencia} Hz",
-  "notaAlvo": "Nota objetivo {nota}"
+  "notaAlvo": "Nota objetivo {nota}",
+  "recomecar": "Reiniciar",
+  "recomecarDescricao": "Borrar las cuerdas afinadas",
+  "idioma": "Idioma",
+  "idiomaSistema": "Idioma del sistema",
+  "nomeIdiomaPt": "Português (Brasil)",
+  "nomeIdiomaEn": "English",
+  "nomeIdiomaEs": "Español"
 }

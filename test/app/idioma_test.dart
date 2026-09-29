@@ -40,4 +40,12 @@ void main() {
       expect(resolver(const []), const Locale('en'));
     });
   });
+
+  test('o seletor dos ajustes tem o idioma do aparelho e todos os do app', () {
+    expect(opcoesIdioma.first.codigo, isNull);
+    expect(
+      opcoesIdioma.skip(1).map((opcao) => opcao.codigo).toSet(),
+      idiomasSuportados.map((idioma) => idioma.languageCode).toSet(),
+    );
+  });
 }

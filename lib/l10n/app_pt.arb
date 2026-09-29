@@ -40,12 +40,12 @@
   "permissaoNegada": "O acesso ao microfone está desligado. Ligue nas configurações do sistema para afinar.",
   "abrirConfiguracoes": "Abrir configurações",
   "grupoUkuleleCavaquinho": "Ukulele e cavaquinho",
-  "grupoViolaoViola": "Violão e viola",
+  "grupoViolaoViola": "Violão, guitarra e viola",
   "grupoBaixo": "Baixo",
   "instrumentoUkulele": "Ukulele",
   "instrumentoUkuleleBaritono": "Ukulele barítono",
   "instrumentoCavaquinho": "Cavaquinho",
-  "instrumentoViolao": "Violão",
+  "instrumentoViolao": "Violão / Guitarra",
   "instrumentoViolao7": "Violão 7 cordas",
   "instrumentoViolaCaipira": "Viola caipira",
   "instrumentoBaixo": "Baixo",
@@ -76,5 +76,12 @@
   "solfejoB": "Si",
   "esperandoCorda": "Esperando uma corda",
   "frequenciaHz": "{frequencia} Hz",
-  "notaAlvo": "Nota alvo {nota}"
+  "notaAlvo": "Nota alvo {nota}",
+  "recomecar": "Recomeçar",
+  "recomecarDescricao": "Limpar as cordas afinadas",
+  "idioma": "Idioma",
+  "idiomaSistema": "Idioma do sistema",
+  "nomeIdiomaPt": "Português (Brasil)",
+  "nomeIdiomaEn": "English",
+  "nomeIdiomaEs": "Español"
 }

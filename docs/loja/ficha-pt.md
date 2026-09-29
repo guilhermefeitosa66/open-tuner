@@ -6,7 +6,7 @@ OpenTuner: Afinador
 
 ## Descrição curta (80)
 
-Afinador simples para ukulele, violão e baixo. Grátis, sem anúncios e offline.
+Afinador de ukulele, violão, guitarra e baixo. Grátis, sem anúncios e offline.
 
 ## Descrição completa (4000)
 
@@ -22,7 +22,7 @@ INSTRUMENTOS
 • Ukulele: padrão, sol grave (Low G), em Ré
 • Ukulele barítono
 • Cavaquinho: padrão, natural
-• Violão: padrão, Drop D, meio tom abaixo, um tom abaixo, DADGAD, Open G, Open D
+• Violão / Guitarra: padrão, Drop D, meio tom abaixo, um tom abaixo, DADGAD, Open G, Open D
 • Violão 7 cordas: sétima em Dó, sétima em Si
 • Viola caipira: cebolão em Mi, cebolão em Ré, rio abaixo
 • Baixo de 4, 5 e 6 cordas

@@ -222,7 +222,7 @@
   },
   "instrumentoViolao": "Guitar",
   "@instrumentoViolao": {
-    "description": "Instrument name: acoustic guitar"
+    "description": "Instrument name: 6-string acoustic and electric guitar (same tuning). In Portuguese both names are needed (\"violão\" is only the acoustic one); in English \"guitar\" already covers both"
   },
   "instrumentoViolao7": "7-string guitar",
   "@instrumentoViolao7": {
@@ -359,5 +359,33 @@
         "example": "E4"
       }
     }
+  },
+  "recomecar": "Start over",
+  "@recomecar": {
+    "description": "Button over the instrument head, shown when a string is marked as tuned: clears all the marks (e.g. to tune a second instrument)"
+  },
+  "recomecarDescricao": "Clear the tuned strings",
+  "@recomecarDescricao": {
+    "description": "Accessibility label of the start over button"
+  },
+  "idioma": "Language",
+  "@idioma": {
+    "description": "Settings: title of the app language section"
+  },
+  "idiomaSistema": "System language",
+  "@idiomaSistema": {
+    "description": "Settings: language option that follows the device language"
+  },
+  "nomeIdiomaPt": "Português (Brasil)",
+  "@nomeIdiomaPt": {
+    "description": "Name of the Portuguese language in Portuguese itself. Do not translate: the same in every file"
+  },
+  "nomeIdiomaEn": "English",
+  "@nomeIdiomaEn": {
+    "description": "Name of the English language in English itself. Do not translate: the same in every file"
+  },
+  "nomeIdiomaEs": "Español",
+  "@nomeIdiomaEs": {
+    "description": "Name of the Spanish language in Spanish itself. Do not translate: the same in every file"
   }
 }

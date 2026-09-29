@@ -8,8 +8,8 @@ import '../../dados/preferencias.dart';
 import '../../dominio/estado_corda.dart';
 import '../afinador/desenhos.dart';
 
-/// Conteúdo da folha de ajustes (RF-17): tema, nome das notas, precisão,
-/// referência do Lá e tela ligada.
+/// Conteúdo da folha de ajustes (RF-17): tema, idioma, nome das notas,
+/// precisão, referência do Lá e tela ligada.
 class ConteudoAjustes extends StatelessWidget {
   const ConteudoAjustes({
     super.key,
@@ -43,6 +43,11 @@ class ConteudoAjustes extends StatelessWidget {
                 },
                 aoEscolher: (valor) => ajustes.tema = valor,
               ),
+            ),
+            const SizedBox(height: 18),
+            _Secao(
+              titulo: textos.idioma,
+              child: _SeletorIdioma(ajustes: ajustes),
             ),
             const SizedBox(height: 18),
             _Secao(
@@ -186,6 +191,71 @@ class _Segmentos<T> extends StatelessWidget {
   }
 }
 
+/// O seletor de idioma: o do aparelho ou um dos idiomas do app, com a
+/// bandeira e o nome na própria língua.
+class _SeletorIdioma extends StatelessWidget {
+  const _SeletorIdioma({required this.ajustes});
+
+  final Ajustes ajustes;
+
+  @override
+  Widget build(BuildContext context) {
+    final cores = context.cores;
+    final textos = context.textos;
+    final estilo = TextStyle(
+      fontSize: 15,
+      fontWeight: FontWeight.w700,
+      color: cores.texto,
+    );
+
+    Widget opcao(OpcaoIdioma opcao) => Row(
+      children: [
+        ExcludeSemantics(
+          child: Text(opcao.bandeira, style: const TextStyle(fontSize: 20)),
+        ),
+        const SizedBox(width: 12),
+        Flexible(
+          child: Text(
+            nomeIdioma(textos, opcao.codigo),
+            style: estilo,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: cores.superficieAlta,
+        borderRadius: BorderRadius.circular(13),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String?>(
+          key: const Key('idioma'),
+          value: ajustes.idioma,
+          isExpanded: true,
+          itemHeight: 52,
+          borderRadius: BorderRadius.circular(13),
+          dropdownColor: cores.superficie,
+          iconEnabledColor: cores.accent,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded),
+          items: [
+            for (final item in opcoesIdioma)
+              DropdownMenuItem<String?>(
+                key: Key('idioma-${item.codigo ?? 'sistema'}'),
+                value: item.codigo,
+                child: opcao(item),
+              ),
+          ],
+          onChanged: (codigo) => ajustes.idioma = codigo,
+        ),
+      ),
+    );
+  }
+}
+
 class _ReferenciaLa extends StatelessWidget {
   const _ReferenciaLa({required this.ajustes});
 
@@ -205,6 +275,7 @@ class _ReferenciaLa extends StatelessWidget {
           button: true,
           enabled: ativo,
           label: rotulo,
+          onTap: ativo ? () => ajustes.a4 = ajustes.a4 + passo : null,
           excludeSemantics: true,
           child: Material(
             color: cores.superficieAlta,

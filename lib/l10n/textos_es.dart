@@ -271,4 +271,25 @@ class TextosEs extends Textos {
   String notaAlvo(String nota) {
     return 'Nota objetivo $nota';
   }
+
+  @override
+  String get recomecar => 'Reiniciar';
+
+  @override
+  String get recomecarDescricao => 'Borrar las cuerdas afinadas';
+
+  @override
+  String get idioma => 'Idioma';
+
+  @override
+  String get idiomaSistema => 'Idioma del sistema';
+
+  @override
+  String get nomeIdiomaPt => 'Português (Brasil)';
+
+  @override
+  String get nomeIdiomaEn => 'English';
+
+  @override
+  String get nomeIdiomaEs => 'Español';
 }

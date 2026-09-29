@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:open_tuner/audio/fonte_audio.dart';
 import 'package:open_tuner/dominio/estado_corda.dart';
@@ -9,6 +10,7 @@ import 'package:open_tuner/features/afinador/folhas.dart';
 import 'package:open_tuner/features/afinador/grafico.dart';
 
 import '../apoio/abrir_app.dart';
+import '../apoio/fontes.dart';
 import '../apoio/fonte_audio_falsa.dart';
 
 /// E4, a terceira corda do ukulele padrão (G4 C4 E4 A4).
@@ -490,6 +492,82 @@ void main() {
       expect(app.tocador.avisosDeAfinada, 2);
     });
 
+    testWidgets('Recomeçar aparece com uma corda marcada e limpa as marcas', (
+      tester,
+    ) async {
+      final app = await abrirApp(tester);
+      expect(find.byKey(const Key('recomecar')), findsNothing);
+
+      app.fonte.frequencia = e4;
+      await esperar(tester, const Duration(milliseconds: 1500));
+      expect(find.byKey(const Key('selo-2')), findsOneWidget);
+      expect(find.byKey(const Key('recomecar')), findsOneWidget);
+      expect(find.text('Recomeçar'), findsOneWidget);
+      // Rótulo com o texto visível, a dica e a ação de toque (Voice Access,
+      // Acesso com interruptor); pelo menos 48 dp de altura.
+      expect(
+        tester.getSemantics(find.byKey(const Key('recomecar'))),
+        containsSemantics(
+          label: 'Recomeçar',
+          hint: 'Limpar as cordas afinadas',
+          isButton: true,
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getRect(find.byKey(const Key('recomecar'))).height,
+        greaterThanOrEqualTo(48),
+      );
+      expect(
+        tester.getSemantics(find.byKey(const Key('corda-0'))),
+        containsSemantics(isButton: true, hasTapAction: true),
+      );
+      expect(
+        tester.getSemantics(find.byKey(const Key('auto'))),
+        containsSemantics(hasTapAction: true),
+      );
+
+      // O instrumento seguinte: as marcas somem, o botão também.
+      app.fonte.frequencia = null;
+      await esperar(tester, const Duration(milliseconds: 400));
+      await tester.tap(find.byKey(const Key('recomecar')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('selo-2')), findsNothing);
+      expect(find.byKey(const Key('recomecar')), findsNothing);
+
+      // E a corda afinada ganha a marca, o anel e o aviso de novo.
+      app.fonte.frequencia = e4;
+      await esperar(tester, const Duration(milliseconds: 1500));
+      expect(find.byKey(const Key('selo-2')), findsOneWidget);
+      expect(app.tocador.avisosDeAfinada, 2);
+    });
+
+    testWidgets('Recomeçar com a corda ainda soando não a marca de novo', (
+      tester,
+    ) async {
+      final app = await abrirApp(tester);
+      app.fonte
+        ..frequencia = e4
+        ..amplitude = 0.4;
+      await esperar(tester, const Duration(milliseconds: 1500));
+      expect(find.byKey(const Key('selo-2')), findsOneWidget);
+      expect(app.tocador.avisosDeAfinada, 1);
+
+      // A corda continua soando, afinada, quando o botão é tocado.
+      app.fonte.amplitude = 0.2;
+      await tester.tap(find.byKey(const Key('recomecar')));
+      await esperar(tester, const Duration(milliseconds: 1500));
+      expect(find.byKey(const Key('selo-2')), findsNothing);
+      expect(app.tocador.avisosDeAfinada, 1);
+      expect(app.vibracoes, 1);
+
+      // Uma palhetada nova, sim, conta.
+      app.fonte.amplitude = 0.5;
+      await esperar(tester, const Duration(milliseconds: 1500));
+      expect(find.byKey(const Key('selo-2')), findsOneWidget);
+      expect(app.tocador.avisosDeAfinada, 2);
+    });
+
     testWidgets('a corda que sai da nota e volta avisa de novo', (
       tester,
     ) async {
@@ -588,12 +666,14 @@ void main() {
       await tester.tap(find.byKey(const Key('botao-instrumento')));
       await tester.pumpAndSettle();
       expect(find.text('UKULELE E CAVAQUINHO'), findsOneWidget);
+      expect(find.text('VIOLÃO, GUITARRA E VIOLA'), findsOneWidget);
       expect(find.text('BAIXO'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('instrumento-violao')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Violão'), findsOneWidget);
+      // Violão e guitarra elétrica: a mesma afinação.
+      expect(find.text('Violão / Guitarra'), findsOneWidget);
       expect(find.text('6 cordas'), findsOneWidget);
       expect(find.text('Padrão'), findsOneWidget);
       expect(find.text('E A D G B E'), findsOneWidget);
@@ -619,6 +699,57 @@ void main() {
 
       expect(find.text('5 pares'), findsOneWidget);
       expect(find.bySemanticsLabel('Par B2'), findsOneWidget);
+    });
+
+    testWidgets('o idioma escolhido nos ajustes vale na hora e fica guardado', (
+      tester,
+    ) async {
+      final app = await abrirApp(tester);
+      expect(find.text('Toque qualquer corda para começar'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('abrir-ajustes')));
+      await tester.pumpAndSettle();
+      expect(find.text('Idioma'), findsOneWidget);
+      expect(find.text('Idioma do sistema'), findsOneWidget);
+
+      // O seletor mostra todos os idiomas do app, cada um na própria língua.
+      await tester.tap(find.byKey(const Key('idioma')));
+      await tester.pumpAndSettle();
+      for (final nome in ['Português (Brasil)', 'English', 'Español']) {
+        expect(find.text(nome), findsWidgets);
+      }
+      await tester.tap(find.byKey(const Key('idioma-en')).last);
+      await tester.pumpAndSettle();
+
+      expect(app.preferencias.getString('idioma'), 'en');
+      expect(find.text('Settings'), findsOneWidget);
+      // Até o véu da folha, que o leitor de tela fala, troca de idioma.
+      expect(
+        ModalRoute.of(tester.element(find.byType(Folha)))!.barrierLabel,
+        'Close',
+      );
+      expect(find.text('Language'), findsOneWidget);
+      expect(find.text('Play any string to start'), findsOneWidget);
+
+      // De volta ao idioma do aparelho (português, no teste).
+      await tester.tap(find.byKey(const Key('idioma')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('idioma-sistema')).last);
+      await tester.pumpAndSettle();
+      expect(app.preferencias.getString('idioma'), isNull);
+      expect(find.text('Toque qualquer corda para começar'), findsOneWidget);
+    });
+
+    testWidgets('abre no idioma guardado', (tester) async {
+      await abrirApp(tester, preferencias: {'idioma': 'es'});
+      expect(find.text('Toca cualquier cuerda para empezar'), findsOneWidget);
+    });
+
+    testWidgets('um idioma guardado que o app não tem segue o aparelho', (
+      tester,
+    ) async {
+      await abrirApp(tester, preferencias: {'idioma': 'fr'});
+      expect(find.text('Toque qualquer corda para começar'), findsOneWidget);
     });
 
     testWidgets('os ajustes trocam o tema e ficam guardados', (tester) async {
@@ -809,6 +940,32 @@ void main() {
   });
 
   group('telas de tamanhos diferentes', () {
+    for (final escala in const [1.0, 1.3, 2.0]) {
+      testWidgets('o nome "Violão / Guitarra" cabe inteiro na barra, sem '
+          'desfazer o texto a ${(escala * 100).round()}%', (tester) async {
+        await carregarFontesDoApp(tester);
+        tester.platformDispatcher.textScaleFactorTestValue = escala;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        await abrirApp(
+          tester,
+          tela: const Size(360, 640),
+          preferencias: {'instrumento': 'violao'},
+        );
+        final paragrafo = tester.renderObject<RenderParagraph>(
+          find.text('Violão / Guitarra'),
+        );
+        // Inteiro (sem reticências) até 130%, como o projeto garante (a 200%,
+        // numa tela de 360, nem "Guitarra" sozinha cabe em meia barra) e, no
+        // máximo, 15% menor que o tamanho pedido: quando não cabe assim,
+        // quebra em duas linhas, em vez de desfazer o texto grande.
+        if (escala <= 1.3) expect(paragrafo.didExceedMaxLines, isFalse);
+        final tamanho = paragrafo.textScaler.scale(
+          (paragrafo.text as TextSpan).style!.fontSize!,
+        );
+        expect(tamanho, greaterThanOrEqualTo(16 * escala * 0.85 - 0.01));
+      });
+    }
+
     for (final tela in const [Size(360, 640), Size(430, 932), Size(360, 780)]) {
       testWidgets('cabe em ${tela.width.toInt()} × ${tela.height.toInt()} '
           'com texto a 130%', (tester) async {

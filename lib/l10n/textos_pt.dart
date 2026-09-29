@@ -158,7 +158,7 @@ class TextosPt extends Textos {
   String get grupoUkuleleCavaquinho => 'Ukulele e cavaquinho';
 
   @override
-  String get grupoViolaoViola => 'Violão e viola';
+  String get grupoViolaoViola => 'Violão, guitarra e viola';
 
   @override
   String get grupoBaixo => 'Baixo';
@@ -173,7 +173,7 @@ class TextosPt extends Textos {
   String get instrumentoCavaquinho => 'Cavaquinho';
 
   @override
-  String get instrumentoViolao => 'Violão';
+  String get instrumentoViolao => 'Violão / Guitarra';
 
   @override
   String get instrumentoViolao7 => 'Violão 7 cordas';
@@ -271,4 +271,25 @@ class TextosPt extends Textos {
   String notaAlvo(String nota) {
     return 'Nota alvo $nota';
   }
+
+  @override
+  String get recomecar => 'Recomeçar';
+
+  @override
+  String get recomecarDescricao => 'Limpar as cordas afinadas';
+
+  @override
+  String get idioma => 'Idioma';
+
+  @override
+  String get idiomaSistema => 'Idioma do sistema';
+
+  @override
+  String get nomeIdiomaPt => 'Português (Brasil)';
+
+  @override
+  String get nomeIdiomaEn => 'English';
+
+  @override
+  String get nomeIdiomaEs => 'Español';
 }

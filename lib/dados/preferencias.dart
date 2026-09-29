@@ -36,6 +36,7 @@ class Preferencias {
   static const _chavePrecisao = 'precisao';
   static const _chaveA4 = 'a4';
   static const _chaveTelaLigada = 'telaLigada';
+  static const _chaveIdioma = 'idioma';
 
   /// Id do instrumento, ou null na primeira abertura.
   String? get instrumento => _disco.getString(_chaveInstrumento);
@@ -72,6 +73,11 @@ class Preferencias {
   bool get telaLigada => _disco.getBool(_chaveTelaLigada) ?? true;
   set telaLigada(bool valor) =>
       unawaited(_disco.setBool(_chaveTelaLigada, valor));
+
+  /// Código do idioma escolhido nos ajustes ('pt', 'en', 'es'); null segue o
+  /// idioma do aparelho.
+  String? get idioma => _disco.getString(_chaveIdioma);
+  set idioma(String? codigo) => _gravarTexto(_chaveIdioma, codigo);
 
   T _lerEnum<T extends Enum>(List<T> valores, String chave, T padrao) {
     final nome = _disco.getString(chave);

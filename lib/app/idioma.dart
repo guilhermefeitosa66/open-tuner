@@ -11,6 +11,36 @@ const idiomasSuportados = [Locale('en'), Locale('pt'), Locale('es')];
 
 const _reserva = Locale('en');
 
+/// Uma opção do seletor de idioma dos ajustes: o código (null = o idioma do
+/// aparelho) e a bandeira que o acompanha.
+class OpcaoIdioma {
+  const OpcaoIdioma(this.codigo, this.bandeira);
+
+  final String? codigo;
+  final String bandeira;
+}
+
+/// As opções do seletor, na ordem em que aparecem: o idioma do aparelho e,
+/// depois, cada idioma com textos próprios, com a bandeira do país da
+/// variante que os textos usam (o português é o do Brasil).
+const opcoesIdioma = [
+  OpcaoIdioma(null, '🌐'),
+  OpcaoIdioma('pt', '🇧🇷'),
+  OpcaoIdioma('en', '🇺🇸'),
+  OpcaoIdioma('es', '🇪🇸'),
+];
+
+/// O nome de uma opção de idioma. Os idiomas aparecem na própria língua
+/// ("English", "Español"), que é como quem os fala os procura; só "Idioma do
+/// sistema" segue o idioma da tela.
+String nomeIdioma(Textos textos, String? codigo) => switch (codigo) {
+  null => textos.idiomaSistema,
+  'pt' => textos.nomeIdiomaPt,
+  'en' => textos.nomeIdiomaEn,
+  'es' => textos.nomeIdiomaEs,
+  _ => codigo,
+};
+
 /// Escolhe o idioma do app a partir dos idiomas preferidos do aparelho, na
 /// ordem do usuário.
 ///
