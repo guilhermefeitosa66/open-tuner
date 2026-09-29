@@ -102,8 +102,19 @@ segundo plano ou a tela apaga, e volta sozinha ao retornar.
 - precisão de **±1 cent** em sinal limpo de 30 Hz a 1.000 Hz;
 - rejeição de leitura quando a confiança do algoritmo ou a energia do sinal ficam abaixo do limiar,
   para que silêncio e ruído de fundo não movam o ponteiro;
-- suavização da leitura (mediana curta mais média exponencial) sem atraso perceptível: o ponteiro
-  precisa acompanhar a mão girando a tarraxa.
+- **harmônicos das cordas graves.** O microfone do celular quase não capta a fundamental das cordas
+  graves, e com o corpo do instrumento os harmônicos pares dominam: o YIN clássico lê 2× ou 3× a
+  nota (numa gravação real de violão, em alguns segundos do E2, 18 de 24 leituras). Duas defesas: o
+  período é o primeiro mergulho perto do mais fundo (limiar relativo, à maneira do McLeod), e não o
+  primeiro abaixo de um limiar fixo; e, entre o detector e a escolha da corda, a nota que está
+  soando é seguida no tempo e as leituras num múltiplo dela (ou numa sub-harmônica) voltam à
+  fundamental, decidindo pelas cordas da afinação, pela confiança, pela palhetada e pela
+  continuidade (`DobraHarmonicos`);
+- **o que a tela mostra passa por um filtro de Kalman** (desvio e velocidade), com o ruído da
+  leitura aprendido das próprias leituras e rejeição de leituras improváveis (`FiltroKalman`): com a
+  corda parada o ponteiro e o número ficam parados; com a tarraxa girando, o modelo de velocidade
+  acompanha a rampa sem atraso perceptível; o ataque da palhetada (10 a 15 cents agudo nos primeiros
+  0,15 s) não move o ponteiro de uma corda que já vinha soando.
 
 **RF-03 · Cents.** O desvio é `1200 × log2(f_medida / f_alvo)`, com `f_alvo` calculada pelo
 temperamento igual a partir da referência A4 (RF-17).
@@ -122,12 +133,17 @@ referência marcaria a si mesma como afinada. Ligar o Auto de novo devolve a esc
 ### O afinador
 
 **RF-06 · Indicador.** Um círculo no alto da área do gráfico mostra o desvio em cents, com sinal
-(−22, +11). A posição horizontal é proporcional ao desvio, de −50 cents na borda esquerda a +50 na
-direita, passando pela linha vertical do centro:
+(−22, +11). O número tem histerese: só muda quando o ponteiro se afasta dele mais de meio cent mais
+40% da tolerância (2,5 cents na precisão normal), então fica parado com a corda parada e anda em
+escada, numa direção só, com a tarraxa girando. A posição horizontal é proporcional ao desvio, de
+−50 cents na borda esquerda a +50 na direita, passando pela linha vertical do centro:
 
 - **à esquerda da linha:** corda frouxa, texto "Aperte a corda" e seta para cima;
 - **à direita da linha:** corda apertada demais, texto "Afrouxe a corda" e seta para baixo;
-- **na linha:** afinada, o número dá lugar a um ✓ e o texto passa a "Afinada".
+- **na linha:** afinada, o número dá lugar a um ✓, o texto passa a "Afinada", a nota alvo fica
+  verde e uma linha verde acende no centro do gráfico. O ✓ entra dentro da tolerância, depois do
+  ataque da palhetada, e só sai quando o desvio passa de 1,6 × a tolerância (8 cents na normal): não
+  pisca na borda.
 
 Além de ±50 cents o círculo fica preso na borda. Os símbolos ♭ e ♯ marcam os dois lados.
 
@@ -139,7 +155,7 @@ rejeitadas (silêncio) deixam um vão. O rastro esmaece perto da cabeça do inst
 
 | Estado | Condição | Claro | Escuro |
 |---|---|---|---|
-| Afinado | dentro da tolerância (±5 cents; ±2 na precisão fina) | `#2A7353` | `#5CC592` |
+| Afinado | o ✓ do RF-06 (entra em ±5 cents, ±2 na fina; sai além de 1,6 × isso) | `#2A7353` | `#5CC592` |
 | Perto | até 15 cents | `#8A6400` | `#E6C24F` |
 | Longe | mais de 15 cents | `#B04A1C` | `#EE8A52` |
 

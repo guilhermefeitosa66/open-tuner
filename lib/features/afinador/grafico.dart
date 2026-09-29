@@ -191,10 +191,9 @@ Direcao? direcaoDe(LeituraTela leitura) {
 
 /// Cents com sinal, como no protótipo: "−22", "+11" (sinal de menos de
 /// verdade, não hífen).
-String centsComSinal(double cents) {
-  final inteiro = cents.round();
-  if (inteiro == 0) return '0';
-  return '${inteiro < 0 ? '−' : '+'}${inteiro.abs()}';
+String centsComSinal(int cents) {
+  if (cents == 0) return '0';
+  return '${cents < 0 ? '−' : '+'}${cents.abs()}';
 }
 
 /// O indicador (RF-06): o círculo com os cents, a ponta embaixo e a pílula
@@ -260,7 +259,7 @@ class _Indicador extends StatelessWidget {
     final rotulo = switch (direcao) {
       null => textos.esperandoCorda,
       Direcao.afinada => textos.afinada,
-      _ => '${textos.desvioCents(leitura.cents.round())}, $textoPilula',
+      _ => '${textos.desvioCents(leitura.numero)}, $textoPilula',
     };
 
     final Widget conteudo = switch (direcao) {
@@ -271,7 +270,7 @@ class _Indicador extends StatelessWidget {
         espessura: 2.8,
       ),
       _ => Text(
-        centsComSinal(leitura.cents),
+        centsComSinal(leitura.numero),
         key: const Key('cents'),
         maxLines: 1,
         style: TextStyle(

@@ -16,9 +16,9 @@ import '../../dominio/detector.dart';
 import '../../dominio/dobra_harmonicos.dart';
 import '../../dominio/escolha_corda.dart';
 import '../../dominio/estado_corda.dart';
+import '../../dominio/filtro_kalman.dart';
 import '../../dominio/marcador_afinada.dart';
 import '../../dominio/nota.dart';
-import '../../dominio/suavizador.dart';
 import 'historico_leituras.dart';
 
 /// O que o indicador mostra agora.
@@ -29,6 +29,7 @@ class LeituraTela {
     required this.cents,
     required this.frequencia,
     required this.estado,
+    this.numero = 0,
     this.progresso = 0,
   });
 
@@ -43,8 +44,13 @@ class LeituraTela {
   /// Índice da corda alvo na afinação.
   final int? corda;
 
-  /// Desvio suavizado até a corda alvo.
+  /// Onde fica o ponteiro: o desvio até a corda alvo, em cents, já sem o
+  /// tremor da leitura.
   final double cents;
+
+  /// O número escrito no indicador, em cents inteiros. Tem histerese: fica
+  /// parado com a corda parada, e anda em escada com a tarraxa.
+  final int numero;
 
   /// Frequência medida, em Hz.
   final double frequencia;
@@ -64,10 +70,12 @@ class LeituraTela {
       outro.cents == cents &&
       outro.frequencia == frequencia &&
       outro.estado == estado &&
+      outro.numero == numero &&
       outro.progresso == progresso;
 
   @override
-  int get hashCode => Object.hash(corda, cents, frequencia, estado, progresso);
+  int get hashCode =>
+      Object.hash(corda, cents, frequencia, estado, numero, progresso);
 }
 
 /// Liga e desliga o "manter a tela ligada".
@@ -84,7 +92,9 @@ Future<void> _telaLigadaPeloPlugin(bool ligada) async {
 Future<void> _vibrarCurto() => HapticFeedback.vibrate();
 
 /// O afinador por trás da tela: escuta a [FonteAudio], detecta a frequência,
-/// escolhe a corda, suaviza, classifica e marca as cordas afinadas.
+/// leva de volta à fundamental as leituras num harmônico ([DobraHarmonicos]),
+/// escolhe a corda, filtra o que a tela mostra ([FiltroKalman]: ponteiro,
+/// número e marca de afinada) e marca as cordas afinadas.
 ///
 /// Três canais de aviso, para a tela redesenhar só o que mudou:
 /// - o próprio controlador: instrumento, afinação, Auto, corda alvo, cordas
@@ -149,7 +159,7 @@ class ControladorAfinador extends ChangeNotifier {
   late DetectorFrequencia _detector;
   late JanelaDeslizante _janela;
   late int _a4;
-  final Suavizador _suavizador = Suavizador();
+  late final FiltroKalman _filtro = FiltroKalman(precisao: ajustes.precisao);
   final MarcadorAfinada _marcador = MarcadorAfinada();
   final Set<int> _afinadas = {};
   EstadoPermissao _permissao = EstadoPermissao.desconhecida;
@@ -259,7 +269,7 @@ class ControladorAfinador extends ChangeNotifier {
     _escolha.fixar(indice);
     final duracao = _tocador.tocarCorda(frequenciaAlvo(indice));
     _ensurdecer(duracao);
-    _suavizador.reiniciar();
+    _filtro.reiniciar();
     _marcador.reiniciar();
     _dobra.reiniciar();
     _cordaDaLeitura = null;
@@ -275,6 +285,7 @@ class ControladorAfinador extends ChangeNotifier {
   }
 
   void _aoMudarAjustes() {
+    _filtro.precisao = ajustes.precisao;
     if (ajustes.a4 != _a4) {
       _a4 = ajustes.a4;
       final fixada = _auto ? null : _escolha.atual;
@@ -288,7 +299,7 @@ class ControladorAfinador extends ChangeNotifier {
   }
 
   void _recomecarLeitura() {
-    _suavizador.reiniciar();
+    _filtro.esquecerTudo();
     _janela.limpar();
     _marcador.reiniciar();
     _dobra.reiniciar();
@@ -409,11 +420,15 @@ class ControladorAfinador extends ChangeNotifier {
     // Leituras num harmônico (ou sub-harmônico) da nota que está soando
     // voltam à fundamental; a dobra precisa de todas as análises, com a
     // energia, para seguir a nota e reconhecer a palhetada.
-    final corrigida = _dobra.corrigir(medida, rms: _rms(janela));
+    final rms = _rms(janela);
+    final corrigida = _dobra.corrigir(medida, rms: rms);
     if (corrigida == null) {
+      // O filtro também precisa das análises sem leitura: é a energia delas
+      // que marca a palhetada seguinte.
+      _filtro.adicionar(tempo: _tempo, cents: null, rms: rms);
       _aoSilenciar();
     } else {
-      _aoOuvir(corrigida.frequencia);
+      _aoOuvir(corrigida.frequencia, rms);
     }
   }
 
@@ -444,7 +459,7 @@ class ControladorAfinador extends ChangeNotifier {
     );
     if (!leitura.value.ehOciosa && _tempo - _ultimoSom >= tempoParaOcioso) {
       leitura.value = LeituraTela.ociosa;
-      _suavizador.reiniciar();
+      _filtro.reiniciar();
     }
     if (_afinadas.isNotEmpty && _tempo - _ultimoSom >= tempoParaLimparMarcas) {
       _afinadas.clear();
@@ -452,21 +467,30 @@ class ControladorAfinador extends ChangeNotifier {
     }
   }
 
-  void _aoOuvir(double frequencia) {
+  void _aoOuvir(double frequencia, double rms) {
     _ultimoSom = _tempo;
     final anterior = _escolha.atual;
     final corda = _escolha.escolher(frequencia);
-    if (corda != _cordaDaLeitura) {
+    final cordaNova = corda != _cordaDaLeitura;
+    if (cordaNova) {
       _cordaDaLeitura = corda;
-      _suavizador.reiniciar();
       _marcador.reiniciar();
     }
-    final cents = _suavizador.adicionar(_escolha.cents(frequencia, corda));
-    final estado = classificar(cents, ajustes.precisao);
+    final exibicao = _filtro.adicionar(
+      tempo: _tempo,
+      cents: _escolha.cents(frequencia, corda),
+      rms: rms,
+      cordaNova: cordaNova,
+    )!;
+    final cents = exibicao.ponteiro;
+    // A marca de afinada vem do filtro, com histerese: não pisca na borda da
+    // tolerância. Fora dela, a cor segue a distância do ponteiro.
+    final estado = exibicao.afinada
+        ? EstadoCorda.afinada
+        : (cents.abs() <= limitePerto ? EstadoCorda.perto : EstadoCorda.longe);
     historico.adicionar(cents);
 
-    // A frequência mostrada sai dos cents suavizados, para andar junto com
-    // o ponteiro. Num par da viola, a oitava de cima mede contra o dobro.
+    // A frequência mostrada sai do ponteiro, para andar junto com ele. Num par da viola, a oitava de cima mede contra o dobro.
     var alvo = frequenciaAlvo(corda);
     if (_instrumento.pares &&
         centsEntre(frequencia, alvo * 2).abs() <
@@ -489,6 +513,7 @@ class ControladorAfinador extends ChangeNotifier {
       cents: cents,
       frequencia: alvo * math.pow(2, cents / 1200),
       estado: estado,
+      numero: exibicao.numero,
       // Corda já marcada e ainda na nota: o indicador fica cheio.
       progresso: _afinadas.contains(corda) && estado == EstadoCorda.afinada
           ? 1

@@ -193,6 +193,37 @@ void main() {
       expect(app.tocador.avisosDeAfinada, 1);
     });
 
+    testWidgets('corda parada com tremor: o número fica parado', (
+      tester,
+    ) async {
+      final app = await abrirApp(tester);
+      // −12 cents, com a leitura tremendo ±3 a cada análise, como a corda
+      // de verdade no microfone do celular.
+      final numeros = <String>[];
+      for (var i = 0; i < 75; i++) {
+        app.fonte.frequencia = FonteAudioFalsa.desviada(
+          e4,
+          -12 + (i.isEven ? 3 : -3),
+        );
+        await tester.pump(const Duration(milliseconds: 40));
+        final texto = find.byKey(const Key('cents'));
+        if (i >= 25 && texto.evaluate().isNotEmpty) {
+          numeros.add(tester.widget<Text>(texto).data!);
+        }
+      }
+      expect(numeros, isNotEmpty);
+      var trocas = 0;
+      for (var i = 1; i < numeros.length; i++) {
+        if (numeros[i] != numeros[i - 1]) trocas++;
+      }
+      // Em 2 s de corda parada, no máximo uma troca (o número assentando).
+      expect(trocas, lessThanOrEqualTo(1), reason: '$numeros');
+      expect(
+        int.parse(numeros.last.replaceAll('−', '-')),
+        inInclusiveRange(-14, -10),
+      );
+    });
+
     testWidgets('as marcas somem ao trocar de afinação', (tester) async {
       final app = await abrirApp(tester);
       app.fonte.frequencia = e4;
