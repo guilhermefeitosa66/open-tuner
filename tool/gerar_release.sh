@@ -137,12 +137,12 @@ done
 (
   cd "$destino"
   if command -v sha256sum >/dev/null 2>&1; then
-    soma() { sha256sum -- "$@"; }
+    soma() { sha256sum "$@"; }
   else
-    soma() { shasum -a 256 -- "$@"; }
+    soma() { shasum -a 256 "$@"; }
   fi
-  soma *.apk >SHA256SUMS.txt
-  soma *.aab >SHA256SUMS-aab.txt
+  soma -- *.apk >SHA256SUMS.txt
+  soma -- *.aab >SHA256SUMS-aab.txt
 )
 
 # As notas vão com a impressão digital do certificado preenchida: é o que
