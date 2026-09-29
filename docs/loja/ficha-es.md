@@ -15,7 +15,7 @@ OpenTuner es un afinador de cuerdas que solo afina. Toca una cuerda y te dice si
 CÓMO LEERLO
 • A la izquierda de la línea central: la cuerda está floja. Ténsala.
 • A la derecha de la línea: está demasiado tensa. Aflójala.
-• Sobre la línea: afinada. Mantenla un segundo y la cuerda recibe un ✓ verde.
+• Sobre la línea: afinada. Un anillo verde se cierra alrededor del marcador, suena un aviso y la cuerda recibe un ✓ verde.
 El rastro debajo del marcador baja por la pantalla y muestra cómo llegaste a la nota.
 
 INSTRUMENTOS

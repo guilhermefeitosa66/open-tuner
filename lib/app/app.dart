@@ -11,7 +11,7 @@ import 'idioma.dart';
 import 'tema.dart';
 
 /// Versão mostrada nos ajustes. Acompanha o `version` do pubspec.
-const versaoApp = '0.1.0';
+const versaoApp = '1.0.0';
 
 /// Raiz do aplicativo. O tema segue o ajuste (Sistema, Claro ou Escuro). O
 /// idioma é o escolhido nos ajustes ou, por padrão, o do aparelho, com inglês

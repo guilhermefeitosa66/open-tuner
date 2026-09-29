@@ -418,8 +418,8 @@ anúncios, compras dentro do app.
 | 0.2 | Detector de frequência e escolha de corda, com a suíte de testes de sinais sintéticos. **Feito.** |
 | 0.3 | Captura do microfone e tela do afinador: indicador, rastro, nota alvo. **Feito.** |
 | 0.4 | Cabeça do instrumento, barra inferior, folhas de instrumento e afinação, memória. **Feito.** |
-| 0.5 | Ajustes, permissão, acessibilidade, fontes e ícone do app. **Feito; falta validar num aparelho.** |
-| 1.0 | Teste com instrumentos reais (ukulele, violão, baixo, viola), publicação na Play Store e no GitHub Releases. |
+| 0.5 | Ajustes, permissão, acessibilidade, fontes e ícone do app. **Feito; validado num Galaxy S25.** |
+| 1.0 | Teste com instrumentos reais (ukulele, violão, baixo, viola), publicação na Play Store e no GitHub Releases. **GitHub Releases: v1.0.0, testada com violão. Falta a Play Store e o teste com ukulele, baixo e viola.** |
 
 ## 9. Em aberto
 

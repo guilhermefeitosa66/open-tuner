@@ -15,7 +15,7 @@ OpenTuner is a string tuner that only tunes. Pluck a string and it tells you if 
 HOW TO READ IT
 • Left of the center line: the string is loose. Tighten it.
 • Right of the line: it is too tight. Loosen it.
-• On the line: in tune. Hold it for a second and the string gets a green check.
+• On the line: in tune. A green ring closes around the marker, a chime plays, and the string gets a green check.
 The trail below the marker scrolls down and shows how you got there.
 
 INSTRUMENTS

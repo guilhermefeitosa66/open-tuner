@@ -15,7 +15,7 @@ OpenTuner é um afinador de cordas que só afina. Toque uma corda e ele mostra s
 COMO LER
 • À esquerda da linha do centro: a corda está frouxa. Aperte.
 • À direita da linha: apertada demais. Afrouxe.
-• Na linha: afinada. Segure um segundo e a corda ganha um ✓ verde.
+• Na linha: afinada. Um anel verde fecha em volta do marcador, toca um aviso e a corda ganha um ✓ verde.
 O rastro embaixo do marcador rola para baixo e mostra o caminho até a nota.
 
 INSTRUMENTOS
