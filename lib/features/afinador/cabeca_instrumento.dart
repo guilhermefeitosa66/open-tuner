@@ -70,9 +70,9 @@ class GeometriaCabeca {
   }
 }
 
-/// A cabeça desenhada ([PintorCabeca]) e os botões das cordas por cima. Escuta o controlador:
-/// muda quando a corda alvo, as marcas ou a afinação mudam, não a cada
-/// leitura.
+/// A cabeça desenhada ([PintorCabeca]) e os botões das cordas por cima.
+/// Escuta o controlador: muda quando a corda alvo, as marcas ou a afinação
+/// mudam, não a cada leitura.
 class CabecaInstrumento extends StatelessWidget {
   const CabecaInstrumento({super.key, required this.controlador});
 

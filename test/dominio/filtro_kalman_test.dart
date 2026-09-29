@@ -188,10 +188,12 @@ void main() {
   test('a marca não aparece antes de o ataque de uma corda nova passar', () {
     final filtro = FiltroKalman();
     final exibicoes = passar(filtro, trecho(10, (_) => 0));
-    // tempoAtaque = 0,15 s: as análises em 0, 0,04, 0,08 e 0,12 s não têm ✓.
+    // tempoAtaque = 0,15 s: as análises em 0, 0,04, 0,08 e 0,12 s são do
+    // ataque (com ou sem palhetada reconhecida), e a marca pede três
+    // leituras assentadas depois dele.
     expect(
       [for (final e in exibicoes) e!.afinada],
-      [false, false, false, false, true, true, true, true, true, true],
+      [false, false, false, false, false, false, true, true, true, true],
     );
   });
 
@@ -420,6 +422,62 @@ void main() {
       }
     });
 
+    test('sem a palhetada reconhecida, o viés do ataque também não vira ✓', () {
+      // A nota fraca demais para contar como palhetada (RMS abaixo de 0,01,
+      // que o detector ainda lê): o filtro recomeça sem saber do ataque.
+      List<Analise> fraca(
+        double corda, {
+        double ruido = 0,
+        math.Random? aleatorio,
+      }) => [
+        for (final a in cordaNova(corda, ruido: ruido, aleatorio: aleatorio))
+          (cents: a.cents, rms: a.cents == null ? a.rms : 0.007),
+      ];
+      bool algumaMarca(List<Exibicao?> exibicoes) =>
+          exibicoes.any((e) => e?.afinada ?? false);
+      expect(algumaMarca(passar(FiltroKalman(), fraca(-7))), isFalse);
+      expect(
+        algumaMarca(passar(FiltroKalman(precisao: Precisao.fina), fraca(-3))),
+        isFalse,
+      );
+      for (var semente = 0; semente < 30; semente++) {
+        final exibicoes = passar(
+          FiltroKalman(),
+          fraca(-7.5, ruido: 1, aleatorio: math.Random(semente)),
+        );
+        expect(algumaMarca(exibicoes), isFalse, reason: 'semente $semente');
+      }
+
+      // O histórico de energia velho: a corda soava mais forte antes de o
+      // filtro reiniciar (o botão da corda deixa o afinador surdo, sem
+      // análises), e a palhetada seguinte não passa do RMS de antes.
+      List<Analise> palhetada() => [
+        ...trecho(4, (_) => -7.5 + 12, rms: 0.177),
+        ...trecho(75, (_) => -7.5, rms: 0.15),
+      ];
+      final filtro = FiltroKalman();
+      passar(filtro, trecho(30, (_) => -7.5, rms: 0.21));
+      filtro.reiniciar();
+      expect(algumaMarca(passar(filtro, palhetada(), inicio: 3.1)), isFalse);
+      // E a primeira análise depois de esquecer tudo, sem histórico.
+      filtro
+        ..esquecerTudo()
+        ..esquecerEnergia();
+      expect(algumaMarca(passar(filtro, palhetada(), inicio: 10)), isFalse);
+      // Esquecer a energia (o período surdo) também vale para uma corda que o
+      // filtro segue: a palhetada seguinte, mais fraca que o som de antes,
+      // conta.
+      passar(filtro, trecho(30, (_) => -7.5, rms: 0.21), inicio: 20);
+      filtro.esquecerEnergia();
+      final seguida = passar(filtro, [
+        ...trecho(3, (_) => -7.5 + 12, rms: 0.18),
+        ...trecho(20, (_) => -7.5, rms: 0.15),
+      ], inicio: 22);
+      for (final e in seguida) {
+        expect(e!.ponteiro, lessThan(-6), reason: '$e');
+      }
+    });
+
     /// Parada em [de] por 2 s, depois a tarraxa anda [velocidade] cents por
     /// segundo até [ate] e para.
     List<Analise> rampa(
@@ -565,6 +623,95 @@ void main() {
       }
     });
 
+    test('a marca acesa não atravessa a palhetada da corda reafinada muda '
+        'dentro da folga de saída', () {
+      // Uma corda nova nesses valores nunca ganharia a marca; a reafinada
+      // também não fica com ela (no máximo no ataque e nas três primeiras
+      // leituras assentadas, que decidem).
+      for (final (precisao, nova) in [
+        (Precisao.normal, 7.0),
+        (Precisao.normal, -7.5),
+        (Precisao.fina, 3.0),
+        (Precisao.fina, -3.0),
+      ]) {
+        final exibicoes = passar(
+          FiltroKalman(precisao: precisao),
+          reafinada(nova),
+        ).sublist(65);
+        expect(
+          exibicoes.skip(8).where((e) => e!.afinada),
+          isEmpty,
+          reason: '$precisao, reafinada em $nova',
+        );
+      }
+      // Tocada de novo ainda afinada, a marca fica, sem piscar.
+      for (final (precisao, nova) in [
+        (Precisao.normal, 1.0),
+        (Precisao.normal, -2.5),
+        (Precisao.fina, 0.5),
+      ]) {
+        final exibicoes = passar(
+          FiltroKalman(precisao: precisao),
+          reafinada(nova),
+        ).sublist(50);
+        expect(
+          exibicoes.where((e) => !e!.afinada),
+          isEmpty,
+          reason: '$precisao, tocada de novo em $nova',
+        );
+      }
+    });
+
+    test('as leituras de antes da palhetada não fazem a marca entrar', () {
+      // A nota morre com a corda chegando à nota (sem ✓, pela energia), a
+      // mão gira a tarraxa com a corda muda para logo fora da tolerância e
+      // toca de novo: as leituras afinadas de antes não entram na média.
+      for (final precisao in Precisao.values) {
+        final tolerancia = precisao.tolerancia;
+        for (final mudo in [2, 5, 10, 15]) {
+          for (final nova in [tolerancia + 1.5, -(tolerancia + 2)]) {
+            for (var semente = 0; semente < 10; semente++) {
+              final aleatorio = math.Random(semente);
+              double r() => 0.5 * gauss(aleatorio);
+              final exibicoes = passar(FiltroKalman(precisao: precisao), [
+                ...trecho(10, (_) => null, rms: 0.002),
+                for (var i = 0; i < 55; i++)
+                  (
+                    cents: (i < 30 ? 12.0 : 0.5) + r(),
+                    rms: 0.3 * math.exp(-i * intervalo / 0.5),
+                  ),
+                ...trecho(mudo, (_) => null, rms: 0.002),
+                for (var i = 0; i < 40; i++)
+                  (
+                    cents:
+                        nova + 12 * math.max(0, 1 - i * intervalo / 0.08) + r(),
+                    rms: i < 3 ? 0.3 : 0.25,
+                  ),
+              ]);
+              expect(
+                exibicoes.skip(65 + mudo).where((e) => e!.afinada),
+                isEmpty,
+                reason:
+                    '$precisao, $mudo análises muda, em $nova, '
+                    'semente $semente',
+              );
+            }
+          }
+        }
+      }
+    });
+
+    test('a marca acesa não atravessa o salto para dentro da folga', () {
+      // O ruído aprendido chega ao piso e o portão fica estreito: a leitura
+      // nova em 7 é rejeitada até o filtro saltar para ela.
+      final filtro = FiltroKalman();
+      passar(filtro, trecho(250, (_) => 0));
+      expect(filtro.atual!.afinada, isTrue);
+      final exibicoes = passar(filtro, trecho(50, (_) => 7), inicio: 10);
+      expect(exibicoes.last!.ponteiro, closeTo(7, 1));
+      expect(exibicoes.skip(8).where((e) => e!.afinada), isEmpty);
+    });
+
     test('o degrau entre palhetadas não vira velocidade', () {
       final exibicoes = passar(FiltroKalman(), reafinada(-12)).sublist(65);
       for (final e in exibicoes) {
@@ -587,6 +734,141 @@ void main() {
       expect(exibicoes.last!.afinada, isFalse);
       expect(exibicoes.last!.ponteiro, closeTo(9, 1));
     });
+  });
+
+  group('energia da nota', () {
+    test(
+      'o pico de uma nota forte não barra a marca da nota fraca seguinte',
+      () {
+        final filtro = FiltroKalman();
+        passar(filtro, [
+          ...trecho(5, (_) => null, rms: 0.002),
+          ...trecho(50, (_) => 0, rms: 0.35),
+        ]);
+        // O silêncio longo reinicia o filtro (no controlador), e a nota
+        // seguinte é tão fraca que nem conta como palhetada.
+        filtro.reiniciar();
+        final exibicoes = passar(filtro, [
+          ...trecho(75, (_) => null, rms: 0.002),
+          ...trecho(75, (_) => 1, rms: 0.0078),
+        ], inicio: 2.2);
+        expect(exibicoes.last!.afinada, isTrue);
+      },
+    );
+
+    test('o estalo reconhecido como palhetada não vira o pico da nota', () {
+      // Um toque no celular no meio da nota: duas análises com RMS 1,0 que
+      // o detector rejeita, e a corda continua soando em 0,13.
+      final exibicoes = passar(FiltroKalman(), [
+        ...trecho(5, (_) => null, rms: 0.002),
+        ...trecho(50, (_) => -12, rms: 0.13),
+        ...trecho(2, (_) => null, rms: 1),
+        ...trecho(100, (_) => 0.5, rms: 0.13),
+      ]);
+      expect(exibicoes.last!.afinada, isTrue);
+    });
+
+    test('o pico é o da nota sustentada, não o do estalo da palheta', () {
+      // Como no violão gravado: a primeira análise da palhetada vale umas
+      // oito vezes a nota sustentada, que 0,4 s depois ainda soa firme (a
+      // 12% do estalo, mas perto do próprio pico) com a corda afinada.
+      final exibicoes = passar(FiltroKalman(), [
+        ...trecho(5, (_) => null, rms: 0.002),
+        (cents: 14, rms: 0.46),
+        for (var i = 1; i < 25; i++)
+          (cents: 0.5, rms: 0.065 * math.exp(-i * intervalo / 2)),
+      ]);
+      expect(exibicoes.last!.afinada, isTrue);
+    });
+  });
+
+  test('numa rampa com a leitura ruidosa, a mediana das leituras apaga a '
+      'marca antes', () {
+    // Como na gravação real, na precisão fina: a leitura treme uns 4,5
+    // cents, o ✓ está aceso com a corda na nota e a tarraxa sobe além da
+    // tolerância. O desvio estimado fica para trás e segurava a marca na
+    // folga de saída; a mediana das últimas leituras a apaga antes.
+    int falsas(double margemMediana) {
+      var falsas = 0;
+      for (final velocidade in [20.0, 40.0, 80.0]) {
+        for (var semente = 0; semente < 30; semente++) {
+          final aleatorio = math.Random(semente);
+          final filtro = FiltroKalman(
+            precisao: Precisao.fina,
+            margemMediana: margemMediana,
+          );
+          passar(filtro, [
+            ...trecho(5, (_) => null, rms: 0.002),
+            ...trecho(100, (_) => 4.5 * gauss(aleatorio)),
+          ]);
+          for (var i = 0; i < 40; i++) {
+            final verdade = math.min(12, velocidade * i * intervalo).toDouble();
+            final e = filtro.adicionar(
+              tempo: (105 + i) * intervalo,
+              cents: verdade + 4.5 * gauss(aleatorio),
+              rms: 0.1,
+            )!;
+            if (verdade > 6 && e.afinada) falsas++;
+          }
+        }
+      }
+      return falsas;
+    }
+
+    expect(falsas(1), lessThan(falsas(double.infinity)));
+
+    // Com a corda parada dentro da tolerância e o mesmo ruído, a mediana
+    // não tira o ✓.
+    int semMarca(double margemMediana) {
+      var semMarca = 0;
+      for (var semente = 0; semente < 30; semente++) {
+        final aleatorio = math.Random(semente);
+        final exibicoes = passar(
+          FiltroKalman(precisao: Precisao.fina, margemMediana: margemMediana),
+          trecho(300, (_) => 1 + 4.5 * gauss(aleatorio)),
+        );
+        semMarca += exibicoes.skip(100).where((e) => !e!.afinada).length;
+      }
+      return semMarca;
+    }
+
+    expect(semMarca(1), semMarca(double.infinity));
+  });
+
+  test('parado fora da tolerância, o número não fica dentro dela', () {
+    // O ataque agudo traz o ponteiro por cima; a folga do ponteiro e a
+    // histerese do número não podem deixar escrito um número dentro da
+    // tolerância (sem o ✓) numa corda parada fora dela.
+    for (final (precisao, corda, ruido) in [
+      (Precisao.fina, -3.0, 0.0),
+      (Precisao.fina, -3.0, 1.0),
+      (Precisao.normal, -7.5, 1.0),
+      (Precisao.normal, -6, 0.0),
+    ]) {
+      final tolerancia = precisao.tolerancia;
+      for (var semente = 0; semente < 20; semente++) {
+        final aleatorio = math.Random(semente);
+        final exibicoes = passar(FiltroKalman(precisao: precisao), [
+          ...trecho(12, (_) => null, rms: 0.002),
+          for (var i = 0; i < 100; i++)
+            (
+              cents:
+                  corda +
+                  12 * math.max(0, 1 - i * intervalo / 0.12) +
+                  ruido * gauss(aleatorio),
+              rms: i < 3 ? 0.2 : 0.15,
+            ),
+        ]);
+        for (final e in exibicoes.skip(37)) {
+          if (e!.afinada) continue;
+          expect(
+            e.ponteiro.abs() > tolerancia && e.numero.abs() <= tolerancia,
+            isFalse,
+            reason: '$precisao, corda em $corda, semente $semente: $e',
+          );
+        }
+      }
+    }
   });
 
   test('na precisão fina o ✓ não pisca com o tremor na borda', () {

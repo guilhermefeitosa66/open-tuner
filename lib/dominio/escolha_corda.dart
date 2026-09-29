@@ -23,6 +23,7 @@ class EscolhaCorda {
   List<double> _alvos;
   int? _atual;
   bool _fixada = false;
+  bool _solta = false;
   int? _candidata;
   int _seguidas = 0;
 
@@ -47,8 +48,9 @@ class EscolhaCorda {
     }
 
     final maisProxima = _maisProxima(frequencia);
-    if (atual == null) {
+    if (atual == null || _solta) {
       _atual = maisProxima;
+      _solta = false;
       _zerarContagem();
       return maisProxima;
     }
@@ -85,12 +87,25 @@ class EscolhaCorda {
     RangeError.checkValidIndex(indice, _alvos, 'indice');
     _atual = indice;
     _fixada = true;
+    _solta = false;
     _zerarContagem();
   }
 
   /// Volta ao automático, mantendo a corda atual como ponto de partida.
   void liberar() {
     _fixada = false;
+    _solta = false;
+    _zerarContagem();
+  }
+
+  /// Modo automático: a próxima leitura escolhe a corda mais próxima direto,
+  /// sem a histerese, como a primeira. Depois de um silêncio, a corda que
+  /// soa não tem nada a ver com a de antes, e medida contra ela levaria o
+  /// ponteiro à borda até a troca. [atual] continua o mesmo até lá. No modo
+  /// manual não faz nada.
+  void soltar() {
+    if (_fixada) return;
+    _solta = true;
     _zerarContagem();
   }
 
@@ -101,6 +116,7 @@ class EscolhaCorda {
     _alvos = List.unmodifiable(alvos);
     _atual = null;
     _fixada = false;
+    _solta = false;
     _zerarContagem();
   }
 

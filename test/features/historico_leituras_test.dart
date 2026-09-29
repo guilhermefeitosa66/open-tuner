@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:open_tuner/dominio/estado_corda.dart';
 import 'package:open_tuner/features/afinador/historico_leituras.dart';
 
 void main() {
@@ -28,6 +29,18 @@ void main() {
     // Agora o 5 saiu: só silêncio.
     historico.adicionar(null);
     expect(avisos, 2);
+  });
+
+  test('guarda o estado de cada leitura, para a cor do rastro', () {
+    final historico = HistoricoLeituras(capacidade: 3)
+      ..adicionar(0, estado: EstadoCorda.afinada)
+      ..adicionar(null, estado: EstadoCorda.perto)
+      ..adicionar(12, estado: EstadoCorda.perto)
+      ..adicionar(20, estado: EstadoCorda.longe);
+    expect(
+      [for (var i = 0; i < 3; i++) historico.estado(i)],
+      [EstadoCorda.longe, EstadoCorda.perto, null],
+    );
   });
 
   test('limpar esvazia', () {

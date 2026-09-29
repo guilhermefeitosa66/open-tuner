@@ -1,16 +1,21 @@
 import 'package:flutter/foundation.dart';
 
-/// As últimas [capacidade] leituras em cents, a mais nova em `[0]`. Um null
-/// é uma leitura rejeitada (silêncio), que vira um vão no rastro.
+import '../../dominio/estado_corda.dart';
+
+/// As últimas [capacidade] leituras em cents, a mais nova em `[0]`, cada uma
+/// com o estado que o indicador mostrava nela (a cor do trecho do rastro).
+/// Um null é uma leitura rejeitada (silêncio), que vira um vão no rastro.
 ///
 /// Avisa quem escuta a cada leitura nova: é o que faz o rastro rolar, sem
 /// reconstruir widget nenhum.
 class HistoricoLeituras extends ChangeNotifier {
   HistoricoLeituras({this.capacidade = 80})
-    : _valores = List<double?>.filled(capacidade, null);
+    : _valores = List<double?>.filled(capacidade, null),
+      _estados = List<EstadoCorda?>.filled(capacidade, null);
 
   final int capacidade;
   final List<double?> _valores;
+  final List<EstadoCorda?> _estados;
 
   /// Posição da leitura mais nova em [_valores].
   int _inicio = 0;
@@ -29,13 +34,21 @@ class HistoricoLeituras extends ChangeNotifier {
     return _valores[(_inicio + indice) % capacidade];
   }
 
+  /// O estado da leitura de [indice] passos atrás; null num vão ou quando
+  /// ela veio sem estado.
+  EstadoCorda? estado(int indice) {
+    RangeError.checkValidIndex(indice, this, 'indice', _quantidade);
+    return _estados[(_inicio + indice) % capacidade];
+  }
+
   /// Todos os valores, do mais novo para o mais antigo.
   List<double?> get valores => [for (var i = 0; i < _quantidade; i++) this[i]];
 
-  void adicionar(double? cents) {
+  void adicionar(double? cents, {EstadoCorda? estado}) {
     _inicio = (_inicio - 1 + capacidade) % capacidade;
     if (_quantidade == capacidade && _valores[_inicio] != null) _naoNulas--;
     _valores[_inicio] = cents;
+    _estados[_inicio] = cents == null ? null : estado;
     if (_quantidade < capacidade) _quantidade++;
     if (cents != null) _naoNulas++;
     // Silêncio sobre silêncio: nada a redesenhar.

@@ -11,6 +11,7 @@ import '../../audio/fonte_audio.dart';
 import '../../audio/tocador.dart';
 import '../../dados/ajustes.dart';
 import '../../dados/preferencias.dart';
+import '../../dominio/estado_corda.dart';
 import '../ajustes/folha_ajustes.dart';
 import 'cabeca_instrumento.dart';
 import 'controlador_afinador.dart';
@@ -316,7 +317,6 @@ class _Grafico extends StatelessWidget {
               ),
               foregroundPainter: PintorRastro(
                 historico: controlador.historico,
-                precisao: controlador.ajustes.precisao,
                 corAfinado: cores.afinado,
                 corPerto: cores.perto,
                 corLonge: cores.longe,
@@ -366,11 +366,15 @@ class _Grafico extends StatelessWidget {
             child: RepaintBoundary(
               child: IndicadorDesvio(
                 leitura: controlador.leitura,
+                precisao: controlador.ajustes.precisao,
                 geometria: geometria,
               ),
             ),
           ),
-          _Anunciador(leitura: controlador.leitura),
+          _Anunciador(
+            leitura: controlador.leitura,
+            precisao: controlador.ajustes.precisao,
+          ),
         ],
       ],
     );
@@ -378,11 +382,16 @@ class _Grafico extends StatelessWidget {
 }
 
 /// Anuncia pelo leitor de tela o estado da corda (frouxa, apertada, afinada)
-/// só quando muda, e no máximo uma vez por segundo.
+/// só quando muda, e no máximo uma vez por segundo. A mudança que chega
+/// dentro desse segundo não se perde: quando ele acaba, o estado de então é
+/// conferido de novo (a exibição calma para de mudar com a corda parada, e
+/// nenhum aviso chegaria depois). Sem instrução (dentro da tolerância, ainda
+/// sem o ✓), nada é dito.
 class _Anunciador extends StatefulWidget {
-  const _Anunciador({required this.leitura});
+  const _Anunciador({required this.leitura, required this.precisao});
 
   final ValueListenable<LeituraTela> leitura;
+  final Precisao precisao;
 
   @override
   State<_Anunciador> createState() => _AnunciadorState();
@@ -391,7 +400,8 @@ class _Anunciador extends StatefulWidget {
 class _AnunciadorState extends State<_Anunciador> {
   static const _intervalo = Duration(seconds: 1);
 
-  final Stopwatch _desdeUltimo = Stopwatch();
+  /// Ativo durante o segundo depois de uma fala; ao acabar, confere de novo.
+  Timer? _espera;
   Direcao? _anunciada;
 
   @override
@@ -411,25 +421,26 @@ class _AnunciadorState extends State<_Anunciador> {
 
   @override
   void dispose() {
+    _espera?.cancel();
     widget.leitura.removeListener(_aoMudar);
     super.dispose();
   }
 
   void _aoMudar() {
     if (!mounted || !MediaQuery.of(context).accessibleNavigation) return;
-    final direcao = direcaoDe(widget.leitura.value);
-    if (direcao == null || direcao == _anunciada) return;
-    if (_desdeUltimo.isRunning && _desdeUltimo.elapsed < _intervalo) return;
-    _anunciada = direcao;
-    _desdeUltimo
-      ..reset()
-      ..start();
+    if (_espera?.isActive ?? false) return;
+    final direcao = direcaoDe(widget.leitura.value, widget.precisao);
+    if (direcao == _anunciada) return;
     final textos = context.textos;
     final mensagem = switch (direcao) {
       Direcao.apertar => textos.aperteACorda,
       Direcao.afrouxar => textos.afrouxeACorda,
       Direcao.afinada => textos.afinada,
+      Direcao.nenhuma || null => null,
     };
+    if (mensagem == null) return;
+    _anunciada = direcao;
+    _espera = Timer(_intervalo, _aoMudar);
     unawaited(
       SemanticsService.sendAnnouncement(
         View.of(context),

@@ -127,7 +127,13 @@ typedef _Leitura = ({double tempo, double cents, bool ataque, bool aceita});
 /// que o batimento de um par de cordas, que sobe e desce a energia várias
 /// vezes por segundo, renove a palhetada a cada ciclo e prenda o filtro na
 /// espera do ataque. Nos [tempoAtaque] segundos seguintes a corda soa mais
-/// aguda, pela tensão extra da deformação, e isso não é afinação.
+/// aguda, pela tensão extra da deformação, e isso não é afinação. Sem
+/// histórico de energia (a energia foi esquecida: o afinador ficou surdo), a
+/// primeira análise com som conta como palhetada. E uma corda que recomeça
+/// sem palhetada reconhecida, depois de mais de [tempoLacuna] sem leitura
+/// nenhuma, também começa no ataque: a nota fraca demais para a palhetada,
+/// ou mais fraca que o som de antes do período surdo, tem o ataque do mesmo
+/// jeito, e sem isso o viés dele entrava como leitura assentada.
 ///
 /// Numa corda que o filtro já segue, a mão que toca soltou a tarraxa: o
 /// estado vai até a palhetada, a velocidade volta a zero sem levar nada do
@@ -162,7 +168,9 @@ typedef _Leitura = ({double tempo, double cents, bool ataque, bool aceita});
 /// **O número** sai do ponteiro e só muda quando ele se afasta do número
 /// escrito por mais de meio cent mais [histereseNumero] × a tolerância:
 /// parado com a corda parada, e em escada, numa direção só, com a tarraxa
-/// girando.
+/// girando. Com o ponteiro fora da tolerância, o número também fica fora
+/// (arredondado para longe do zero): a histerese não deixa escrito "−2" na
+/// precisão fina com a corda parada em −3, sem o ✓.
 ///
 /// **A marca de afinada** é o que mais importa acertar: um ✓ falso é o pior
 /// erro. Ela se decide pelo desvio estimado, limitado às últimas três
@@ -170,10 +178,14 @@ typedef _Leitura = ({double tempo, double cents, bool ataque, bool aceita});
 /// ponto, ou ainda carrega o viés do ataque, as leituras o desmentem. Entra
 /// numa leitura aceita fora do ataque, passado o ataque desde o recomeço ou
 /// a palhetada, com esse desvio dentro de [entradaAfinada] × a tolerância,
-/// com pelo menos três leituras assentadas desde o recomeço e a média delas
-/// (até [leiturasParaSaltar]) também dentro, e com a energia ainda acima de
-/// [fracaoEnergia] do pico da última palhetada: a nota morrendo desafina e
-/// dá leituras enviesadas.
+/// com pelo menos três leituras assentadas desde o recomeço ou a palhetada
+/// e a média delas (até [leiturasParaSaltar]) também dentro, e com a energia
+/// ainda acima de [fracaoEnergia] do pico da nota: a nota morrendo desafina
+/// e dá leituras enviesadas. As leituras de antes da palhetada não contam (a
+/// tarraxa pode ter girado com a corda muda), e o pico é o maior RMS desde o
+/// fim do ataque: o estalo da palheta, ou um toque no celular reconhecido
+/// como palhetada, vale várias vezes o som sustentado, e com ele no pico a
+/// marca não entrava numa corda que ainda soava firme.
 ///
 /// Sai quando o desvio fica além da saída por [analisesSaida] análises
 /// aceitas seguidas (o desvio estimado vagueia um pouco, e sem essa espera a
@@ -183,12 +195,21 @@ typedef _Leitura = ({double tempo, double cents, bool ataque, bool aceita});
 /// assentadas passam todas da saída, do mesmo lado, por mais de meio desvio
 /// do ruído (a corda saiu da tolerância e o filtro ainda não chegou lá), ou
 /// quando duas leituras seguidas rejeitadas, concordando entre si, ficam do
-/// mesmo lado além da saída. A saída fica em [saidaAfinada] × a tolerância,
-/// mas nunca a menos de [faixaAfinada] desvios do ruído acima da entrada: na
-/// precisão fina com um microfone ruidoso, a faixa proporcional à
-/// tolerância é mais estreita que o vaivém do próprio desvio estimado. As
-/// frações seguem a [precisao]: ±5 cents na normal, ±2 na fina. Ao trocar a
-/// precisão, a marca acesa só fica se também entraria na nova.
+/// mesmo lado além da saída, ou quando a mediana das últimas
+/// [leiturasParaSaltar] leituras assentadas passa da saída por mais de
+/// [margemMediana] desvios do ruído: numa rampa com a leitura ruidosa, o
+/// desvio estimado fica para trás e a marca atravessava a folga junto com a
+/// tarraxa. A saída fica em [saidaAfinada] × a tolerância, mas nunca a menos
+/// de [faixaAfinada] desvios do ruído acima da entrada: na precisão fina com
+/// um microfone ruidoso, a faixa proporcional à tolerância é mais estreita
+/// que o vaivém do próprio desvio estimado. As frações seguem a [precisao]:
+/// ±5 cents na normal, ±2 na fina. Ao trocar a precisão, a marca acesa só
+/// fica se também entraria na nova. A palhetada e o salto também são uma
+/// medição nova: a marca acesa fica durante o ataque e, com três leituras
+/// assentadas novas, só continua se elas (a média e o desvio) cabem na
+/// metade de dentro da folga entre a entrada e a saída. Assim a corda
+/// reafinada muda para perto da saída não herda o ✓, e a tocada de novo sem
+/// mexer na tarraxa não o perde pelo vaivém da leitura.
 ///
 /// Deve receber todas as análises, em ordem, inclusive as rejeitadas pelo
 /// detector (cents null), com a energia de cada janela: é o que marca as
@@ -219,6 +240,7 @@ class FiltroKalman {
     this.faixaAfinada = 0.75,
     this.analisesSaida = 5,
     this.fracaoEnergia = 0.15,
+    this.margemMediana = 1,
   }) : assert(tempoResposta > 0, 'tempoResposta precisa ser positivo'),
        assert(ruidoInicial > 0, 'ruidoInicial precisa ser positivo'),
        assert(ruidoMinimo > 0, 'ruidoMinimo precisa ser positivo'),
@@ -314,8 +336,13 @@ class FiltroKalman {
   final int analisesSaida;
 
   /// A marca de afinada não entra com o RMS abaixo desta fração do pico da
-  /// última palhetada (0 desliga).
+  /// nota, depois do ataque (0 desliga).
   final double fracaoEnergia;
+
+  /// A marca de afinada sai quando a mediana das últimas leituras assentadas
+  /// passa da saída por mais deste tanto de desvios do ruído (infinito
+  /// desliga).
+  final double margemMediana;
 
   /// Quantas análises de RMS recentes a palhetada compara: ela passa
   /// [fatorPalhetada] vezes o menor e também o maior delas.
@@ -365,6 +392,12 @@ class FiltroKalman {
   final List<double> _rmsRecentes = [];
   bool _subindo = false;
   double _palhetada = double.negativeInfinity;
+
+  /// Instante da última leitura, aceita ou não: uma leitura depois de mais
+  /// de [tempoLacuna] sem nenhuma começa uma nota.
+  double _ultimaLeitura = double.negativeInfinity;
+
+  /// O maior RMS desde o fim do ataque da última palhetada.
   double _picoPalhetada = 0;
 
   /// Instante em que o filtro recomeçou (corda nova ou salto).
@@ -383,6 +416,10 @@ class FiltroKalman {
   double _tempoExibicao = 0;
   int? _numero;
   bool _afinada = false;
+
+  /// A marca acesa atravessou uma palhetada ou um salto e se decide de novo
+  /// com as próximas [_leiturasMarca] leituras assentadas.
+  bool _reavaliar = false;
   int _analisesFora = 0;
   Exibicao? _atual;
 
@@ -396,11 +433,7 @@ class FiltroKalman {
     if (!_afinada || estado == null) return;
     // A marca acesa na precisão anterior só fica se entraria na nova: senão
     // uma corda a 3 cents, afinada na normal, ficaria marcada na fina.
-    final entrada = entradaAfinada * nova.tolerancia;
-    if (_desvioMarca(estado).abs() <= entrada &&
-        _media(_assentadas).abs() <= entrada) {
-      return;
-    }
+    if (_dentroDaEntrada(estado, entradaAfinada * nova.tolerancia)) return;
     _afinada = false;
     final atual = _atual;
     if (atual != null) {
@@ -436,6 +469,7 @@ class FiltroKalman {
     _ponteiro = null;
     _numero = null;
     _afinada = false;
+    _reavaliar = false;
     _analisesFora = 0;
     _atual = null;
   }
@@ -448,12 +482,21 @@ class FiltroKalman {
     _esquecerTempo();
   }
 
+  /// Esquece a energia recente, mas não a corda: o afinador ficou surdo (o
+  /// som do próprio app) e não se sabe o que soou nesse tempo. A próxima
+  /// análise com som conta como palhetada.
+  void esquecerEnergia() {
+    _rmsRecentes.clear();
+    _subindo = false;
+  }
+
   void _esquecerTempo() {
     _ultimaAnalise = null;
     _intervalo = _intervaloPadrao;
     _rmsRecentes.clear();
     _subindo = false;
     _palhetada = double.negativeInfinity;
+    _ultimaLeitura = double.negativeInfinity;
     _picoPalhetada = 0;
     _inicio = double.negativeInfinity;
   }
@@ -484,9 +527,18 @@ class FiltroKalman {
     if (cordaNova) reiniciar();
     if (cents == null || !cents.isFinite) return _atual;
 
+    final estado = _estado;
+    final comecaNota = tempo - _ultimaLeitura > tempoLacuna;
+    _ultimaLeitura = tempo;
+    if (estado == null && comecaNota && tempo - _palhetada >= tempoAtaque) {
+      // Uma nota que começa sem palhetada reconhecida (fraca demais, ou mais
+      // fraca que o som de antes do período surdo) tem o ataque do mesmo
+      // jeito. Não vale para a corda nova que o Auto escolhe no meio da
+      // nota: o ataque dela já passou.
+      _marcarPalhetada(tempo);
+    }
     final emAtaque = tempo - _palhetada < tempoAtaque;
     final r = _ruido * (emAtaque ? fatorAtaque * fatorAtaque : 1);
-    final estado = _estado;
     if (estado == null) {
       _recomecar(tempo, cents, r);
       return _atual = _exibir(tempo);
@@ -710,6 +762,8 @@ class FiltroKalman {
       ..clear()
       ..addAll(assentadas);
     _analisesFora = 0;
+    // O salto é uma medição nova: a marca acesa precisa entrar de novo.
+    _reavaliar = _afinada;
     return true;
   }
 
@@ -771,28 +825,51 @@ class FiltroKalman {
         (p - numero).abs() > 0.5 + histereseNumero * tolerancia) {
       _numero = p.round();
     }
+    // Com o ponteiro fora da tolerância, o número também fica fora: a
+    // histerese não deixa escrito, sem o ✓, um número que diz "afinada".
+    if (p.abs() > tolerancia && _numero!.abs() <= tolerancia) {
+      _numero = p < 0 ? p.floor() : p.ceil();
+    }
 
     final entrada = entradaAfinada * tolerancia;
     final desvio = _desvioMarca(estado);
     final saida = _saida;
+    if (_afinada && _reavaliar && _assentadas.length >= _leiturasMarca) {
+      // Depois da palhetada ou do salto, a marca acesa só fica se as
+      // leituras novas cabem na metade de dentro da folga de saída: a corda
+      // reafinada muda perto da saída não herda o ✓ da afinação de antes, e
+      // a tocada de novo sem mexer na tarraxa não o perde pelo vaivém da
+      // leitura.
+      _reavaliar = false;
+      _afinada = _dentroDaEntrada(estado, (entrada + saida) / 2);
+      _analisesFora = 0;
+    }
     if (_afinada) {
       final alem = saida + _margemLeituras * sigma;
       _analisesFora = desvio.abs() > saida ? _analisesFora + 1 : 0;
       if (_analisesFora >= analisesSaida ||
           desvio.abs() > alem ||
-          (ultimas != null && _todasAlem(ultimas, alem))) {
+          (ultimas != null && _todasAlem(ultimas, alem)) ||
+          (_assentadas.length >= leiturasParaSaltar &&
+              _mediana(_assentadas).abs() > saida + margemMediana * sigma)) {
         _afinada = false;
         _analisesFora = 0;
       }
-    } else if (desvio.abs() <= entrada &&
-        tempo - math.max(_inicio, _palhetada) >= tempoAtaque &&
+    } else if (tempo - math.max(_inicio, _palhetada) >= tempoAtaque &&
         _assentadas.length >= _leiturasMarca &&
-        _media(_assentadas).abs() <= entrada &&
+        _dentroDaEntrada(estado, entrada) &&
         _rmsRecentes.last >= fracaoEnergia * _picoPalhetada) {
       _afinada = true;
+      _reavaliar = false;
     }
     return Exibicao(ponteiro: p, numero: _numero!, afinada: _afinada);
   }
+
+  /// Se o desvio que decide a marca e a média das leituras assentadas
+  /// ficam dentro de [entrada].
+  bool _dentroDaEntrada(_Estado estado, double entrada) =>
+      _desvioMarca(estado).abs() <= entrada &&
+      _media(_assentadas).abs() <= entrada;
 
   /// Numa análise rejeitada, o ponteiro e o número ficam, mas a marca de
   /// afinada apaga se as duas últimas leituras, rejeitadas e concordando
@@ -849,6 +926,11 @@ class FiltroKalman {
   static bool _todasAlem(List<double> valores, double limite) =>
       valores.every((x) => x > limite) || valores.every((x) => x < -limite);
 
+  static double _mediana(List<double> valores) {
+    final ordenados = [...valores]..sort();
+    return ordenados[ordenados.length ~/ 2];
+  }
+
   static double _media(List<double> valores) =>
       valores.isEmpty ? 0 : valores.reduce((a, b) => a + b) / valores.length;
 
@@ -859,13 +941,19 @@ class FiltroKalman {
   /// estenderia por toda a subida.
   void _acompanharEnergia(double tempo, double rms) {
     var subiu = false;
-    if (_rmsRecentes.isNotEmpty && rms >= _energiaPalhetada) {
-      var menor = double.infinity, maior = 0.0;
-      for (final valor in _rmsRecentes) {
-        menor = math.min(menor, valor);
-        maior = math.max(maior, valor);
+    if (rms >= _energiaPalhetada) {
+      if (_rmsRecentes.isEmpty) {
+        // Sem histórico (a energia foi esquecida), não se sabe se a nota
+        // começou agora: o ataque pode estar aí.
+        subiu = true;
+      } else {
+        var menor = double.infinity, maior = 0.0;
+        for (final valor in _rmsRecentes) {
+          menor = math.min(menor, valor);
+          maior = math.max(maior, valor);
+        }
+        subiu = rms > fatorPalhetada * menor && rms > maior;
       }
-      subiu = rms > fatorPalhetada * menor && rms > maior;
     }
     if (subiu && !_subindo) {
       // Quem toca a corda soltou a tarraxa: o estado vai até a palhetada, a
@@ -887,13 +975,28 @@ class FiltroKalman {
           p11: velocidadeInicial * velocidadeInicial,
           tempo: tempo,
         );
+        // As leituras de antes da palhetada podem ser de outra afinação (a
+        // tarraxa girou com a corda muda), e a marca acesa precisa entrar de
+        // novo com as leituras novas.
+        _assentadas.clear();
+        _reavaliar = _afinada;
       }
-      _palhetada = tempo;
-      _picoPalhetada = rms;
+      _marcarPalhetada(tempo);
     }
-    _picoPalhetada = math.max(_picoPalhetada, rms);
+    // O pico da nota só conta depois do ataque: o estalo da palheta vale
+    // várias vezes o som sustentado e não diz nada sobre a nota morrer.
+    if (tempo - _palhetada >= tempoAtaque) {
+      _picoPalhetada = math.max(_picoPalhetada, rms);
+    }
     _subindo = subiu;
     _rmsRecentes.add(rms);
     if (_rmsRecentes.length > _historicoRms) _rmsRecentes.removeAt(0);
+  }
+
+  /// A palhetada (ou o começo de uma corda) em [tempo]: o ataque começa ali,
+  /// e o pico da nota recomeça.
+  void _marcarPalhetada(double tempo) {
+    _palhetada = tempo;
+    _picoPalhetada = 0;
   }
 }

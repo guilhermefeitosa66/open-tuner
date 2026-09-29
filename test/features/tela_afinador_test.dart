@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:open_tuner/audio/fonte_audio.dart';
+import 'package:open_tuner/dominio/estado_corda.dart';
 import 'package:open_tuner/features/afinador/desenhos.dart';
 import 'package:open_tuner/features/afinador/folhas.dart';
 import 'package:open_tuner/features/afinador/grafico.dart';
@@ -64,6 +67,204 @@ void main() {
                   .foregroundPainter!
               as PintorProgresso)
           .progresso;
+
+  bool vistoNoIndicador(WidgetTester tester) => find
+      .descendant(
+        of: find.byKey(const Key('indicador')),
+        matching: find.byType(Visto),
+      )
+      .evaluate()
+      .isNotEmpty;
+
+  /// O número escrito no indicador; null sem número (✓ ou ociosa).
+  int? numeroNoIndicador(WidgetTester tester) {
+    final texto = find.byKey(const Key('cents'));
+    if (texto.evaluate().isEmpty) return null;
+    return int.parse(
+      tester.widget<Text>(texto).data!.replaceAll('−', '-').replaceAll('+', ''),
+    );
+  }
+
+  /// A instrução da pílula, se houver.
+  String? instrucao(WidgetTester tester) {
+    for (final texto in const ['Aperte a corda', 'Afrouxe a corda']) {
+      if (find.text(texto).evaluate().isNotEmpty) return texto;
+    }
+    return null;
+  }
+
+  PintorRastro rastro(WidgetTester tester) =>
+      tester
+              .widget<CustomPaint>(
+                find.byWidgetPredicate(
+                  (w) =>
+                      w is CustomPaint && w.foregroundPainter is PintorRastro,
+                ),
+              )
+              .foregroundPainter!
+          as PintorRastro;
+
+  group('sem o ✓', () {
+    testWidgets('número e instrução nunca discordam, e dentro da tolerância '
+        'não há instrução', (tester) async {
+      final app = await abrirApp(tester);
+      // Tocada a +16 cents; a nota cai logo para uns 12% da energia, e a
+      // tarraxa desce a 10 cents/s até −0,4 (afinada): o ✓ não entra, e o
+      // ponteiro erra um pouco para os dois lados do zero.
+      app.fonte.frequencia = FonteAudioFalsa.desviada(e4, 16);
+      await esperar(tester, const Duration(milliseconds: 200));
+      final problemas = <String>[];
+      for (var i = 0; i < 100; i++) {
+        final t = i * 0.04;
+        app.fonte
+          ..frequencia = FonteAudioFalsa.desviada(
+            e4,
+            math.max(-0.4, 16 - 10 * t),
+          )
+          ..amplitude = math.max(0.06, 0.5 * math.exp(-t / 0.15));
+        await tester.pump(const Duration(milliseconds: 40));
+        final numero = numeroNoIndicador(tester);
+        final pilula = instrucao(tester);
+        if (numero == null) continue;
+        if ((numero.abs() <= 5 && pilula != null) ||
+            (pilula == 'Aperte a corda' && numero >= 0) ||
+            (pilula == 'Afrouxe a corda' && numero <= 0)) {
+          problemas.add('${t.toStringAsFixed(2)} s: $numero "$pilula"');
+        }
+      }
+      expect(problemas, isEmpty);
+    });
+
+    testWidgets('a corda afinada não recebe instrução antes do ✓', (
+      tester,
+    ) async {
+      final app = await abrirApp(tester);
+      app.fonte.frequencia = e4;
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 40));
+        expect(instrucao(tester), isNull, reason: '${40 * (i + 1)} ms');
+      }
+      expect(vistoNoIndicador(tester), isTrue);
+    });
+
+    for (final (de, para, errada, certa) in const [
+      (1.0, -11.0, 'Afrouxe a corda', 'Aperte a corda'),
+      (0.0, 11.0, 'Aperte a corda', 'Afrouxe a corda'),
+    ]) {
+      testWidgets('quando o ✓ apaga de uma vez ($de → $para), a instrução '
+          'não sai do lado errado', (tester) async {
+        final app = await abrirApp(tester);
+        app.fonte.frequencia = FonteAudioFalsa.desviada(e4, de);
+        await esperar(tester, const Duration(milliseconds: 1800));
+        expect(vistoNoIndicador(tester), isTrue);
+        app.fonte.frequencia = FonteAudioFalsa.desviada(e4, para);
+        for (var i = 0; i < 20; i++) {
+          await tester.pump(const Duration(milliseconds: 40));
+          expect(instrucao(tester), isNot(errada), reason: '${40 * i} ms');
+        }
+        expect(instrucao(tester), certa);
+      });
+    }
+
+    testWidgets('o anel só fica cheio com o ✓', (tester) async {
+      // O anel anima até o valor da leitura: confere o valor de chegada e a
+      // cor do fundo, que enche de verde com o anel fechado.
+      double anelAlvo() => tester
+          .widget<TweenAnimationBuilder<double>>(
+            find
+                .descendant(
+                  of: find.byKey(const Key('indicador')),
+                  matching: find.byType(TweenAnimationBuilder<double>),
+                )
+                .first,
+          )
+          .tween
+          .end!;
+      Color? fundo() =>
+          (tester
+                      .widget<AnimatedContainer>(
+                        find.descendant(
+                          of: find.byKey(const Key('indicador')),
+                          matching: find.byType(AnimatedContainer),
+                        ),
+                      )
+                      .decoration!
+                  as BoxDecoration)
+              .color;
+      final app = await abrirApp(tester);
+      final fundoSemMarca = fundo();
+      app.fonte.frequencia = e4;
+      await esperar(tester, const Duration(milliseconds: 1800));
+      expect(find.byKey(const Key('selo-2')), findsOneWidget);
+      expect(fundo(), isNot(fundoSemMarca));
+      app.fonte.frequencia = FonteAudioFalsa.desviada(e4, 11);
+      var semVisto = 0;
+      for (var i = 0; i < 25; i++) {
+        await tester.pump(const Duration(milliseconds: 40));
+        if (vistoNoIndicador(tester)) continue;
+        semVisto++;
+        expect(anelAlvo(), lessThan(1), reason: '${40 * i} ms');
+        expect(fundo(), fundoSemMarca, reason: '${40 * i} ms');
+      }
+      expect(semVisto, greaterThan(10));
+    });
+
+    testWidgets('o rastro tem a cor e a posição do indicador', (tester) async {
+      final app = await abrirApp(tester);
+      final problemas = <String>[];
+      for (final (cents, duracao) in const [
+        (0.0, 1800),
+        (7.0, 800),
+        (11.0, 800),
+        (0.0, 800),
+      ]) {
+        app.fonte.frequencia = FonteAudioFalsa.desviada(e4, cents);
+        for (var t = 0; t < duracao; t += 40) {
+          await tester.pump(const Duration(milliseconds: 40));
+          final historico = rastro(tester).historico;
+          if (historico.length == 0) continue;
+          final ponto = historico[0];
+          if (ponto == null) continue;
+          final estado = historico.estado(0);
+          if (vistoNoIndicador(tester)
+              ? ponto != 0 || estado != EstadoCorda.afinada
+              : estado == EstadoCorda.afinada) {
+            problemas.add(
+              '$cents, $t ms: ✓=${vistoNoIndicador(tester)} rastro em '
+              '${ponto.toStringAsFixed(2)} $estado',
+            );
+          }
+        }
+      }
+      expect(problemas, isEmpty);
+    });
+
+    testWidgets('o leitor de tela anuncia "Afinada" e não manda girar a '
+        'corda afinada', (tester) async {
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(accessibleNavigation: true);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      final app = await abrirApp(tester);
+      app.fonte.frequencia = e4;
+      await esperar(tester, const Duration(seconds: 4));
+      expect(
+        [for (final a in tester.takeAnnouncements()) a.message],
+        ['Afinada'],
+      );
+      // A corda sai da nota logo depois de um anúncio: a mudança que cai
+      // dentro do intervalo entre falas é dita quando ele acaba.
+      app.fonte.frequencia = FonteAudioFalsa.desviada(e4, -14);
+      await esperar(tester, const Duration(milliseconds: 400));
+      app.fonte.frequencia = e4;
+      await esperar(tester, const Duration(milliseconds: 400));
+      app.fonte.frequencia = FonteAudioFalsa.desviada(e4, 14);
+      await esperar(tester, const Duration(seconds: 3));
+      final ditos = [for (final a in tester.takeAnnouncements()) a.message];
+      expect(ditos.last, 'Afrouxe a corda', reason: '$ditos');
+    });
+  });
 
   testWidgets('longe da nota, o anel de progresso não aparece', (tester) async {
     final app = await abrirApp(tester);
@@ -131,7 +332,9 @@ void main() {
     ) async {
       final app = await abrirApp(tester);
       app.fonte.frequencia = e4;
-      await esperar(tester, const Duration(milliseconds: 300));
+      // A primeira leitura espera a segunda confirmar (40 ms), e o ✓ pede o
+      // ataque (0,15 s) e três leituras assentadas depois dele.
+      await esperar(tester, const Duration(milliseconds: 400));
 
       expect(find.text('Afinada'), findsOneWidget);
       expect(

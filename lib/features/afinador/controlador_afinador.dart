@@ -125,6 +125,7 @@ class ControladorAfinador extends ChangeNotifier {
     }
     _montarDetector();
     _a4 = ajustes.a4;
+    _precisao = ajustes.precisao;
     ajustes.addListener(_aoMudarAjustes);
   }
 
@@ -148,6 +149,14 @@ class ControladorAfinador extends ChangeNotifier {
   /// Silêncio depois do qual o indicador volta ao centro, vazio.
   static const tempoParaOcioso = 1.5;
 
+  /// Com a tela ociosa, duas leituras concordam se ficam a menos disto, em
+  /// cents.
+  static const concordancia = 50.0;
+
+  /// Por quanto tempo, em segundos, a leitura que espera a confirmação vale
+  /// (o detector pode rejeitar uma análise entre as duas).
+  static const validadePendente = 0.25;
+
   final HistoricoLeituras historico = HistoricoLeituras();
   final ValueNotifier<LeituraTela> leitura = ValueNotifier(LeituraTela.ociosa);
 
@@ -159,6 +168,7 @@ class ControladorAfinador extends ChangeNotifier {
   late DetectorFrequencia _detector;
   late JanelaDeslizante _janela;
   late int _a4;
+  late Precisao _precisao;
   late final FiltroKalman _filtro = FiltroKalman(precisao: ajustes.precisao);
   final MarcadorAfinada _marcador = MarcadorAfinada();
   final Set<int> _afinadas = {};
@@ -179,6 +189,14 @@ class ControladorAfinador extends ChangeNotifier {
   /// senão a corda de referência marcaria a si mesma como afinada.
   double _surdoAte = -1;
   int? _cordaDaLeitura;
+
+  /// Com a tela ociosa, a leitura só aparece quando a seguinte concorda com
+  /// ela: a primeira análise depois do silêncio sai às vezes na oitava de
+  /// baixo ou num harmônico, e mostrada levava o ponteiro à borda (e o Auto,
+  /// à corda errada). Esta é a leitura que espera a confirmação, em Hz, e o
+  /// instante dela.
+  double? _pendente;
+  double _tempoPendente = double.negativeInfinity;
 
   // Medição do detector em modo debug.
   final Stopwatch _cronometro = Stopwatch();
@@ -269,15 +287,23 @@ class ControladorAfinador extends ChangeNotifier {
     _escolha.fixar(indice);
     final duracao = _tocador.tocarCorda(frequenciaAlvo(indice));
     _ensurdecer(duracao);
-    _filtro.reiniciar();
+    // O filtro não ouve o período surdo: a energia de antes não diz nada
+    // sobre a palhetada que vem depois do som.
+    _filtro
+      ..reiniciar()
+      ..esquecerEnergia();
     _marcador.reiniciar();
     _dobra.reiniciar();
     _cordaDaLeitura = null;
+    _pendente = null;
     leitura.value = LeituraTela.ociosa;
     notifyListeners();
   }
 
   void _ensurdecer(Duration duracao) {
+    // Sem escutar, o microfone não ouve o som; e o relógio do áudio parado
+    // deixaria o afinador surdo quando a escuta começasse.
+    if (!escutando) return;
     _surdoAte = math.max(
       _surdoAte,
       _tempo + duracao.inMicroseconds / 1e6 + folgaDoSom,
@@ -285,13 +311,28 @@ class ControladorAfinador extends ChangeNotifier {
   }
 
   void _aoMudarAjustes() {
-    _filtro.precisao = ajustes.precisao;
+    final precisao = ajustes.precisao;
+    _filtro.precisao = precisao;
+    if (precisao != _precisao) {
+      // Uma corda marcada com ±5 cents pode estar fora de ±2: as marcas da
+      // precisão mais folgada não valem na mais estreita (na volta, valem).
+      if (precisao.tolerancia < _precisao.tolerancia) {
+        _marcador.reiniciar();
+        if (_afinadas.isNotEmpty) {
+          _afinadas.clear();
+          notifyListeners();
+        }
+      }
+      _precisao = precisao;
+    }
     if (ajustes.a4 != _a4) {
       _a4 = ajustes.a4;
       final fixada = _auto ? null : _escolha.atual;
       _escolha.trocarAlvos(_alvos());
       _dobra.trocarAlvos(_alvos());
       if (fixada != null) _escolha.fixar(fixada);
+      // Com outra referência, as cordas marcadas ficaram desafinadas.
+      _afinadas.clear();
       _recomecarLeitura();
       notifyListeners();
     }
@@ -303,7 +344,9 @@ class ControladorAfinador extends ChangeNotifier {
     _janela.limpar();
     _marcador.reiniciar();
     _dobra.reiniciar();
+    _escolha.soltar();
     _cordaDaLeitura = null;
+    _pendente = null;
     historico.limpar();
     leitura.value = LeituraTela.ociosa;
   }
@@ -376,6 +419,9 @@ class ControladorAfinador extends ChangeNotifier {
   Future<void> _pararEscuta() async {
     final assinatura = _assinatura;
     _assinatura = null;
+    // O período surdo está no relógio do áudio, que para junto com a
+    // escuta: o som do app já terá acabado quando ela voltar.
+    _surdoAte = -1;
     // Depois do cancel nenhum bloco chega mais; não precisa esperar.
     unawaited(assinatura?.cancel());
     await fonte.parar();
@@ -460,6 +506,10 @@ class ControladorAfinador extends ChangeNotifier {
     if (!leitura.value.ehOciosa && _tempo - _ultimoSom >= tempoParaOcioso) {
       leitura.value = LeituraTela.ociosa;
       _filtro.reiniciar();
+      // No Auto, a corda seguinte se escolhe direto, como na abertura: medida
+      // contra a de antes, levaria o ponteiro à borda até a troca.
+      _escolha.soltar();
+      _pendente = null;
     }
     if (_afinadas.isNotEmpty && _tempo - _ultimoSom >= tempoParaLimparMarcas) {
       _afinadas.clear();
@@ -469,6 +519,24 @@ class ControladorAfinador extends ChangeNotifier {
 
   void _aoOuvir(double frequencia, double rms) {
     _ultimoSom = _tempo;
+    final ociosa = leitura.value.ehOciosa;
+    var confirmada = true;
+    if (ociosa) {
+      final pendente = _tempo - _tempoPendente <= validadePendente
+          ? _pendente
+          : null;
+      confirmada =
+          pendente != null &&
+          centsEntre(frequencia, pendente).abs() <= concordancia;
+      if (!confirmada && pendente != null) {
+        // A leitura que esperava não se confirmou (a oitava de baixo, um
+        // harmônico): o filtro e a escolha da corda recomeçam por esta.
+        _filtro.reiniciar();
+        _escolha.soltar();
+      }
+      _pendente = frequencia;
+      _tempoPendente = _tempo;
+    }
     final anterior = _escolha.atual;
     final corda = _escolha.escolher(frequencia);
     final cordaNova = corda != _cordaDaLeitura;
@@ -482,26 +550,42 @@ class ControladorAfinador extends ChangeNotifier {
       rms: rms,
       cordaNova: cordaNova,
     )!;
+    if (!confirmada) {
+      // O filtro já seguiu a leitura; a tela espera a seguinte confirmar.
+      historico.adicionar(null);
+      return;
+    }
     final cents = exibicao.ponteiro;
     // A marca de afinada vem do filtro, com histerese: não pisca na borda da
     // tolerância. Fora dela, a cor segue a distância do ponteiro.
     final estado = exibicao.afinada
         ? EstadoCorda.afinada
         : (cents.abs() <= limitePerto ? EstadoCorda.perto : EstadoCorda.longe);
-    historico.adicionar(cents);
+    // O rastro segue o indicador: com o ✓, o círculo está na linha do
+    // centro, e o ponto do rastro também.
+    historico.adicionar(
+      estado == EstadoCorda.afinada ? 0 : cents,
+      estado: estado,
+    );
 
-    // A frequência mostrada sai do ponteiro, para andar junto com ele. Num par da viola, a oitava de cima mede contra o dobro.
+    // A frequência mostrada sai do ponteiro, para andar junto com ele. Num
+    // par da viola, a oitava de cima mede contra o dobro.
     var alvo = frequenciaAlvo(corda);
     if (_instrumento.pares &&
         centsEntre(frequencia, alvo * 2).abs() <
             centsEntre(frequencia, alvo).abs()) {
       alvo *= 2;
     }
-    var avisar = corda != anterior;
+    var avisar = corda != anterior || ociosa;
+    // Para a marca da corda, só conta o tempo dentro da tolerância (RF-09):
+    // o ✓ fica aceso até 1,6 × ela, e a corda parada logo fora não pode
+    // ganhar a marca por ter passado pela nota.
     final afinada = _marcador.adicionar(
       tempo: _tempo,
       duracao: _janela.salto / fonte.taxaAmostragem,
-      afinada: estado == EstadoCorda.afinada,
+      afinada:
+          estado == EstadoCorda.afinada &&
+          cents.abs() <= ajustes.precisao.tolerancia,
     );
     if (afinada && _afinadas.add(corda)) {
       unawaited(_vibrar());
@@ -514,9 +598,11 @@ class ControladorAfinador extends ChangeNotifier {
       frequencia: alvo * math.pow(2, cents / 1200),
       estado: estado,
       numero: exibicao.numero,
-      // Corda já marcada e ainda na nota: o indicador fica cheio.
-      progresso: _afinadas.contains(corda) && estado == EstadoCorda.afinada
-          ? 1
+      // Corda já marcada: o indicador fica cheio com o ✓ e vazio sem ele (o
+      // tempo somado para a marca não diz mais nada, e o anel cheio sem o ✓
+      // diria "afinada" junto com "Afrouxe a corda").
+      progresso: _afinadas.contains(corda)
+          ? (estado == EstadoCorda.afinada ? 1 : 0)
           : _marcador.progresso,
     );
     if (avisar) notifyListeners();

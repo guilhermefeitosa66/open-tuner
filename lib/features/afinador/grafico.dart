@@ -95,21 +95,21 @@ class PintorGrade extends CustomPainter {
 }
 
 /// O rastro (RF-07): cada leitura é um ponto que rola para baixo, ligado ao
-/// seguinte por uma curva lisa (Catmull-Rom), com a cor do estado do trecho.
-/// Um null é um vão.
+/// seguinte por uma curva lisa (Catmull-Rom). Cada trecho tem a cor do
+/// estado que o indicador mostrava na leitura mais nova dele (RF-08): o ✓
+/// pinta de verde, a distância só decide entre perto e longe. Um null é um
+/// vão.
 ///
 /// Redesenha só quando o [historico] avisa, sem reconstruir widget nenhum.
 class PintorRastro extends CustomPainter {
   PintorRastro({
     required this.historico,
-    required this.precisao,
     required this.corAfinado,
     required this.corPerto,
     required this.corLonge,
   }) : super(repaint: historico);
 
   final HistoricoLeituras historico;
-  final Precisao precisao;
   final Color corAfinado;
   final Color corPerto;
   final Color corLonge;
@@ -132,8 +132,7 @@ class PintorRastro extends CustomPainter {
       final a = historico[i];
       final b = historico[i + 1];
       if (a == null || b == null) continue;
-      final media = (a.abs() + b.abs()) / 2;
-      final trecho = switch (classificar(media, precisao)) {
+      final trecho = switch (historico.estado(i) ?? EstadoCorda.perto) {
         EstadoCorda.afinada => afinado,
         EstadoCorda.perto => perto,
         EstadoCorda.longe => longe,
@@ -165,7 +164,6 @@ class PintorRastro extends CustomPainter {
   @override
   bool shouldRepaint(PintorRastro antigo) =>
       antigo.historico != historico ||
-      antigo.precisao != precisao ||
       antigo.corAfinado != corAfinado ||
       antigo.corPerto != corPerto ||
       antigo.corLonge != corLonge;
@@ -181,12 +179,26 @@ Color corDoEstado(CoresOpenTuner cores, EstadoCorda? estado) =>
     };
 
 /// O que a leitura pede para a mão fazer.
-enum Direcao { apertar, afrouxar, afinada }
+enum Direcao {
+  apertar,
+  afrouxar,
+  afinada,
 
-Direcao? direcaoDe(LeituraTela leitura) {
+  /// O número está dentro da tolerância, mas o ✓ ainda não entrou (o ataque
+  /// da palhetada, poucas leituras, a nota fraca): o ponteiro erra um ou dois
+  /// cents para qualquer lado perto do zero, e mandar girar a tarraxa seria
+  /// chute.
+  nenhuma,
+}
+
+/// A direção sai do número escrito, não do ponteiro: os dois nunca discordam
+/// na tela. Fora da tolerância o sinal do número é o do ponteiro (a
+/// histerese do número é menor que a tolerância).
+Direcao? direcaoDe(LeituraTela leitura, Precisao precisao) {
   if (leitura.ehOciosa) return null;
   if (leitura.estado == EstadoCorda.afinada) return Direcao.afinada;
-  return leitura.cents < 0 ? Direcao.apertar : Direcao.afrouxar;
+  if (leitura.numero.abs() <= precisao.tolerancia) return Direcao.nenhuma;
+  return leitura.numero < 0 ? Direcao.apertar : Direcao.afrouxar;
 }
 
 /// Cents com sinal, como no protótipo: "−22", "+11" (sinal de menos de
@@ -203,10 +215,12 @@ class IndicadorDesvio extends StatelessWidget {
   const IndicadorDesvio({
     super.key,
     required this.leitura,
+    required this.precisao,
     required this.geometria,
   });
 
   final ValueListenable<LeituraTela> leitura;
+  final Precisao precisao;
   final GeometriaGrafico geometria;
 
   @override
@@ -214,7 +228,7 @@ class IndicadorDesvio extends StatelessWidget {
     return ValueListenableBuilder<LeituraTela>(
       valueListenable: leitura,
       builder: (context, atual, _) {
-        final direcao = direcaoDe(atual);
+        final direcao = direcaoDe(atual, precisao);
         final alvoX = direcao == null || direcao == Direcao.afinada
             ? geometria.centroX
             : geometria.xDe(atual.cents);
@@ -222,8 +236,12 @@ class IndicadorDesvio extends StatelessWidget {
           tween: Tween(end: alvoX),
           duration: const Duration(milliseconds: 90),
           curve: Curves.easeOut,
-          builder: (context, x, _) =>
-              _Indicador(leitura: atual, x: x, geometria: geometria),
+          builder: (context, x, _) => _Indicador(
+            leitura: atual,
+            direcao: direcao,
+            x: x,
+            geometria: geometria,
+          ),
         );
       },
     );
@@ -233,11 +251,13 @@ class IndicadorDesvio extends StatelessWidget {
 class _Indicador extends StatelessWidget {
   const _Indicador({
     required this.leitura,
+    required this.direcao,
     required this.x,
     required this.geometria,
   });
 
   final LeituraTela leitura;
+  final Direcao? direcao;
   final double x;
   final GeometriaGrafico geometria;
 
@@ -246,7 +266,7 @@ class _Indicador extends StatelessWidget {
     final cores = context.cores;
     final textos = context.textos;
     final escala = geometria.escala;
-    final direcao = direcaoDe(leitura);
+    final direcao = this.direcao;
     final cor = corDoEstado(cores, leitura.estado);
     final diametro = geometria.diametroIndicador;
 
@@ -254,11 +274,12 @@ class _Indicador extends StatelessWidget {
       Direcao.apertar => textos.aperteACorda,
       Direcao.afrouxar => textos.afrouxeACorda,
       Direcao.afinada => textos.afinada,
-      null => null,
+      Direcao.nenhuma || null => null,
     };
     final rotulo = switch (direcao) {
       null => textos.esperandoCorda,
       Direcao.afinada => textos.afinada,
+      Direcao.nenhuma => textos.desvioCents(leitura.numero),
       _ => '${textos.desvioCents(leitura.numero)}, $textoPilula',
     };
 
@@ -310,9 +331,9 @@ class _Indicador extends StatelessWidget {
             container: true,
             child: ExcludeSemantics(
               // Perto ou afinada, um anel verde fecha pela borda enquanto a
-              // corda soma tempo na nota; fechado, o círculo enche de verde
-              // (é quando a corda ganha a marca). Longe, nada: o anel só
-              // aparece quando falta pouco.
+              // corda soma tempo na nota; fechado, com o ✓, o círculo enche
+              // de verde (é quando a corda ganha a marca). Longe, nada: o
+              // anel só aparece quando falta pouco.
               child: TweenAnimationBuilder<double>(
                 tween: Tween(
                   end: leitura.estado == EstadoCorda.longe
@@ -331,7 +352,9 @@ class _Indicador extends StatelessWidget {
                     duration: const Duration(milliseconds: 180),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: progresso >= 1
+                      color:
+                          progresso >= 1 &&
+                              leitura.estado == EstadoCorda.afinada
                           ? Color.lerp(cores.fundo, cores.afinado, 0.22)
                           : cores.fundo,
                       border: Border.all(color: cor, width: 3 * escala),
@@ -448,7 +471,7 @@ class _Pilula extends StatelessWidget {
     final seta = switch (direcao) {
       Direcao.apertar => Icons.arrow_upward_rounded,
       Direcao.afrouxar => Icons.arrow_downward_rounded,
-      Direcao.afinada => null,
+      Direcao.afinada || Direcao.nenhuma => null,
     };
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: larguraMaxima),

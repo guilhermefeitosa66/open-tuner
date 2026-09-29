@@ -121,8 +121,10 @@ temperamento igual a partir da referência A4 (RF-17).
 
 **RF-04 · Modo automático** (ligado por padrão, chave "Auto" no topo). O alvo é a corda da afinação
 mais próxima da nota tocada, em cents. Para não pular entre cordas vizinhas, a troca de alvo só
-acontece depois de 5 leituras consecutivas apontando para outra corda. Na viola caipira, a oitava de
-cima de um par conta como o próprio par.
+acontece depois de 5 leituras consecutivas apontando para outra corda. Depois de um silêncio (a tela
+volta à espera, RF-12), a corda seguinte se escolhe direto pela mais próxima, sem essa espera:
+medida contra a corda de antes, ela levaria o ponteiro à borda até a troca. Na viola caipira, a
+oitava de cima de um par conta como o próprio par.
 
 **RF-05 · Modo manual.** Tocar no botão de uma corda fixa aquela corda como alvo, desliga o Auto e
 toca o som da corda, na afinação e na referência A4 atuais, para afinar de ouvido. O som é
@@ -143,15 +145,24 @@ escada, numa direção só, com a tarraxa girando. A posição horizontal é pro
 - **na linha:** afinada, o número dá lugar a um ✓, o texto passa a "Afinada", a nota alvo fica
   verde e uma linha verde acende no centro do gráfico. O ✓ entra dentro da tolerância, depois do
   ataque da palhetada, e só sai quando o desvio passa de 1,6 × a tolerância (8 cents na normal): não
-  pisca na borda.
+  pisca na borda. Uma palhetada nova é uma medição nova: o ✓ aceso só fica se as leituras depois do
+  ataque cabem na metade de dentro dessa folga;
+- **dentro da tolerância, ainda sem o ✓** (no ataque da palhetada, nas primeiras leituras ou com a
+  nota já fraca): o número, sem texto nem seta. Perto do zero o ponteiro erra um ou dois cents para
+  qualquer lado, e mandar girar a tarraxa seria chute.
+
+A instrução sai do número escrito, e não do ponteiro, para os dois nunca discordarem; com o ponteiro
+fora da tolerância, o número também fica fora dela.
 
 Além de ±50 cents o círculo fica preso na borda. Os símbolos ♭ e ♯ marcam os dois lados.
 
 **RF-07 · Rastro.** Abaixo do indicador, cada leitura deixa um ponto que rola para baixo, formando a
-onda do que aconteceu nos últimos 5 segundos (cerca de 80 leituras), a mais nova no alto. Leituras
-rejeitadas (silêncio) deixam um vão. O rastro esmaece perto da cabeça do instrumento.
+onda do que aconteceu nos últimos 5 segundos (cerca de 80 leituras), a mais nova no alto. O ponto
+fica onde o indicador estava: com o ✓, na linha do centro. Leituras rejeitadas (silêncio) deixam
+um vão. O rastro esmaece perto da cabeça do instrumento.
 
-**RF-08 · Estados e cores.** A distância define a cor do indicador e de cada trecho do rastro:
+**RF-08 · Estados e cores.** O estado define a cor do indicador e a de cada trecho do rastro (a
+que o indicador tinha naquela leitura):
 
 | Estado | Condição | Claro | Escuro |
 |---|---|---|---|
@@ -161,11 +172,14 @@ rejeitadas (silêncio) deixam um vão. O rastro esmaece perto da cabeça do inst
 
 **RF-09 · Corda afinada.** A corda solta oscila em volta da nota enquanto morre, então o tempo na
 nota é somado, não seguido: 0,6 segundo dentro da tolerância, com idas e vindas, nos últimos 2
-segundos marca a corda. Enquanto soma, um anel verde fecha pela borda do indicador (só perto ou
-afinada; longe, não aparece); fechado, o indicador enche de verde. Marcada, a corda fica verde no
+segundos marca a corda. Conta o tempo com o ✓ e o ponteiro dentro da tolerância: a corda parada na
+folga de saída do ✓ não ganha a marca. Enquanto soma, um anel verde fecha pela borda do indicador
+(só perto ou afinada; longe, não aparece); fechado, o indicador enche de verde. Com a corda já
+marcada, o anel fica cheio com o ✓ e vazio sem ele. Marcada, a corda fica verde no
 botão (fundo, anel e selo), na tarraxa e no fio; o aparelho vibra uma vez, curto, e toca um aviso
 curto de dois sinos, também sintetizado. As marcas somem ao trocar de
-instrumento ou de afinação, e depois de 2 minutos sem nenhuma corda tocada.
+instrumento ou de afinação, ao mudar a referência do Lá, ao passar da precisão normal para a fina, e
+depois de 2 minutos sem nenhuma corda tocada.
 
 **RF-10 · Nota alvo.** Sobre a linha do centro, um círculo menor mostra a nota alvo com a oitava
 (E⁴), e embaixo dele a frequência medida ("327,4 Hz").
@@ -181,7 +195,9 @@ losango de madrepérola e duas tarraxas por par) e baixo (topo inclinado, tarrax
 grossas). Trocar de instrumento funde um desenho no outro.
 
 **RF-12 · Espera.** Sem corda tocada, o indicador fica no centro, vazio, e uma mensagem pede "Toque
-qualquer corda para começar".
+qualquer corda para começar". Da espera, a primeira leitura só aparece quando a seguinte concorda com
+ela: a primeira análise depois do silêncio sai às vezes na oitava de baixo, e mostrada levaria o
+ponteiro à borda.
 
 ### Barra inferior e seletores
 
@@ -260,7 +276,8 @@ privacidade publicada junto com o app.
 - alvos de toque de no mínimo 48 dp;
 - contraste AA em todo texto nos dois temas (conferido na paleta, seção 5);
 - estado da corda anunciado pelo TalkBack só quando muda (frouxa, apertada, afinada), no máximo uma
-  vez por segundo, para não atropelar o leitor;
+  vez por segundo, para não atropelar o leitor; a mudança que chega dentro desse segundo é dita
+  quando ele acaba, e sem instrução na tela (RF-06) nada é dito;
 - botões de corda com rótulo falado ("Corda E4, afinada");
 - texto até 130% do tamanho do sistema sem cortar nem sobrepor;
 - nenhuma informação só por cor (princípios, seção 1).

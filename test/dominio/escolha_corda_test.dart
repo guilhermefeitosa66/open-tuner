@@ -170,6 +170,22 @@ void main() {
     });
   });
 
+  test('soltar: a próxima leitura escolhe a corda direto, sem histerese', () {
+    final escolha = EscolhaCorda(alvos: violao);
+    escolha.escolher(82.41); // E2
+    escolha.soltar();
+    // A corda atual continua até a próxima leitura.
+    expect(escolha.atual, 0);
+    expect(escolha.escolher(146.83), 2);
+    // Depois dela, a histerese volta a valer.
+    expect(escolha.escolher(82.41), 2);
+    // No manual, soltar não muda nada.
+    escolha
+      ..fixar(4)
+      ..soltar();
+    expect(escolha.escolher(82.41), 4);
+  });
+
   test('trocarAlvos zera a escolha e volta ao automático', () {
     final escolha = EscolhaCorda(alvos: violao);
     escolha.fixar(3);
