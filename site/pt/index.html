@@ -67,24 +67,26 @@
     </div>
 
     <div class="aparelho">
-      <svg id="afinador" viewBox="0 0 312 372" role="img" aria-label="A tela do afinador: um marcador vai para a esquerda quando a corda está frouxa, para a direita quando está apertada demais e fica na linha do centro quando está afinada, deixando um rastro que rola para baixo.">
+      <svg id="afinador" viewBox="0 0 312 372" role="img" aria-label="A tela do afinador: um marcador vai para a esquerda quando a corda está frouxa e para a direita quando está apertada demais. Na linha do centro, um anel verde se fecha em volta dele até confirmar a corda afinada. O rastro rola para baixo.">
         <rect width="312" height="372" fill="#14110E"/>
         <path d="M0 26H312M0 52H312M0 78H312M0 104H312M0 130H312M0 156H312M0 182H312M0 208H312M0 234H312M0 260H312M0 286H312M0 312H312M0 338H312M0 364H312M26 0V372M52 0V372M78 0V372M104 0V372M130 0V372M182 0V372M208 0V372M234 0V372M260 0V372M286 0V372" stroke="#231E19" stroke-width="1"/>
         <path d="M156 0V372" stroke="#4A3F35" stroke-width="1.5"/>
+        <path id="linha-afinada" d="M156 0V372" stroke="#5CC592" stroke-width="3"/>
         <text x="18" y="46" fill="#B3A597" font-family="Fraunces, Georgia, serif" font-size="26">♭</text>
         <text x="278" y="46" fill="#B3A597" font-family="Fraunces, Georgia, serif" font-size="26">♯</text>
         <path id="rastro-longe" d="M0 0" fill="none" stroke="#EE8A52" stroke-width="3" stroke-linecap="round"/>
         <path id="rastro-perto" d="M0 0" fill="none" stroke="#E6C24F" stroke-width="3" stroke-linecap="round"/>
         <path id="rastro-afinado" d="M156 92L156 360" fill="none" stroke="#5CC592" stroke-width="3" stroke-linecap="round"/>
         <g transform="translate(156 214)">
-          <circle r="25" fill="#1E1915" stroke="#4A3F35" stroke-width="2"/>
-          <text x="-4" y="8" text-anchor="middle" fill="#F3EBE0" font-family="Fraunces, Georgia, serif" font-size="22" font-weight="600">E</text>
-          <text x="9" y="-1" text-anchor="middle" fill="#F3EBE0" font-family="Fraunces, Georgia, serif" font-size="11" font-weight="600">4</text>
+          <circle id="nota-aro" r="25" fill="#1E1915" stroke="#5CC592" stroke-width="2.5"/>
+          <text class="nota-texto" x="-4" y="8" text-anchor="middle" fill="#5CC592" font-family="Fraunces, Georgia, serif" font-size="22" font-weight="600">E</text>
+          <text class="nota-texto" x="9" y="-1" text-anchor="middle" fill="#5CC592" font-family="Fraunces, Georgia, serif" font-size="11" font-weight="600">4</text>
         </g>
         <g id="bolha" transform="translate(156 0)">
           <path id="bolha-ponta" d="M-7 79L0 88L7 79Z" fill="#5CC592"/>
-          <circle id="bolha-aro" cy="54" r="26" fill="#14110E" stroke="#5CC592" stroke-width="3"/>
-          <text id="bolha-texto" y="61" text-anchor="middle" fill="#F3EBE0" font-family="Manrope, system-ui, sans-serif" font-size="18" font-weight="800">✓</text>
+          <circle id="bolha-aro" cy="54" r="26" fill="#24392B" stroke="#5CC592" stroke-width="3"/>
+          <circle id="bolha-anel" cy="54" r="26" fill="none" stroke="#5CC592" stroke-width="4" stroke-linecap="round" stroke-dasharray="163.4 163.4" stroke-dashoffset="0" transform="rotate(-90 0 54)"/>
+          <text id="bolha-texto" y="61" text-anchor="middle" fill="#5CC592" font-family="Manrope, system-ui, sans-serif" font-size="18" font-weight="800">✓</text>
         </g>
         <rect x="0" y="330" width="312" height="42" fill="url(#esmaecer)"/>
         <defs>

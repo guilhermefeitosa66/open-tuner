@@ -132,7 +132,7 @@ p { margin: 0; }
 .botao.primario { background: var(--accent); color: var(--sobre-accent); }
 .botao.primario:hover { filter: brightness(1.08); }
 .botao.secundario { background: var(--superficie-alta); color: var(--texto-secundario); cursor: default; }
-.botao svg { width: 20px; height: 20px; }
+.botao svg { width: 20px; height: 20px; flex: none; }
 .miudo { margin-top: 18px; font-size: 14px; color: var(--texto-secundario); }
 
 /* O afinador desenhado */
@@ -154,7 +154,7 @@ section { padding-block: 72px; }
   background: var(--superficie); border: 1px solid var(--grade); border-radius: 22px;
   padding: 24px; display: flex; flex-direction: column; gap: 12px;
 }
-.cartao svg { width: 100%; height: auto; }
+.cartao > svg { width: 100%; height: auto; }
 .cartao p { color: var(--texto-secundario); font-size: 16px; }
 .estado { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; }
 .estado::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: currentColor; }
