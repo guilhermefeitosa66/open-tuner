@@ -115,14 +115,8 @@ class ControladorAfinador extends ChangeNotifier {
        _tocador = tocador ?? TocadorAparelho() {
     _instrumento = instrumentoPorId(preferencias.instrumento ?? '');
     _afinacao = _instrumento.afinacao(preferencias.afinacao ?? '');
-    _auto = preferencias.auto;
     _escolha = EscolhaCorda(alvos: _alvos(), pares: _instrumento.pares);
     _dobra = DobraHarmonicos(alvos: _alvos(), pares: _instrumento.pares);
-    if (!_auto) {
-      _escolha.fixar(
-        preferencias.cordaFixada.clamp(0, _afinacao.notas.length - 1).toInt(),
-      );
-    }
     _montarDetector();
     _a4 = ajustes.a4;
     _precisao = ajustes.precisao;
@@ -177,7 +171,10 @@ class ControladorAfinador extends ChangeNotifier {
 
   late Instrumento _instrumento;
   late Afinacao _afinacao;
-  late bool _auto;
+
+  /// O app abre sempre em Auto (RF-04); só tocar numa corda ou desligar a
+  /// chave sai dele, e isso não fica guardado.
+  bool _auto = true;
   late EscolhaCorda _escolha;
   late DobraHarmonicos _dobra;
   late DetectorFrequencia _detector;
@@ -275,6 +272,8 @@ class ControladorAfinador extends ChangeNotifier {
     if (instrumento.id == _instrumento.id) return;
     _instrumento = instrumento;
     _preferencias.instrumento = instrumento.id;
+    // Outro instrumento, outras cordas: a corda fixada não vale mais nada.
+    _auto = true;
     _montarDetector();
     _trocarAfinacao(instrumento.padrao);
   }
@@ -290,10 +289,7 @@ class ControladorAfinador extends ChangeNotifier {
     _afinadas.clear();
     _escolha = EscolhaCorda(alvos: _alvos(), pares: _instrumento.pares);
     _dobra = DobraHarmonicos(alvos: _alvos(), pares: _instrumento.pares);
-    if (!_auto) {
-      _escolha.fixar(0);
-      _preferencias.cordaFixada = 0;
-    }
+    if (!_auto) _escolha.fixar(0);
     _recomecarLeitura();
     notifyListeners();
   }
@@ -317,13 +313,10 @@ class ControladorAfinador extends ChangeNotifier {
   void definirAuto(bool ligado) {
     if (ligado == _auto) return;
     _auto = ligado;
-    _preferencias.auto = ligado;
     if (ligado) {
       _escolha.liberar();
     } else {
-      final corda = _escolha.atual ?? 0;
-      _escolha.fixar(corda);
-      _preferencias.cordaFixada = corda;
+      _escolha.fixar(_escolha.atual ?? 0);
     }
     notifyListeners();
   }
@@ -332,8 +325,6 @@ class ControladorAfinador extends ChangeNotifier {
   /// dela, na afinação e na referência atuais (RF-05).
   void tocarCorda(int indice) {
     _auto = false;
-    _preferencias.auto = false;
-    _preferencias.cordaFixada = indice;
     _escolha.fixar(indice);
     final duracao = _tocador.tocarCorda(frequenciaAlvo(indice));
     _ensurdecer(duracao);

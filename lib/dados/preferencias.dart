@@ -29,8 +29,6 @@ class Preferencias {
 
   static const _chaveInstrumento = 'instrumento';
   static const _chaveAfinacao = 'afinacao';
-  static const _chaveAuto = 'auto';
-  static const _chaveCordaFixada = 'cordaFixada';
   static const _chaveTema = 'tema';
   static const _chaveNotacao = 'notacao';
   static const _chavePrecisao = 'precisao';
@@ -45,14 +43,6 @@ class Preferencias {
   /// Id da afinação do instrumento guardado.
   String? get afinacao => _disco.getString(_chaveAfinacao);
   set afinacao(String? id) => _gravarTexto(_chaveAfinacao, id);
-
-  bool get auto => _disco.getBool(_chaveAuto) ?? true;
-  set auto(bool valor) => unawaited(_disco.setBool(_chaveAuto, valor));
-
-  /// Corda escolhida à mão, quando o Auto está desligado.
-  int get cordaFixada => _disco.getInt(_chaveCordaFixada) ?? 0;
-  set cordaFixada(int indice) =>
-      unawaited(_disco.setInt(_chaveCordaFixada, indice));
 
   TemaEscolhido get tema =>
       _lerEnum(TemaEscolhido.values, _chaveTema, TemaEscolhido.sistema);

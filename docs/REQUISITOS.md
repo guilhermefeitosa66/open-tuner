@@ -123,7 +123,8 @@ segundo plano ou a tela apaga, e volta sozinha ao retornar.
 **RF-03 · Cents.** O desvio é `1200 × log2(f_medida / f_alvo)`, com `f_alvo` calculada pelo
 temperamento igual a partir da referência A4 (RF-17).
 
-**RF-04 · Modo automático** (ligado por padrão, chave "Auto" no topo). O alvo é a corda da afinação
+**RF-04 · Modo automático** (chave "Auto" no topo). O app abre sempre em Auto, e trocar de
+instrumento volta a ele. O alvo é a corda da afinação
 mais próxima da nota tocada, em cents. Para não pular entre cordas vizinhas, a troca de alvo só
 acontece depois de 5 leituras consecutivas apontando para outra corda. Depois de um silêncio (a tela
 volta à espera, RF-12), a corda seguinte se escolhe direto pela mais próxima, sem essa espera:
@@ -134,7 +135,8 @@ oitava de cima de um par conta como o próprio par.
 toca o som da corda, na afinação e na referência A4 atuais, para afinar de ouvido. O som é
 sintetizado no próprio app (harmônicos de corda dedilhada na frequência exata), então serve para
 qualquer afinação sem gravação nenhuma. Enquanto ele soa, o afinador ignora o microfone, senão a
-referência marcaria a si mesma como afinada. Ligar o Auto de novo devolve a escolha ao detector.
+referência marcaria a si mesma como afinada. Ligar o Auto de novo devolve a escolha ao detector. A
+corda fixada vale até trocar de instrumento ou fechar o app: não é guardada.
 
 ### O afinador
 
@@ -207,7 +209,8 @@ com o instrumento, com as tarraxas sempre nas mesmas alturas para os botões nã
 ukulele (coroa arredondada, tarraxas de botão), cavaquinho (bico no alto, tarraxas borboleta de
 metal), violão (cabeça vazada com rolos, estilo clássico), viola caipira (recorte em lóbulos,
 losango de madrepérola e duas tarraxas por par), baixo (topo inclinado, tarraxas grandes, cordas
-grossas) e violino (caixa de cravelhas aberta, voluta no alto, cravelhas de ébano). Trocar de instrumento funde um desenho no outro.
+grossas) e violino (caixa de cravelhas aberta, voluta no alto, cravelhas de ébano). Trocar de
+instrumento funde um desenho no outro.
 
 **RF-12 · Espera.** Sem corda tocada, o indicador fica no centro, vazio, e uma mensagem pede "Toque
 qualquer corda para começar". Da espera, a primeira leitura só aparece quando a seguinte concorda com
@@ -253,8 +256,8 @@ Abertos pelo ícone no canto do topo, na mesma folha que sobe de baixo.
 | Referência do Lá (A4) | 430 a 450 Hz, de 1 em 1 | 440 Hz |
 | Manter a tela ligada | ligado · desligado | ligado, só com o afinador aberto |
 
-**RF-18 · Memória.** Instrumento, afinação, modo Auto e ajustes são guardados no aparelho e
-restaurados ao abrir.
+**RF-18 · Memória.** Instrumento, afinação e ajustes são guardados no aparelho e restaurados ao
+abrir. O modo Auto não: o app abre sempre nele (RF-04).
 
 ### Permissão do microfone
 

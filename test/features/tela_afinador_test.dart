@@ -632,8 +632,6 @@ void main() {
       await tester.pump();
 
       expect(autoLigado(tester), isFalse);
-      expect(app.preferencias.getBool('auto'), isFalse);
-      expect(app.preferencias.getInt('cordaFixada'), 0);
       // E o som da corda, um G4.
       expect(app.tocador.cordas, hasLength(1));
       expect(app.tocador.cordas.single, closeTo(392.0, 0.01));
@@ -899,7 +897,7 @@ void main() {
       expect(app.telaLigada.last, isTrue);
     });
 
-    testWidgets('restaura instrumento, afinação, Auto e ajustes', (
+    testWidgets('restaura instrumento, afinação e ajustes, e abre em Auto', (
       tester,
     ) async {
       await abrirApp(
@@ -917,24 +915,12 @@ void main() {
       expect(find.text('Baixo'), findsOneWidget);
       expect(find.text('Drop D'), findsOneWidget);
       expect(find.text('Ré Lá Ré Sol'), findsOneWidget);
-      expect(autoLigado(tester), isFalse);
+      // O Auto não é guardado: mesmo quem fechou o app com uma corda fixada
+      // (preferência de versões antigas) volta em Auto.
+      expect(autoLigado(tester), isTrue);
       expect(
         tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
         ThemeMode.dark,
-      );
-      expect(
-        tester
-            .widget<Semantics>(
-              find
-                  .descendant(
-                    of: find.byKey(const Key('corda-1')),
-                    matching: find.byType(Semantics),
-                  )
-                  .first,
-            )
-            .properties
-            .selected,
-        isTrue,
       );
     });
   });

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:open_tuner/dominio/afinacoes.dart';
 import 'package:open_tuner/dominio/estado_corda.dart';
 import 'package:open_tuner/features/afinador/grafico.dart';
 
@@ -32,11 +33,10 @@ void main() {
     test(
       'uma leitura na oitava de baixo não leva o ponteiro à borda',
       () async {
-        for (final preferencias in [
-          const <String, Object>{},
-          const <String, Object>{'auto': false, 'cordaFixada': 2},
-        ]) {
-          b = await ControladorSincrono.abrir(preferencias: preferencias);
+        for (final manual in [false, true]) {
+          b = await ControladorSincrono.abrir();
+          // No manual, a corda E4 fixada à mão.
+          if (manual) b.controlador.tocarCorda(2);
           b.tocar(desviada(e4, -8), 25);
           // 2 s de silêncio: a tela volta a ociosa.
           b.tocar(null, 50);
@@ -50,7 +50,7 @@ void main() {
             expect(
               l.cents.abs(),
               lessThan(50),
-              reason: '$preferencias: ${trecho(b, desde)}',
+              reason: 'manual: $manual, ${trecho(b, desde)}',
             );
           }
           expect(b.leitura.corda, 2);
@@ -58,6 +58,23 @@ void main() {
           b.descartar();
         }
         b = await ControladorSincrono.abrir();
+      },
+    );
+
+    test(
+      'trocar de instrumento volta ao Auto; trocar de afinação, não',
+      () async {
+        b = await ControladorSincrono.abrir();
+        expect(b.controlador.auto, isTrue);
+        b.controlador.tocarCorda(1);
+        expect(b.controlador.auto, isFalse);
+        b.controlador.escolherAfinacao(
+          b.controlador.instrumento.afinacao('sol-grave'),
+        );
+        expect(b.controlador.auto, isFalse);
+        b.controlador.escolherInstrumento(instrumentoPorId('violino'));
+        expect(b.controlador.auto, isTrue);
+        expect(b.controlador.cordaAlvo, isNull);
       },
     );
 
