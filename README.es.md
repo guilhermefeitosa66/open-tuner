@@ -118,6 +118,7 @@ La primera afinación de cada instrumento es la estándar, que ya viene elegida.
 | Bajo de 4 cuerdas | Estándar, Drop D, Medio tono abajo |
 | Bajo de 5 cuerdas | Estándar, Con Do agudo |
 | Bajo de 6 cuerdas | Estándar |
+| Violín (beta) | Estándar |
 
 El cavaquinho y la viola caipira son brasileños. El cavaquinho es el pequeño instrumento de cuatro
 cuerdas de la samba y del choro. La viola caipira tiene diez cuerdas en cinco pares, y los tres pares

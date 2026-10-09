@@ -208,6 +208,10 @@
   "@grupoBaixo": {
     "description": "Instrument group heading"
   },
+  "grupoArco": "Bowed strings",
+  "@grupoArco": {
+    "description": "Instrument group heading: instruments played with a bow (violin)"
+  },
   "instrumentoUkulele": "Ukulele",
   "@instrumentoUkulele": {
     "description": "Instrument name"
@@ -243,6 +247,10 @@
   "instrumentoBaixo6": "6-string bass",
   "@instrumentoBaixo6": {
     "description": "Instrument name"
+  },
+  "instrumentoViolino": "Violin (beta)",
+  "@instrumentoViolino": {
+    "description": "Instrument name. \"(beta)\" marks it as new and still being tested with real instruments"
   },
   "afinacaoPadrao": "Standard",
   "@afinacaoPadrao": {

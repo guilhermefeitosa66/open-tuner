@@ -164,6 +164,9 @@ class TextosEn extends Textos {
   String get grupoBaixo => 'Bass';
 
   @override
+  String get grupoArco => 'Bowed strings';
+
+  @override
   String get instrumentoUkulele => 'Ukulele';
 
   @override
@@ -189,6 +192,9 @@ class TextosEn extends Textos {
 
   @override
   String get instrumentoBaixo6 => '6-string bass';
+
+  @override
+  String get instrumentoViolino => 'Violin (beta)';
 
   @override
   String get afinacaoPadrao => 'Standard';

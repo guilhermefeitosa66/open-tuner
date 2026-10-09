@@ -14,6 +14,7 @@ String nomeInstrumento(Textos textos, String id) => switch (id) {
   'baixo' => textos.instrumentoBaixo,
   'baixo-5' => textos.instrumentoBaixo5,
   'baixo-6' => textos.instrumentoBaixo6,
+  'violino' => textos.instrumentoViolino,
   _ => id,
 };
 
@@ -21,6 +22,7 @@ String nomeGrupo(Textos textos, GrupoInstrumento grupo) => switch (grupo) {
   GrupoInstrumento.ukuleleCavaquinho => textos.grupoUkuleleCavaquinho,
   GrupoInstrumento.violaoViola => textos.grupoViolaoViola,
   GrupoInstrumento.baixo => textos.grupoBaixo,
+  GrupoInstrumento.arco => textos.grupoArco,
 };
 
 String nomeAfinacao(Textos textos, String id) => switch (id) {

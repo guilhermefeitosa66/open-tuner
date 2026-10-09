@@ -26,6 +26,7 @@ INSTRUMENTOS
 • Guitarra de 7 cuerdas: séptima en Do, séptima en Si
 • Viola caipira: cebolão en Mi, cebolão en Re, rio abaixo
 • Bajo de 4, 5 y 6 cuerdas
+• Violín (beta)
 
 La afinación estándar ya viene elegida. OpenTuner reconoce la cuerda que tocaste, o puedes tocar una cuerda para fijarla.
 

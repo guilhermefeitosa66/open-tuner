@@ -26,6 +26,7 @@ INSTRUMENTS
 • 7-string guitar: low C, low B
 • Viola caipira: cebolão in E, cebolão in D, rio abaixo
 • 4, 5 and 6-string bass
+• Violin (beta)
 
 Standard tuning is already picked. OpenTuner hears which string you played, or you can tap a string to lock it.
 

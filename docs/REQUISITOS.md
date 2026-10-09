@@ -75,6 +75,7 @@ reentrante).
 | Baixo 5 cordas | Padrão *(padrão)* | B0 30,87 · E1 41,20 · A1 55,00 · D2 73,42 · G2 98,00 |
 |  | Com Dó agudo | E1 41,20 · A1 55,00 · D2 73,42 · G2 98,00 · C3 130,81 |
 | Baixo 6 cordas | Padrão *(padrão)* | B0 30,87 · E1 41,20 · A1 55,00 · D2 73,42 · G2 98,00 · C3 130,81 |
+| Violino *(beta, desde a 1.1)* | Padrão *(padrão)* | G3 196,00 · D4 293,66 · A4 440,00 · E5 659,26 |
 
 A faixa que o detector precisa cobrir vai de **B0 (30,87 Hz)** a **E5 (659,26 Hz)**, com folga para
 uma corda muito frouxa ou muito apertada: 28 Hz a 1.400 Hz.
@@ -205,8 +206,8 @@ A corda alvo fica destacada no botão, na tarraxa e no fio da corda. O desenho �
 com o instrumento, com as tarraxas sempre nas mesmas alturas para os botões não saírem do lugar:
 ukulele (coroa arredondada, tarraxas de botão), cavaquinho (bico no alto, tarraxas borboleta de
 metal), violão (cabeça vazada com rolos, estilo clássico), viola caipira (recorte em lóbulos,
-losango de madrepérola e duas tarraxas por par) e baixo (topo inclinado, tarraxas grandes, cordas
-grossas). Trocar de instrumento funde um desenho no outro.
+losango de madrepérola e duas tarraxas por par), baixo (topo inclinado, tarraxas grandes, cordas
+grossas) e violino (caixa de cravelhas aberta, voluta no alto, cravelhas de ébano). Trocar de instrumento funde um desenho no outro.
 
 **RF-12 · Espera.** Sem corda tocada, o indicador fica no centro, vazio, e uma mensagem pede "Toque
 qualquer corda para começar". Da espera, a primeira leitura só aparece quando a seguinte concorda com

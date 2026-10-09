@@ -164,6 +164,9 @@ class TextosPt extends Textos {
   String get grupoBaixo => 'Baixo';
 
   @override
+  String get grupoArco => 'Arco';
+
+  @override
   String get instrumentoUkulele => 'Ukulele';
 
   @override
@@ -189,6 +192,9 @@ class TextosPt extends Textos {
 
   @override
   String get instrumentoBaixo6 => 'Baixo 6 cordas';
+
+  @override
+  String get instrumentoViolino => 'Violino (beta)';
 
   @override
   String get afinacaoPadrao => 'Padrão';

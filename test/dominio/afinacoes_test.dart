@@ -67,6 +67,7 @@ void main() {
       'baixo',
       'baixo-5',
       'baixo-6',
+      'violino',
     ];
 
     const idsAfinacao = {
@@ -87,6 +88,7 @@ void main() {
       'baixo': ['padrao', 'drop-d', 'meio-tom-abaixo'],
       'baixo-5': ['padrao', 'com-do-agudo'],
       'baixo-6': ['padrao'],
+      'violino': ['padrao'],
     };
 
     String notas(Afinacao afinacao) => afinacao.notas.join(' ');
@@ -130,6 +132,7 @@ void main() {
         GrupoInstrumento.violaoViola,
       );
       expect(instrumentoPorId('baixo-5').grupo, GrupoInstrumento.baixo);
+      expect(instrumentoPorId('violino').grupo, GrupoInstrumento.arco);
       expect(instrumentos.where((i) => i.pares).map((i) => i.id), [
         'viola-caipira',
       ]);
@@ -137,6 +140,13 @@ void main() {
 
     test('ordem física: ukulele padrão é reentrante', () {
       expect(notas(instrumentoPorId('ukulele').padrao), 'G4 C4 E4 A4');
+    });
+
+    test('violino em quintas, da mais grave para a mais aguda', () {
+      final violino = instrumentoPorId('violino');
+      expect(notas(violino.padrao), 'G3 D4 A4 E5');
+      expect(violino.frequenciaMinima, closeTo(196.0, 0.01));
+      expect(violino.frequenciaMaxima, closeTo(659.26, 0.01));
     });
 
     test('meio tom abaixo é escrito com bemol', () {

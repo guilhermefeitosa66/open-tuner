@@ -310,6 +310,8 @@ void main() {
       ('ukulele', 440.0, 3),
       ('cavaquinho', 587.33, 3),
       ('cavaquinho', 293.66, 0),
+      ('violino', 196.0, 0),
+      ('violino', 659.26, 3),
     ]) {
       test('$id: nota limpa de $f Hz não cai uma oitava', () {
         final analises = analisar(cordaReal(f, 1.5, 3), instrumentoPorId(id));
@@ -333,6 +335,8 @@ void main() {
       ('violao', e2, 329.63, 5), // E4 = 4 × E2
       ('violao', a2, 329.63, 5), // E4 ≈ 3 × A2
       ('cavaquinho', 293.66, 587.33, 3), // D5 = 2 × D4
+      ('violino', 196.0, 293.66, 1), // D4 ≈ 1,5 × G3
+      ('violino', 440.0, 659.26, 3), // E5 ≈ 1,5 × A4
     ]) {
       test('$id: abafar a corda de $grave Hz e tocar a de $aguda Hz troca a '
           'corda', () {

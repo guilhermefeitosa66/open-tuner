@@ -351,6 +351,12 @@ abstract class Textos {
   /// **'Bass'**
   String get grupoBaixo;
 
+  /// Instrument group heading: instruments played with a bow (violin)
+  ///
+  /// In en, this message translates to:
+  /// **'Bowed strings'**
+  String get grupoArco;
+
   /// Instrument name
   ///
   /// In en, this message translates to:
@@ -404,6 +410,12 @@ abstract class Textos {
   /// In en, this message translates to:
   /// **'6-string bass'**
   String get instrumentoBaixo6;
+
+  /// Instrument name. "(beta)" marks it as new and still being tested with real instruments
+  ///
+  /// In en, this message translates to:
+  /// **'Violin (beta)'**
+  String get instrumentoViolino;
 
   /// Tuning name
   ///

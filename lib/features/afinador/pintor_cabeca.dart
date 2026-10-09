@@ -26,6 +26,10 @@ enum EstiloCabeca {
 
   /// Larga, com o topo inclinado, tarraxas grandes e cordas grossas.
   baixo,
+
+  /// O violino: caixa de cravelhas aberta, a voluta no alto e cravelhas de
+  /// ébano atravessando a caixa.
+  violino,
 }
 
 /// O estilo do desenho de cada instrumento.
@@ -38,6 +42,7 @@ EstiloCabeca estiloDaCabeca(Instrumento instrumento) =>
             : EstiloCabeca.ukulele,
       GrupoInstrumento.violaoViola =>
         instrumento.pares ? EstiloCabeca.viola : EstiloCabeca.violao,
+      GrupoInstrumento.arco => EstiloCabeca.violino,
     };
 
 // Materiais do desenho: iguais nos dois temas, como o objeto de verdade.
@@ -50,12 +55,14 @@ const _fenda = Color(0xFF1C120B);
 const _traste = Color(0xFFB9B2A6);
 const _pestana = Color(0xFFEDE3CF);
 const _corda = Color(0xFFD9D3C9);
+const _ebano = Color(0xFF231812);
 
 /// Tom de cada madeira, misturado à madeira do tema.
 const _koa = Color(0xFFB5773F);
 const _jacaranda = Color(0xFF4A2616);
 const _cedro = Color(0xFF9C5A2C);
 const _bordo = Color(0xFFD8A560);
+const _verniz = Color(0xFF9A4420);
 
 /// A cabeça do instrumento: madeira, veios, pestana, escala, tarraxas, pinos
 /// e as cordas até a pestana. A corda alvo fica destacada; as afinadas, em
@@ -159,7 +166,24 @@ class PintorCabeca extends CustomPainter {
       ..quadraticBezierTo(266, 226, 242, 238)
       ..lineTo(242, 274)
       ..close(),
+    // O violino: a caixa estreita, que afina para cima, e a voluta redonda.
+    EstiloCabeca.violino: Path.combine(
+      PathOperation.union,
+      Path()
+        ..moveTo(148, 274)
+        ..lineTo(148, 236)
+        ..quadraticBezierTo(152, 222, 154, 204)
+        ..lineTo(160, 70)
+        ..lineTo(230, 70)
+        ..lineTo(236, 204)
+        ..quadraticBezierTo(238, 222, 242, 236)
+        ..lineTo(242, 274)
+        ..close(),
+      Path()..addOval(Rect.fromCircle(center: _centroVoluta, radius: 30)),
+    ),
   };
+
+  static const _centroVoluta = Offset(195, 44);
 
   // ----------------------------------------------------------- medidas ---
 
@@ -168,6 +192,7 @@ class PintorCabeca extends CustomPainter {
     final x = switch (estilo) {
       EstiloCabeca.baixo => 97.0,
       EstiloCabeca.ukulele => 113.0,
+      EstiloCabeca.violino => 124.0,
       _ => 104.0,
     };
     return esquerda ? x : GeometriaCabeca.larguraDesenho - x;
@@ -179,6 +204,7 @@ class PintorCabeca extends CustomPainter {
       EstiloCabeca.violao => 159.0,
       EstiloCabeca.ukulele => 153.0,
       EstiloCabeca.baixo => 146.0,
+      EstiloCabeca.violino => 182.0,
       _ => 150.0,
     };
     return esquerda ? x : GeometriaCabeca.larguraDesenho - x;
@@ -188,6 +214,7 @@ class PintorCabeca extends CustomPainter {
     EstiloCabeca.baixo => 2.9,
     EstiloCabeca.violao => 1.9,
     EstiloCabeca.ukulele => 2.0,
+    EstiloCabeca.violino => 1.3,
     _ => 1.4,
   };
 
@@ -208,6 +235,7 @@ class PintorCabeca extends CustomPainter {
       EstiloCabeca.violao => (madeira, 0.0),
       EstiloCabeca.viola => (_cedro, 0.5),
       EstiloCabeca.baixo => (_bordo, 0.6),
+      EstiloCabeca.violino => (_verniz, 0.55),
     };
     return Color.lerp(madeira, tom, quanto)!;
   }
@@ -237,11 +265,12 @@ class PintorCabeca extends CustomPainter {
     _madeira(canvas, contorno, geometria);
     if (estilo == EstiloCabeca.violao) _fendas(canvas, geometria);
     if (estilo == EstiloCabeca.viola) _losango(canvas);
+    if (estilo == EstiloCabeca.violino) _caixaCravelhas(canvas, geometria);
     _braco(canvas);
     _cordas(canvas, geometria);
     if (estilo == EstiloCabeca.violao) {
       _rolos(canvas, geometria);
-    } else {
+    } else if (estilo != EstiloCabeca.violino) {
       _pinos(canvas, geometria);
     }
     _chaves(canvas, geometria);
@@ -250,7 +279,8 @@ class PintorCabeca extends CustomPainter {
 
   /// Eixos das tarraxas, por baixo da madeira.
   void _eixos(Canvas canvas, GeometriaCabeca geometria) {
-    final eixo = Paint()..color = _metalBorda;
+    final eixo = Paint()
+      ..color = estilo == EstiloCabeca.violino ? _ebano : _metalBorda;
     final grossura = estilo == EstiloCabeca.baixo ? 9.0 : 6.0;
     for (var i = 0; i < cordas; i++) {
       final esquerda = geometria.ladoEsquerdo(i);
@@ -358,6 +388,56 @@ class PintorCabeca extends CustomPainter {
       );
   }
 
+  /// A caixa aberta do violino, com as cravelhas de lado a lado, e o
+  /// caracol da voluta.
+  void _caixaCravelhas(Canvas canvas, GeometriaCabeca geometria) {
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTRB(170, 80, 220, 226),
+        const Radius.circular(12),
+      ),
+      Paint()..color = _fenda,
+    );
+    final cravelha = Paint()..color = Color.lerp(_ebano, _marfimBorda, 0.25)!;
+    for (var i = 0; i < cordas; i++) {
+      final y = geometria.yDesenho(i);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTRB(162, y - 3.5, 228, y + 3.5),
+          const Radius.circular(3.5),
+        ),
+        cravelha,
+      );
+    }
+
+    // O caracol: uma espiral que fecha no olho da voluta.
+    final espiral = Path();
+    const voltas = 2.25;
+    const passos = 60;
+    for (var k = 0; k <= passos; k++) {
+      final t = k / passos;
+      final angulo = -math.pi / 2 + t * voltas * 2 * math.pi;
+      final raio = 25 * (1 - t) + 4 * t;
+      final ponto =
+          _centroVoluta + Offset(math.cos(angulo), math.sin(angulo)) * raio;
+      if (k == 0) {
+        espiral.moveTo(ponto.dx, ponto.dy);
+      } else {
+        espiral.lineTo(ponto.dx, ponto.dy);
+      }
+    }
+    canvas
+      ..drawPath(
+        espiral,
+        Paint()
+          ..color = Color.lerp(madeiraEscura, _tomMadeira, 0.25)!
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..strokeCap = StrokeCap.round,
+      )
+      ..drawCircle(_centroVoluta, 3.5, Paint()..color = madeiraEscura);
+  }
+
   void _braco(Canvas canvas) {
     canvas
       ..drawRect(
@@ -384,7 +464,10 @@ class PintorCabeca extends CustomPainter {
     final porLado = [geometria.esquerda, cordas - geometria.esquerda];
     for (var i = 0; i < cordas; i++) {
       final esquerda = geometria.ladoEsquerdo(i);
-      final xn = cordas == 1 ? 195.0 : 158 + i * (74 / (cordas - 1));
+      // No violino as cordas chegam à pestana bem juntas.
+      final xn = estilo == EstiloCabeca.violino
+          ? (cordas == 1 ? 195.0 : 174 + i * (42 / (cordas - 1)))
+          : (cordas == 1 ? 195.0 : 158 + i * (74 / (cordas - 1)));
       final cor = _corDoEstado(i);
       final espessura = _espessura(i) * (cor == null ? 1 : 1.3);
       final tinta = Paint()
@@ -392,7 +475,8 @@ class PintorCabeca extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = espessura;
 
-      var xp = _xPino(esquerda);
+      // No violino a corda desce reta da cravelha, pelo meio da caixa.
+      var xp = estilo == EstiloCabeca.violino ? xn : _xPino(esquerda);
       if (estilo == EstiloCabeca.violao) {
         // Cada corda se enrola num ponto diferente do rolo.
         final lado = esquerda ? i : i - geometria.esquerda;
@@ -492,7 +576,7 @@ class PintorCabeca extends CustomPainter {
     final sentido = esquerda ? 1.0 : -1.0;
 
     // A bucha de metal entre a chave e a madeira.
-    if (estilo != EstiloCabeca.baixo) {
+    if (estilo != EstiloCabeca.baixo && estilo != EstiloCabeca.violino) {
       final bucha = Rect.fromCenter(
         center: centro.translate(sentido * 11, 0),
         width: 6,
@@ -524,6 +608,26 @@ class PintorCabeca extends CustomPainter {
         canvas
           ..drawOval(chave, preenchimento)
           ..drawOval(chave, borda);
+      case EstiloCabeca.violino:
+        // Cravelha de ébano: a cabeça em gota, o colar junto da caixa e o
+        // olho de madrepérola.
+        final ebano = Paint()..color = cor ?? _ebano;
+        final contorno = Paint()
+          ..color = _marfimBorda
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2;
+        final colar = Rect.fromCenter(
+          center: centro.translate(sentido * 14, 0),
+          width: 6,
+          height: 10,
+        );
+        final chave = Rect.fromCenter(center: centro, width: 18, height: 28);
+        canvas
+          ..drawRect(colar, ebano)
+          ..drawRect(colar, contorno)
+          ..drawOval(chave, ebano)
+          ..drawOval(chave, contorno)
+          ..drawCircle(centro, 2.6, Paint()..color = _marfim);
       case EstiloCabeca.violao:
         final chave = Rect.fromCenter(center: centro, width: 18, height: 26);
         canvas

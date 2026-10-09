@@ -88,7 +88,7 @@ class Afinacao {
 }
 
 /// Os grupos da lista de instrumentos (RF-14).
-enum GrupoInstrumento { ukuleleCavaquinho, violaoViola, baixo }
+enum GrupoInstrumento { ukuleleCavaquinho, violaoViola, baixo, arco }
 
 /// Um instrumento e as afinações que o app oferece para ele.
 class Instrumento {
@@ -146,7 +146,7 @@ Afinacao _afinacao(String id, String notas) => Afinacao(
   notas: notas.split(' ').map(NotaAfinacao.ler).toList(growable: false),
 );
 
-/// Os instrumentos da versão 1.0, na ordem da tabela de docs/REQUISITOS.md.
+/// Os instrumentos, na ordem da tabela de docs/REQUISITOS.md.
 /// Acrescentar uma afinação é acrescentar uma linha aqui.
 final List<Instrumento> instrumentos = List.unmodifiable([
   Instrumento(
@@ -223,6 +223,11 @@ final List<Instrumento> instrumentos = List.unmodifiable([
     id: 'baixo-6',
     grupo: GrupoInstrumento.baixo,
     afinacoes: [_afinacao('padrao', 'B0 E1 A1 D2 G2 C3')],
+  ),
+  Instrumento(
+    id: 'violino',
+    grupo: GrupoInstrumento.arco,
+    afinacoes: [_afinacao('padrao', 'G3 D4 A4 E5')],
   ),
 ]);
 

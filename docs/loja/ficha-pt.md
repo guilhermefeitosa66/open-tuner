@@ -26,6 +26,7 @@ INSTRUMENTOS
 • Violão 7 cordas: sétima em Dó, sétima em Si
 • Viola caipira: cebolão em Mi, cebolão em Ré, rio abaixo
 • Baixo de 4, 5 e 6 cordas
+• Violino (beta)
 
 A afinação padrão já vem escolhida. O OpenTuner reconhece a corda tocada, ou você toca numa corda para fixá-la.
 

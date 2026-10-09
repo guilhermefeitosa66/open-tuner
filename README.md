@@ -117,6 +117,7 @@ The first tuning of each instrument is the standard one, already picked when you
 | 4-string bass | Standard, Drop D, Half step down |
 | 5-string bass | Standard, High C |
 | 6-string bass | Standard |
+| Violin (beta) | Standard |
 
 The cavaquinho and the viola caipira are Brazilian. The cavaquinho is the small four-string
 instrument of samba and choro. The viola caipira has ten strings in five pairs, the three lower

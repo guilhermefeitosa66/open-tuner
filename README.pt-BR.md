@@ -118,6 +118,7 @@ A primeira afinação de cada instrumento é a padrão, que já vem escolhida.
 | Baixo 4 cordas | Padrão, Drop D, Meio tom abaixo |
 | Baixo 5 cordas | Padrão, Com Dó agudo |
 | Baixo 6 cordas | Padrão |
+| Violino (beta) | Padrão |
 
 Na viola caipira, os três pares mais graves são afinados em oitava, e o OpenTuner aceita qualquer
 uma das duas cordas do par. As notas e frequências de cada afinação estão em
