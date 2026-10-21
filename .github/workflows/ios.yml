@@ -1,0 +1,143 @@
+# Build do iOS num runner macOS, já que o Xcode só roda no macOS.
+#
+# - Em todo push na main e em PR: compila sem assinatura, só para saber cedo
+#   se algo quebrou do lado do iOS.
+# - Pela aba Actions (workflow_dispatch, "enviar" marcado): arquiva, assina e
+#   manda para o App Store Connect, onde o build aparece no TestFlight e pode
+#   ir para a revisão.
+#
+# A assinatura é a gerenciada pela nuvem da Apple: o certificado de
+# distribuição e o perfil de provisionamento ficam na conta da Apple, e o
+# xcodebuild os obtém com a chave da API do App Store Connect. Nenhum
+# certificado ou .p12 passa pelo repositório nem pelos segredos. A chave da
+# API tem que ter o papel Admin, que é o que permite criar e usar o
+# certificado na nuvem.
+#
+# Segredos (Settings → Secrets and variables → Actions):
+#   APP_STORE_CONNECT_KEY_ID     id da chave (10 caracteres)
+#   APP_STORE_CONNECT_ISSUER_ID  issuer id (UUID, no alto da página de chaves)
+#   APP_STORE_CONNECT_KEY        conteúdo do arquivo AuthKey_XXXXXXXXXX.p8
+# Variável:
+#   APPLE_TEAM_ID                Team ID da conta de desenvolvedor
+name: iOS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      enviar:
+        description: Assinar e enviar ao App Store Connect (TestFlight)
+        type: boolean
+        default: true
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: "3.38.5"
+
+jobs:
+  ios:
+    name: ${{ inputs.enviar && 'Build assinado e envio ao App Store Connect' || 'Build sem assinatura' }}
+    # Desde 28/04/2026 a Apple só aceita builds feitos com o Xcode 26.
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Build sem assinatura
+        if: ${{ !inputs.enviar }}
+        run: flutter build ios --release --no-codesign
+
+      # O número do build (CFBundleVersion) precisa subir a cada envio para a
+      # mesma versão; o número da rodada deste workflow só cresce. A versão
+      # mostrada na loja vem do pubspec.
+      - name: Preparar o projeto do Xcode
+        if: ${{ inputs.enviar }}
+        run: flutter build ios --release --config-only --build-number=${{ github.run_number }}
+
+      - name: Chave da API do App Store Connect
+        if: ${{ inputs.enviar }}
+        env:
+          CHAVE: ${{ secrets.APP_STORE_CONNECT_KEY }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/chaves"
+          printf '%s' "$CHAVE" > "$RUNNER_TEMP/chaves/AuthKey.p8"
+
+      - name: Arquivar
+        if: ${{ inputs.enviar }}
+        env:
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+        run: |
+          xcodebuild archive \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/OpenTuner.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/chaves/AuthKey.p8" \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER_ID" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic
+
+      # destination=upload: o próprio xcodebuild assina para distribuição e
+      # envia ao App Store Connect, sem gerar o .ipa em disco.
+      - name: Assinar e enviar
+        if: ${{ inputs.enviar }}
+        env:
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>destination</key>
+            <string>upload</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>teamID</key>
+            <string>$TEAM_ID</string>
+            <key>manageAppVersionAndBuildNumber</key>
+            <false/>
+          </dict>
+          </plist>
+          EOF
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/OpenTuner.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/exportado" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/chaves/AuthKey.p8" \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER_ID"
+
+      - name: Apagar a chave
+        if: ${{ always() && inputs.enviar }}
+        run: rm -rf "$RUNNER_TEMP/chaves"

@@ -30,9 +30,26 @@ class TocadorAparelho implements Tocador {
   /// Um só jogador: uma corda nova corta a anterior, como a mão na corda.
   AudioPlayer get _pronto => _jogador ??= AudioPlayer()
     ..setReleaseMode(ReleaseMode.stop)
-    ..setAudioContext(
-      AudioContextConfig(focus: AudioContextConfigFocus.duckOthers).build(),
-    );
+    ..setAudioContext(_contexto);
+
+  /// No iOS a sessão de áudio é uma só para o app: a categoria `playback`,
+  /// que o plugin escolhe por padrão, desligaria o microfone a cada corda
+  /// tocada. Fica em `playAndRecord`, com as opções do gravador
+  /// (`FonteAudioMicrofone`) mais o `duckOthers`, saindo pelo alto-falante e
+  /// não pelo fone de ouvido do telefone.
+  static final _contexto = AudioContext(
+    android: AudioContextConfig(
+      focus: AudioContextConfigFocus.duckOthers,
+    ).buildAndroid(),
+    iOS: AudioContextIOS(
+      category: AVAudioSessionCategory.playAndRecord,
+      options: const {
+        AVAudioSessionOptions.defaultToSpeaker,
+        AVAudioSessionOptions.allowBluetoothA2DP,
+        AVAudioSessionOptions.duckOthers,
+      },
+    ),
+  );
 
   @override
   Duration tocarCorda(double frequencia) {

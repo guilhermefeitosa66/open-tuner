@@ -65,15 +65,56 @@ faixas infantis depois, sem mudar o código.
 | Imagem de destaque (feature graphic) | 1024 × 500 PNG | a fazer, com o símbolo e o nome sobre a madeira |
 | Capturas de celular | 2 a 8, 1080 × 1920 ou maiores | do app real, uma por idioma da ficha |
 
-## App Store (quando houver versão iOS)
+## App Store
 
 | Campo | Valor |
 |---|---|
+| Bundle ID | `io.github.guilhermefeitosa66.opentuner` (o mesmo id do Android) |
+| Aparelhos | Só iPhone, em retrato. No iPad roda no modo de compatibilidade e a ficha não pede capturas de iPad |
+| Categoria | Música (secundária: Utilidades) |
 | Subtítulo (30) | Ukulele, guitar & bass tuner |
 | Palavras-chave (100) | tuner,ukulele,guitar,bass,cavaquinho,viola,chromatic,pitch,tuning,strings,acoustic |
 | Privacidade (rótulo nutricional) | Data Not Collected |
-| `NSMicrophoneUsageDescription` | "OpenTuner listens to the string you play to show if it is in tune. Audio is never recorded." (traduzido por idioma em `InfoPlist.strings`) |
+| Criptografia | Não usa (`ITSAppUsesNonExemptEncryption` = falso no `Info.plist`) |
+| `NSMicrophoneUsageDescription` | Em `ios/Runner/*.lproj/InfoPlist.strings`, um por idioma |
 | Licença de uso | EULA padrão da Apple, citado nos termos de uso |
+| Classificação etária | 4+: todas as respostas do questionário são "nenhum" |
+
+### Build e envio
+
+Não precisa de Mac. O workflow `iOS` (`.github/workflows/ios.yml`) compila sem assinatura em todo
+push e, rodado à mão na aba Actions, assina e envia o build ao App Store Connect. A assinatura é a
+gerenciada pela nuvem da Apple: nenhum certificado sai da conta da Apple. Diferente do Android,
+aqui uma chave vai para os segredos do GitHub: a da API do App Store Connect. Ela pode ser revogada
+a qualquer momento em Users and Access → Integrations, sem afetar o app publicado.
+
+Configuração, uma vez só, depois que a conta de desenvolvedor estiver ativa:
+
+1. **Bundle ID**: developer.apple.com → Certificates, IDs & Profiles → Identifiers → "+" → App IDs →
+   App, com o id explícito acima e nenhuma capability marcada.
+2. **App no App Store Connect**: Apps → "+" → New App: iOS, nome OpenTuner, idioma principal English
+   (U.S.), o bundle id acima, SKU `opentuner`.
+3. **Chave da API**: App Store Connect → Users and Access → Integrations → App Store Connect API →
+   Team Keys → "+", papel **Admin** (o necessário para a assinatura na nuvem). Baixar o `.p8`, que
+   só pode ser baixado uma vez, e anotar o Key ID e o Issuer ID.
+4. **GitHub** (Settings → Secrets and variables → Actions):
+   - segredos `APP_STORE_CONNECT_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID` e `APP_STORE_CONNECT_KEY`
+     (o conteúdo do `.p8`);
+   - variável `APPLE_TEAM_ID`, o Team ID de developer.apple.com → Membership details.
+5. Apagar o `.p8` da máquina depois de colar no GitHub, ou guardar junto da chave do Android.
+
+A cada versão: Actions → iOS → Run workflow. O número do build é o da rodada do workflow; a versão
+vem do `pubspec.yaml`. O build aparece no TestFlight em uns 15 minutos.
+
+### Antes de mandar para a revisão
+
+- [ ] Testar pelo TestFlight num iPhone de verdade: microfone, corda de referência tocando sem
+      cortar o microfone, aviso de afinada, troca de idioma.
+- [ ] Capturas de 6,9" (1320 × 2868 ou 1290 × 2796), de 3 a 10, uma série por idioma da ficha.
+- [ ] URL de suporte (o site) e de política de privacidade preenchidas.
+- [ ] App Privacy: "Data Not Collected".
+- [ ] Notas para o revisor: o app só usa o microfone, não tem login; para testar, tocar qualquer
+      corda ou assobiar perto do aparelho.
 
 ## Checklist antes de enviar
 

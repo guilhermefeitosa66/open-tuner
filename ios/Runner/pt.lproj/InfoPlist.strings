@@ -1,0 +1,2 @@
+/* Texto do pedido de permissão do microfone. */
+"NSMicrophoneUsageDescription" = "O OpenTuner escuta a corda que você toca para mostrar se ela está afinada. O som é analisado no aparelho e nunca é gravado nem enviado.";

@@ -15,7 +15,9 @@ O que sai daqui (tudo versionado; rode de novo quando a marca mudar):
 - `android/app/src/main/res/mipmap-*/ic_launcher*.png`: ícones legados para
   API 24 e 25, quadrado arredondado e redondo, em todas as densidades;
 - `docs/loja/icone-512.png` e `docs/loja/destaque-1024x500.png`: ícone e
-  imagem de destaque da ficha na Play Store.
+  imagem de destaque da ficha na Play Store;
+- `ios/Runner/Assets.xcassets/AppIcon.appiconset/`: o ícone do iOS, um PNG
+  só de 1024 × 1024, do qual o Xcode tira os outros tamanhos.
 
 A geometria vem de `docs/marca/icone-app.svg`: a palheta e a onda são os
 mesmos `d` do SVG, e as proporções do ícone adaptativo são as de lá.
@@ -47,6 +49,7 @@ from shapely.geometry import LineString
 
 RAIZ = Path(__file__).resolve().parent.parent
 RES = RAIZ / "android/app/src/main/res"
+ICONE_IOS = RAIZ / "ios/Runner/Assets.xcassets/AppIcon.appiconset"
 LOJA = RAIZ / "docs/loja"
 FONTES = RAIZ / "assets/fontes"
 
@@ -296,13 +299,30 @@ def svg_legado(redondo: bool) -> str:
 
 
 def svg_loja() -> str:
-    """Ícone da Play Store: quadrado cheio, sem transparência (a loja aplica
-    a própria máscara de cantos)."""
+    """Ícone das lojas: quadrado cheio, sem transparência (a Play Store e o
+    iOS aplicam a própria máscara de cantos)."""
     simbolo = svg_simbolo(256, 256, 512 * PROPORCAO_SIMBOLO, CREME, NOGUEIRA)
     return (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">'
         f'<rect width="512" height="512" fill="{NOGUEIRA}"/>{simbolo}</svg>'
     )
+
+
+CONTENTS_IOS = """{
+  "images" : [
+    {
+      "filename" : "Icon-App-1024x1024@1x.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+"""
 
 
 def _fonte_css(familia: str, arquivo: str, peso: int) -> str:
@@ -455,6 +475,16 @@ async def rasterizar(previa: Path | None) -> None:
         Image.open(io.BytesIO(opaco)).convert("RGBA").save(saida, "PNG", optimize=True)
         pngs["loja-512"] = saida.getvalue()
         (LOJA / "icone-512.png").write_bytes(pngs["loja-512"])
+
+        # O iOS recusa ícone com canal alfa, mesmo todo opaco: RGB puro.
+        opaco = await _rasterizar(pagina, _html_svg(svg_loja(), 1024), 1024, 1024, False)
+        saida = io.BytesIO()
+        Image.open(io.BytesIO(opaco)).convert("RGB").save(saida, "PNG", optimize=True)
+        ICONE_IOS.mkdir(parents=True, exist_ok=True)
+        for antigo in ICONE_IOS.glob("*.png"):
+            antigo.unlink()
+        (ICONE_IOS / "Icon-App-1024x1024@1x.png").write_bytes(saida.getvalue())
+        (ICONE_IOS / "Contents.json").write_text(CONTENTS_IOS, encoding="utf-8")
 
         # A imagem de destaque, ao contrário, é PNG de 24 bits, sem alfa.
         pngs["destaque"] = await _rasterizar(pagina, html_destaque(), 1024, 500, False)

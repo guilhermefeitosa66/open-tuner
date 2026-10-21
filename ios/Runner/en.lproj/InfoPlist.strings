@@ -1,0 +1,2 @@
+/* Texto do pedido de permissão do microfone. */
+"NSMicrophoneUsageDescription" = "OpenTuner listens to the string you play to show whether it is in tune. The sound is analyzed on the device and never recorded or sent anywhere.";

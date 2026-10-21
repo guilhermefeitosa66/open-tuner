@@ -130,6 +130,15 @@ class FonteAudioMicrofone implements FonteAudio {
       // Um fone Bluetooth puxaria o áudio para o SCO, de 8 ou 16 kHz.
       manageBluetooth: false,
     ),
+    // O mesmo no iOS: sem `allowBluetooth`, que é o perfil de chamada (HFP),
+    // de banda estreita. O tocador usa as mesmas opções, porque divide a
+    // sessão de áudio com o gravador.
+    iosConfig: const IosRecordConfig(
+      categoryOptions: [
+        IosAudioCategoryOption.defaultToSpeaker,
+        IosAudioCategoryOption.allowBluetoothA2DP,
+      ],
+    ),
   );
 
   @override
