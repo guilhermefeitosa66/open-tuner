@@ -1,0 +1,7 @@
+# As capturas de tela geram imagens para a loja; não são teste de regressão e
+# ficam fora da rodada normal (e do CI).
+#
+#   flutter test --run-skipped --tags capturas --update-goldens
+tags:
+  capturas:
+    skip: "Gera as capturas; rode com --run-skipped --tags capturas --update-goldens"
