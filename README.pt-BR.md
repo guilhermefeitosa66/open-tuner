@@ -17,6 +17,12 @@
 </p>
 
 <p align="center">
+  <a href="https://play.google.com/store/apps/details?id=io.github.guilhermefeitosa66.opentuner"><img src="site/lojas/google-play-pt.png" alt="Disponível no Google Play" height="52"></a>
+  &nbsp;
+  <a href="https://apps.apple.com/app/id6828465029"><img src="site/lojas/app-store-pt.svg" alt="Baixar na App Store" height="52"></a>
+</p>
+
+<p align="center">
   <a href="https://github.com/guilhermefeitosa66/open-tuner/releases/latest"><img src="https://img.shields.io/github/v/release/guilhermefeitosa66/open-tuner?style=for-the-badge&label=Baixar&color=6B4226" alt="Baixar a última versão"></a>
   &nbsp;
   <a href="https://guilhermefeitosa66.github.io/open-tuner/"><img src="https://img.shields.io/badge/Site-OpenTuner-6B4226?style=for-the-badge" alt="Site do projeto"></a>
@@ -26,11 +32,15 @@
 
 ## Baixar
 
-**O OpenTuner 1.0.0 saiu**, para Android 7.0 ou mais novo.
+**O OpenTuner está na Google Play e na App Store**, para Android 7.0 ou mais novo e iOS 13 ou mais novo.
+
+- **Google Play:** [OpenTuner na Google Play](https://play.google.com/store/apps/details?id=io.github.guilhermefeitosa66.opentuner).
+- **App Store:** [OpenTuner na App Store](https://apps.apple.com/app/id6828465029).
+
+No Android, também dá para instalar o APK direto do GitHub:
 
 - **GitHub Releases:** [versão mais recente](https://github.com/guilhermefeitosa66/open-tuner/releases/latest)
   (hoje, a [v1.0.0](https://github.com/guilhermefeitosa66/open-tuner/releases/tag/v1.0.0)).
-- **Google Play:** em breve.
 
 Cada versão tem um APK por tipo de processador. Escolha o do seu aparelho:
 

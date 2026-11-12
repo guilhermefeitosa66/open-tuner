@@ -124,14 +124,18 @@ p { margin: 0; }
 .abertura { padding-block: 40px 72px; }
 .abertura .conteudo { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 56px; align-items: center; }
 .abertura p.chamada { font-size: 20px; color: var(--texto-secundario); margin-top: 20px; max-width: 34ch; }
-.acoes { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+/* Selos oficiais das lojas, na abertura e na seção de download. O do Google vem
+   sem a margem transparente do arquivo original, para ficar da mesma altura. */
+.lojas { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 32px; }
+.lojas a { display: block; border-radius: 10px; }
+.lojas img { display: block; width: auto; height: 52px; }
+#download .lojas { margin: 0 0 36px; }
 .botao {
   display: inline-flex; align-items: center; gap: 10px; min-height: 52px;
   padding: 0 24px; border-radius: 999px; font-weight: 800; font-size: 16px; text-decoration: none;
 }
 .botao.primario { background: var(--accent); color: var(--sobre-accent); }
 .botao.primario:hover { filter: brightness(1.08); }
-.botao.secundario { background: var(--superficie-alta); color: var(--texto-secundario); cursor: default; }
 .botao svg { width: 20px; height: 20px; flex: none; }
 .miudo { margin-top: 18px; font-size: 14px; color: var(--texto-secundario); }
 
