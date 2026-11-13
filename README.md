@@ -17,15 +17,15 @@
 </p>
 
 <p align="center">
-  <a href="https://play.google.com/store/apps/details?id=io.github.guilhermefeitosa66.opentuner"><img src="site/lojas/google-play-en.png" alt="Get it on Google Play" height="52"></a>
+  <a href="https://play.google.com/store/apps/details?id=io.github.guilhermefeitosa66.opentuner"><img src="docs/loja/selos/google-play-en.png" alt="Get it on Google Play" height="52"></a>
   &nbsp;
-  <a href="https://apps.apple.com/app/id6828465029"><img src="site/lojas/app-store-en.svg" alt="Download on the App Store" height="52"></a>
+  <a href="https://apps.apple.com/app/id6828465029"><img src="docs/loja/selos/app-store-en.svg" alt="Download on the App Store" height="52"></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/guilhermefeitosa66/open-tuner/releases/latest"><img src="https://img.shields.io/github/v/release/guilhermefeitosa66/open-tuner?style=for-the-badge&label=Download&color=6B4226" alt="Download the latest release"></a>
   &nbsp;
-  <a href="https://guilhermefeitosa66.github.io/open-tuner/"><img src="https://img.shields.io/badge/Site-OpenTuner-6B4226?style=for-the-badge" alt="Project website"></a>
+  <a href="https://opentuner.libre-apps.org/"><img src="https://img.shields.io/badge/Site-OpenTuner-6B4226?style=for-the-badge" alt="Project website"></a>
   &nbsp;
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-6B4226?style=for-the-badge" alt="Apache-2.0 license"></a>
 </p>
@@ -145,11 +145,11 @@ every tuning are in [docs/REQUISITOS.md](docs/REQUISITOS.md#2-instrumentos-e-afi
 - The release script refuses to publish an APK that asks for any Android permission other than the
   microphone (`RECORD_AUDIO`).
 
-Full text: [privacy policy](https://guilhermefeitosa66.github.io/open-tuner/privacy/).
+Full text: [privacy policy](https://opentuner.libre-apps.org/privacy/).
 
 **Never ads.** For as long as the project can be paid for and kept in the store, there will be no
 ads, no in-app purchases and no paid version with extra features. The promise is public, on the
-[website](https://guilhermefeitosa66.github.io/open-tuner/).
+[website](https://opentuner.libre-apps.org/).
 
 ## What's next
 
@@ -192,7 +192,6 @@ The `make` targets have Portuguese names; `make` alone lists them all.
 | `make apk` | Release APKs, one per architecture |
 | `make instalar` | Builds the APKs and installs the one for the device's architecture over the current install, keeping its data |
 | `make aab` | Release App Bundle, the Play Store format |
-| `make site` | Serves `site/` at http://localhost:8000/ |
 | `make desatualizadas` | Lists the packages that have newer versions |
 | `make limpar` | Deletes the build output (`flutter clean`) |
 
@@ -232,7 +231,6 @@ Good to know:
 | `lib/l10n/` | Texts, one ARB file per language, and the classes generated from them (committed) |
 | `test/` | Tests, in the same layout as `lib/` |
 | `tool/` | Scripts behind `make`: environment check, install, signing key, release, icons |
-| `site/` | The website, published to GitHub Pages by the `Site` workflow |
 | `docs/` | Project documentation, in Portuguese |
 
 ## Contributing
@@ -270,10 +268,10 @@ In Portuguese, in `docs/`:
   checklist.
 - [marca/](docs/marca/README.md): the symbol and the app icon.
 
-The [website](https://guilhermefeitosa66.github.io/open-tuner/), with the [privacy policy](https://guilhermefeitosa66.github.io/open-tuner/privacy/) and the
-[terms of use](https://guilhermefeitosa66.github.io/open-tuner/terms/), is in English, [Portuguese](https://guilhermefeitosa66.github.io/open-tuner/pt/) and [Spanish](https://guilhermefeitosa66.github.io/open-tuner/es/): the flag
-buttons at the top of each page switch the language. Its source is in `site/`, and a new text goes
-into all three versions.
+The [website](https://opentuner.libre-apps.org/), with the [privacy policy](https://opentuner.libre-apps.org/privacy/) and the
+[terms of use](https://opentuner.libre-apps.org/terms/), is in English, [Portuguese](https://opentuner.libre-apps.org/pt/) and [Spanish](https://opentuner.libre-apps.org/es/): the flag
+buttons at the top of each page switch the language. Its source lives in a separate private
+repository (`site-opentuner-libre-apps-org`), and a new text goes into all three versions.
 
 ## License
 

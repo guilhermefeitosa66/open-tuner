@@ -8,7 +8,6 @@
 #   DISPOSITIVO=<id>  aparelho a usar quando há mais de um (ids: flutter devices)
 #   ARGS="..."        opções a mais para o Flutter em rodar, apk e aab
 #   AVD=<nome>        emulador a abrir em `emulador` (nomes: make emuladores)
-#   PORTA=<n>         porta do servidor local de `site` (padrão 8000)
 
 FLUTTER ?= flutter
 # O `dart` avulso pode existir no PATH e mesmo assim não rodar (um shim do asdf
@@ -18,7 +17,6 @@ DART ?= $(shell if dart --version >/dev/null 2>&1; then echo dart; \
 	else echo "$$(dirname "$$(command -v flutter)")/dart"; fi)
 DISPOSITIVO ?=
 ARGS ?=
-PORTA ?= 8000
 
 APKS := build/app/outputs/flutter-apk
 AAB := build/app/outputs/bundle/release/app-release.aab
@@ -61,7 +59,7 @@ GPU ?= host -feature -Vulkan
 
 .DEFAULT_GOAL := ajuda
 .PHONY: ajuda dependencias textos verificar desatualizadas rodar apk aab \
-	instalar formatar analisar testar site limpar emuladores emulador \
+	instalar formatar analisar testar limpar emuladores emulador \
 	chave release
 
 ajuda: ## Lista as tarefas
@@ -128,12 +126,6 @@ testar: ## Formatação, análise e testes, como no CI
 	$(DART) format --output=none --set-exit-if-changed lib test
 	$(DART) analyze lib test
 	$(FLUTTER) test
-
-# O site não tem etapa de geração: o que está em site/ é o que o GitHub Pages
-# publica. Só em localhost, para não expor o servidor na rede. Ctrl+C encerra.
-site: ## Serve site/ em localhost para conferir antes de publicar [PORTA=8000]
-	@echo "Site em http://localhost:$(PORTA)/ (Ctrl+C para parar)"
-	python3 -m http.server --bind 127.0.0.1 --directory site $(PORTA)
 
 limpar: ## Apaga o que os builds geraram (flutter clean)
 	$(FLUTTER) clean

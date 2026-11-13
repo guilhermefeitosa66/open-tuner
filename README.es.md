@@ -17,15 +17,15 @@
 </p>
 
 <p align="center">
-  <a href="https://play.google.com/store/apps/details?id=io.github.guilhermefeitosa66.opentuner"><img src="site/lojas/google-play-es.png" alt="Disponible en Google Play" height="52"></a>
+  <a href="https://play.google.com/store/apps/details?id=io.github.guilhermefeitosa66.opentuner"><img src="docs/loja/selos/google-play-es.png" alt="Disponible en Google Play" height="52"></a>
   &nbsp;
-  <a href="https://apps.apple.com/app/id6828465029"><img src="site/lojas/app-store-es.svg" alt="Descárgalo en el App Store" height="52"></a>
+  <a href="https://apps.apple.com/app/id6828465029"><img src="docs/loja/selos/app-store-es.svg" alt="Descárgalo en el App Store" height="52"></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/guilhermefeitosa66/open-tuner/releases/latest"><img src="https://img.shields.io/github/v/release/guilhermefeitosa66/open-tuner?style=for-the-badge&label=Descargar&color=6B4226" alt="Descargar la última versión"></a>
   &nbsp;
-  <a href="https://guilhermefeitosa66.github.io/open-tuner/"><img src="https://img.shields.io/badge/Sitio-OpenTuner-6B4226?style=for-the-badge" alt="Sitio del proyecto"></a>
+  <a href="https://opentuner.libre-apps.org/"><img src="https://img.shields.io/badge/Sitio-OpenTuner-6B4226?style=for-the-badge" alt="Sitio del proyecto"></a>
   &nbsp;
   <a href="LICENSE"><img src="https://img.shields.io/badge/Licencia-Apache--2.0-6B4226?style=for-the-badge" alt="Licencia Apache-2.0"></a>
 </p>
@@ -147,12 +147,12 @@ frecuencias de cada afinación están en
 - El script de release se niega a publicar un APK que pida cualquier permiso de Android además del
   micrófono (`RECORD_AUDIO`).
 
-Texto completo: [política de privacidad](https://guilhermefeitosa66.github.io/open-tuner/es/privacy/)
+Texto completo: [política de privacidad](https://opentuner.libre-apps.org/es/privacy/)
 (en inglés).
 
 **Nunca anuncios.** Mientras el proyecto se pueda costear y mantener en la tienda, no habrá anuncios,
 compras dentro de la app ni versión de pago con funciones extra. La promesa es pública, en el
-[sitio](https://guilhermefeitosa66.github.io/open-tuner/).
+[sitio](https://opentuner.libre-apps.org/).
 
 ## Próximos pasos
 
@@ -195,7 +195,6 @@ Las tareas de `make` tienen nombres en portugués; `make` sin argumentos las lis
 | `make apk` | APK de release, uno por arquitectura |
 | `make instalar` | Genera los APK e instala el de la arquitectura del dispositivo encima del instalado, sin borrar datos |
 | `make aab` | App Bundle de release, el formato de la Play Store |
-| `make site` | Sirve `site/` en http://localhost:8000/ |
 | `make desatualizadas` | Lista los paquetes que tienen versión más nueva |
 | `make limpar` | Borra lo que generaron los builds (`flutter clean`) |
 
@@ -236,7 +235,6 @@ Conviene saber:
 | `lib/l10n/` | Textos, un ARB por idioma, y las clases generadas a partir de ellos (versionadas) |
 | `test/` | Pruebas, con la misma organización que `lib/` |
 | `tool/` | Scripts detrás de `make`: entorno, instalación, clave de firma, release, íconos |
-| `site/` | El sitio, publicado en GitHub Pages por el workflow `Site` |
 | `docs/` | Documentación del proyecto, en portugués |
 
 ## Cómo contribuir
@@ -275,10 +273,10 @@ En portugués, en `docs/`:
   de publicación.
 - [marca/](docs/marca/README.md): el símbolo y el ícono de la app.
 
-El [sitio](https://guilhermefeitosa66.github.io/open-tuner/es/), con la [política de privacidad](https://guilhermefeitosa66.github.io/open-tuner/es/privacy/) y los
-[términos de uso](https://guilhermefeitosa66.github.io/open-tuner/es/terms/), está en español, [inglés](https://guilhermefeitosa66.github.io/open-tuner/) y [portugués](https://guilhermefeitosa66.github.io/open-tuner/pt/): los botones
-de bandera en la parte superior de cada página cambian el idioma. Su código está en `site/`, y un
-texto nuevo entra en las tres versiones.
+El [sitio](https://opentuner.libre-apps.org/es/), con la [política de privacidad](https://opentuner.libre-apps.org/es/privacy/) y los
+[términos de uso](https://opentuner.libre-apps.org/es/terms/), está en español, [inglés](https://opentuner.libre-apps.org/) y [portugués](https://opentuner.libre-apps.org/pt/): los botones
+de bandera en la parte superior de cada página cambian el idioma. Su código está en un repositorio privado
+aparte (`site-opentuner-libre-apps-org`), y un texto nuevo entra en las tres versiones.
 
 ## Licencia
 

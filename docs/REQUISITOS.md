@@ -35,12 +35,13 @@ A distribuição é global, Android primeiro e iOS depois.
 - **GitHub Releases**, com os APKs assinados pela mesma chave da loja, para quem não usa a Play Store.
 - **F-Droid**, depois da 1.0. Nada no projeto pode impedir isso (seção 4, Privacidade).
 - **App Store**, depois que a versão Android estiver estável (seção 4, Plataformas).
-- **Site** em `site/`, publicado no GitHub Pages: apresentação, a promessa de não ter anúncios, o
-  download pelo GitHub Releases e a política de privacidade e os termos de uso que as lojas exigem
-  (`https://guilhermefeitosa66.github.io/open-tuner/privacy/`). Em inglês na raiz, com as URLs de
-  sempre, e em português e espanhol em `pt/` e `es/`; os botões de bandeira do alto de cada página
-  levam à mesma página no outro idioma. Só a página inicial da raiz troca de idioma sozinha, pela
-  escolha guardada ou pelo idioma do navegador.
+- **Site** em https://opentuner.libre-apps.org, publicado pela Vercel a partir de um repositório
+  privado à parte (`site-opentuner-libre-apps-org`): apresentação, a promessa de não ter anúncios,
+  o download pelo GitHub Releases e a política de privacidade e os termos de uso que as lojas exigem
+  (`https://opentuner.libre-apps.org/privacy/`). Em inglês na raiz, com os mesmos caminhos de quando
+  ficava no GitHub Pages (que agora redireciona para lá), e em português e espanhol em `pt/` e
+  `es/`; os botões de bandeira do alto de cada página levam à mesma página no outro idioma. Só a
+  página inicial da raiz troca de idioma sozinha, pela escolha guardada ou pelo idioma do navegador.
 
 ## 2. Instrumentos e afinações da versão 1.0
 
