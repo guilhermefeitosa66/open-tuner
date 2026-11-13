@@ -13,9 +13,9 @@ conferidos.
 | Categoria | Música e áudio |
 | Preço | Grátis, sem compras no app |
 | Contém anúncios | **Não** |
-| Site | https://guilhermefeitosa66.github.io/open-tuner/ |
-| Política de privacidade | https://guilhermefeitosa66.github.io/open-tuner/privacy/ |
-| Termos de uso | https://guilhermefeitosa66.github.io/open-tuner/terms/ |
+| Site | https://opentuner.libre-apps.org/ |
+| Política de privacidade | https://opentuner.libre-apps.org/privacy/ |
+| Termos de uso | https://opentuner.libre-apps.org/terms/ |
 | E-mail de contato | [SEU E-MAIL DE DESENVOLVEDOR]: a Play Store exige e mostra na ficha |
 | Idioma padrão da ficha | Inglês (en-US), com traduções pt-BR e es-419 |
 
