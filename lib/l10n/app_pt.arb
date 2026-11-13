@@ -85,5 +85,14 @@
   "idiomaSistema": "Idioma do sistema",
   "nomeIdiomaPt": "Português (Brasil)",
   "nomeIdiomaEn": "English",
-  "nomeIdiomaEs": "Español"
+  "nomeIdiomaEs": "Español",
+  "linkSite": "Site do OpenTuner",
+  "linkFundacao": "Libre Apps, a fundação de apps livres",
+  "sobreTitulo": "Sobre o OpenTuner",
+  "versaoApp": "Versão {versao}",
+  "sobreDescricao": "Um afinador de cordas livre e de código aberto, sem anúncios e sem internet. Faz parte da Libre Apps.",
+  "linkCodigo": "Código-fonte no GitHub",
+  "linkPrivacidade": "Política de privacidade",
+  "linkTermos": "Termos de uso",
+  "linkLicencas": "Licenças"
 }

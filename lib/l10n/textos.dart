@@ -614,6 +614,60 @@ abstract class Textos {
   /// In en, this message translates to:
   /// **'Español'**
   String get nomeIdiomaEs;
+
+  /// Link at the bottom of the settings that opens the OpenTuner website
+  ///
+  /// In en, this message translates to:
+  /// **'OpenTuner website'**
+  String get linkSite;
+
+  /// Link at the bottom of the settings that opens libre-apps.org, the foundation OpenTuner is part of
+  ///
+  /// In en, this message translates to:
+  /// **'Libre Apps, the free apps foundation'**
+  String get linkFundacao;
+
+  /// Title of the About screen and of the button that opens it in the settings
+  ///
+  /// In en, this message translates to:
+  /// **'About OpenTuner'**
+  String get sobreTitulo;
+
+  /// Installed version on the About screen
+  ///
+  /// In en, this message translates to:
+  /// **'Version {versao}'**
+  String versaoApp(String versao);
+
+  /// Short description at the top of the About screen
+  ///
+  /// In en, this message translates to:
+  /// **'A free and open source string tuner, with no ads and no internet. Part of Libre Apps.'**
+  String get sobreDescricao;
+
+  /// About screen: opens the source code
+  ///
+  /// In en, this message translates to:
+  /// **'Source code on GitHub'**
+  String get linkCodigo;
+
+  /// About screen: opens the privacy policy
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get linkPrivacidade;
+
+  /// About screen: opens the terms of use
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of use'**
+  String get linkTermos;
+
+  /// About screen: opens the licenses of the app and its libraries
+  ///
+  /// In en, this message translates to:
+  /// **'Licenses'**
+  String get linkLicencas;
 }
 
 class _TextosDelegate extends LocalizationsDelegate<Textos> {

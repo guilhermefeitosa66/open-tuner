@@ -395,5 +395,47 @@
   "nomeIdiomaEs": "Español",
   "@nomeIdiomaEs": {
     "description": "Name of the Spanish language in Spanish itself. Do not translate: the same in every file"
+  },
+  "linkSite": "OpenTuner website",
+  "@linkSite": {
+    "description": "Link at the bottom of the settings that opens the OpenTuner website"
+  },
+  "linkFundacao": "Libre Apps, the free apps foundation",
+  "@linkFundacao": {
+    "description": "Link at the bottom of the settings that opens libre-apps.org, the foundation OpenTuner is part of"
+  },
+  "sobreTitulo": "About OpenTuner",
+  "@sobreTitulo": {
+    "description": "Title of the About screen and of the button that opens it in the settings"
+  },
+  "versaoApp": "Version {versao}",
+  "@versaoApp": {
+    "description": "Installed version on the About screen",
+    "placeholders": {
+      "versao": {
+        "type": "String",
+        "example": "1.1.1"
+      }
+    }
+  },
+  "sobreDescricao": "A free and open source string tuner, with no ads and no internet. Part of Libre Apps.",
+  "@sobreDescricao": {
+    "description": "Short description at the top of the About screen"
+  },
+  "linkCodigo": "Source code on GitHub",
+  "@linkCodigo": {
+    "description": "About screen: opens the source code"
+  },
+  "linkPrivacidade": "Privacy policy",
+  "@linkPrivacidade": {
+    "description": "About screen: opens the privacy policy"
+  },
+  "linkTermos": "Terms of use",
+  "@linkTermos": {
+    "description": "About screen: opens the terms of use"
+  },
+  "linkLicencas": "Licenses",
+  "@linkLicencas": {
+    "description": "About screen: opens the licenses of the app and its libraries"
   }
 }

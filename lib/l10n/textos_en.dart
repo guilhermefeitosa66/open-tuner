@@ -298,4 +298,34 @@ class TextosEn extends Textos {
 
   @override
   String get nomeIdiomaEs => 'Español';
+
+  @override
+  String get linkSite => 'OpenTuner website';
+
+  @override
+  String get linkFundacao => 'Libre Apps, the free apps foundation';
+
+  @override
+  String get sobreTitulo => 'About OpenTuner';
+
+  @override
+  String versaoApp(String versao) {
+    return 'Version $versao';
+  }
+
+  @override
+  String get sobreDescricao =>
+      'A free and open source string tuner, with no ads and no internet. Part of Libre Apps.';
+
+  @override
+  String get linkCodigo => 'Source code on GitHub';
+
+  @override
+  String get linkPrivacidade => 'Privacy policy';
+
+  @override
+  String get linkTermos => 'Terms of use';
+
+  @override
+  String get linkLicencas => 'Licenses';
 }

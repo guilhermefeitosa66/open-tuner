@@ -7,6 +7,7 @@ import '../../dados/ajustes.dart';
 import '../../dados/preferencias.dart';
 import '../../dominio/estado_corda.dart';
 import '../afinador/desenhos.dart';
+import '../sobre/tela_sobre.dart';
 
 /// Conteúdo da folha de ajustes (RF-17): tema, idioma, nome das notas,
 /// precisão, referência do Lá e tela ligada.
@@ -84,6 +85,26 @@ class ConteudoAjustes extends StatelessWidget {
               textos.sobre(versao),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12, color: cores.textoSecundario),
+            ),
+            const SizedBox(height: 4),
+            Center(
+              child: TextButton.icon(
+                key: const Key('abrir-sobre'),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => TelaSobre(versao: versao),
+                  ),
+                ),
+                icon: Icon(Icons.info_outline, color: cores.accent),
+                label: Text(
+                  textos.sobreTitulo,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: cores.accent,
+                  ),
+                ),
+              ),
             ),
           ],
         ),

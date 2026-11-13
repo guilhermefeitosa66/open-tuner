@@ -298,4 +298,34 @@ class TextosPt extends Textos {
 
   @override
   String get nomeIdiomaEs => 'Español';
+
+  @override
+  String get linkSite => 'Site do OpenTuner';
+
+  @override
+  String get linkFundacao => 'Libre Apps, a fundação de apps livres';
+
+  @override
+  String get sobreTitulo => 'Sobre o OpenTuner';
+
+  @override
+  String versaoApp(String versao) {
+    return 'Versão $versao';
+  }
+
+  @override
+  String get sobreDescricao =>
+      'Um afinador de cordas livre e de código aberto, sem anúncios e sem internet. Faz parte da Libre Apps.';
+
+  @override
+  String get linkCodigo => 'Código-fonte no GitHub';
+
+  @override
+  String get linkPrivacidade => 'Política de privacidade';
+
+  @override
+  String get linkTermos => 'Termos de uso';
+
+  @override
+  String get linkLicencas => 'Licenças';
 }
