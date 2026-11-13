@@ -39,7 +39,7 @@ A distribuição é global, Android primeiro e iOS depois.
   privado à parte (`site-opentuner-libre-apps-org`): apresentação, a promessa de não ter anúncios,
   o download pelo GitHub Releases e a política de privacidade e os termos de uso que as lojas exigem
   (`https://opentuner.libre-apps.org/privacy/`). Em inglês na raiz, com os mesmos caminhos de quando
-  ficava no GitHub Pages (que agora redireciona para lá), e em português e espanhol em `pt/` e
+  ficava no GitHub Pages (que agora mostra um aviso com o link para lá), e em português e espanhol em `pt/` e
   `es/`; os botões de bandeira do alto de cada página levam à mesma página no outro idioma. Só a
   página inicial da raiz troca de idioma sozinha, pela escolha guardada ou pelo idioma do navegador.
 
